@@ -1334,6 +1334,9 @@ class SwarmingGTestTest(SwarmingTest):
     """Waits for launched test to finish and collects the results."""
     try:
       super(SwarmingGTestTest, self).post_run(api, suffix)
+    except Exception as e:
+      traceback.print_exc()
+      raise
     finally:
       step_result = api.step.active_result
       if (hasattr(step_result, 'test_utils') and
