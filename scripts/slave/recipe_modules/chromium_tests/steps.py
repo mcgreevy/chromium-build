@@ -1335,8 +1335,11 @@ class SwarmingGTestTest(SwarmingTest):
     try:
       super(SwarmingGTestTest, self).post_run(api, suffix)
     except Exception as e:
+      print "DBG exception in post_run"
       traceback.print_exc()
       raise
+    else:
+      print "DBG no exception in post_run"
     finally:
       step_result = api.step.active_result
       if (hasattr(step_result, 'test_utils') and
