@@ -785,6 +785,12 @@ class SwarmingApi(recipe_api.RecipeApi):
             ok_ret=allowed_return_codes,
             step_test_data=lambda: step_test_data,
             **kwargs)
+    except Exception as e:
+      print "DBG caught exception in swarming _default_collect_step"
+      traceback.print_exc()
+      raise
+    else:
+      print "DBG not caught exception in swarming _default_collect_step"
     finally:
       step_result = None
       try:
@@ -829,6 +835,12 @@ class SwarmingApi(recipe_api.RecipeApi):
           step_test_data=step_test_data,
           allow_subannotations=True,
           **kwargs)
+    except Exception as e:
+      print "DBG caught exception in swarming"
+      traceback.print_exc()
+      raise
+    else:
+      print "DBG not caught exception in swarming"
     finally:
       # HACK: it is assumed that caller used 'api.test_utils.gtest_results'
       # placeholder for 'test_launcher_summary_output' parameter when calling
