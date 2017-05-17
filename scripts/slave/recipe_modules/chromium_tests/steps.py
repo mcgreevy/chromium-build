@@ -1214,6 +1214,12 @@ class SwarmingTest(Test):
 
     try:
       api.swarming.collect_task(self._tasks[suffix])
+    except Exception as e:
+      print "DBG exception in base post_run"
+      traceback.print_exc()
+      raise
+    else:
+      print "DBG no exception in base post_run"
     finally:
       valid, failures = self.validate_task_results(api, api.step.active_result)
       self._results[suffix] = {'valid': valid, 'failures': failures}
