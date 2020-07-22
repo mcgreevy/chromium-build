@@ -4,15 +4,15 @@
 
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import remote_run_factory
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.WebRTC
+import main_site_config
+ActiveMain = main_site_config.WebRTC
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -22,7 +22,7 @@ def m_remote_run(recipe, **kwargs):
 def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='webrtc_windows_scheduler',
-                            branch='master',
+                            branch='main',
                             treeStableTimer=30,
                             builderNames=[
           'Win32 Debug',
@@ -38,8 +38,8 @@ def Update(c):
       ]),
   ])
 
-  # 'slavebuilddir' below is used to reduce the number of checkouts since some
-  # of the builders are pooled over multiple slave machines.
+  # 'subordinatebuilddir' below is used to reduce the number of checkouts since some
+  # of the builders are pooled over multiple subordinate machines.
   specs = [
     {'name': 'Win32 Debug'},
     {'name': 'Win32 Release'},
@@ -48,13 +48,13 @@ def Update(c):
     {
       'name': 'Win32 Release [large tests]',
       'category': 'compile|baremetal|windows',
-      'slavebuilddir': 'win_baremetal',
+      'subordinatebuilddir': 'win_baremetal',
     },
-    {'name': 'Win32 Debug (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win32 Release (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win64 Debug (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win64 Release (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win32 ASan', 'slavebuilddir': 'win_asan'},
+    {'name': 'Win32 Debug (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win32 Release (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win64 Debug (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win64 Release (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win32 ASan', 'subordinatebuilddir': 'win_asan'},
   ]
 
   c['builders'].extend([
@@ -65,6 +65,6 @@ def Update(c):
         'factory': m_remote_run('webrtc/standalone', timeout=3600),
         'notify_on_missing': True,
         'category': spec.get('category', 'compile|testers|windows'),
-        'slavebuilddir': spec.get('slavebuilddir', 'win'),
+        'subordinatebuilddir': spec.get('subordinatebuilddir', 'win'),
       } for spec in specs
   ])

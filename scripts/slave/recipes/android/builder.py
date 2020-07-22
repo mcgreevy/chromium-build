@@ -193,16 +193,16 @@ BUILDERS = freeze({
 from recipe_engine.recipe_api import Property
 
 PROPERTIES = {
-  'mastername': Property(),
+  'mainname': Property(),
   'buildername': Property(),
   'revision': Property(default='HEAD'),
 }
 
-def _GetChromiumTestsCompileTargets(api, mastername, buildername, update_step):
+def _GetChromiumTestsCompileTargets(api, mainname, buildername, update_step):
   # This is a bridge to the chromium recipe for the perf bots, allowing us to
   # solely use src/-side test specifications before switching.
   ct_bot_config = api.chromium_tests.create_bot_config_object(
-      mastername, buildername)
+      mainname, buildername)
   ct_bot_db = api.chromium_tests.create_bot_db_object()
   ct_bot_config.initialize_bot_db(api.chromium_tests, ct_bot_db, update_step)
   _, tests_including_triggered = api.chromium_tests.get_tests(
@@ -210,8 +210,8 @@ def _GetChromiumTestsCompileTargets(api, mastername, buildername, update_step):
   return api.chromium_tests.get_compile_targets(
       ct_bot_config, ct_bot_db, tests_including_triggered)
 
-def _RunStepsInternal(api, mastername, buildername, revision):
-  bot_config = BUILDERS[mastername][buildername]
+def _RunStepsInternal(api, mainname, buildername, revision):
+  bot_config = BUILDERS[mainname][buildername]
   droid = api.chromium_android
 
   default_kwargs = {
@@ -246,11 +246,11 @@ def _RunStepsInternal(api, mastername, buildername, revision):
   api.chromium.runhooks()
 
   if bot_config.get('run_mb'):
-    api.chromium.run_mb(mastername, buildername, use_goma=True)
+    api.chromium.run_mb(mainname, buildername, use_goma=True)
 
   targets = list(bot_config.get('targets', []))
   targets += _GetChromiumTestsCompileTargets(
-      api, mastername, buildername, update_step)
+      api, mainname, buildername, update_step)
   api.chromium.compile(targets, use_goma_module=True)
 
   resource_sizes_configs = bot_config.get('resource_sizes_configs', ())
@@ -278,9 +278,9 @@ def _RunStepsInternal(api, mastername, buildername, revision):
     droid.zip_and_upload_build(upload_config['bucket'])
 
 
-def RunSteps(api, mastername, buildername, revision):
+def RunSteps(api, mainname, buildername, revision):
   with api.tryserver.set_failure_hash():
-    return _RunStepsInternal(api, mastername, buildername, revision)
+    return _RunStepsInternal(api, mainname, buildername, revision)
 
 
 def _sanitize_nonalpha(text):
@@ -289,15 +289,15 @@ def _sanitize_nonalpha(text):
 
 def GenTests(api):
   # tests bots in BUILDERS
-  for mastername, builders in BUILDERS.iteritems():
+  for mainname, builders in BUILDERS.iteritems():
     for buildername in builders:
       yield (
-        api.test('full_%s_%s' % (_sanitize_nonalpha(mastername),
+        api.test('full_%s_%s' % (_sanitize_nonalpha(mainname),
                                  _sanitize_nonalpha(buildername))) +
         api.properties.generic(buildername=buildername,
             repository='svn://svn.chromium.org/chrome/trunk/src',
             buildnumber=257,
-            mastername=mastername,
+            mainname=mainname,
             issue='8675309',
             patchset='1',
             revision='267739',

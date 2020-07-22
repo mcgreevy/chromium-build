@@ -36,11 +36,11 @@ DEPS = [
 
 PROPERTIES = {
     'buildername': Property(default=''),
-    'mastername': Property(default=''),
+    'mainname': Property(default=''),
 }
 
 
-def RunSteps(api, buildername, mastername):
+def RunSteps(api, buildername, mainname):
   # Configure isolate & swarming modules to use staging instances.
   api.isolate.isolate_server = 'https://isolateserver-dev.appspot.com'
   api.swarming.swarming_server = 'https://chromium-swarm-dev.appspot.com'
@@ -62,7 +62,7 @@ def RunSteps(api, buildername, mastername):
   # We are checking out Chromium with swarming_client dep unpinned and pointing
   # to ToT of swarming_client repo, see recipe_modules/gclient/config.py.
   bot_config = api.chromium_tests.create_bot_config_object(
-      mastername, buildername)
+      mainname, buildername)
   api.chromium_tests.configure_build(bot_config)
   api.gclient.c.solutions[0].custom_vars['swarming_revision'] = ''
   api.gclient.c.revisions['src/tools/swarming_client'] = 'HEAD'
@@ -98,8 +98,8 @@ def GenTests(api):
     api.test('android') +
     api.properties(
         buildername='Android N5 Swarm',
-        mastername='chromium.swarm',
-        bot_id='TestSlave',
+        mainname='chromium.swarm',
+        bot_id='TestSubordinate',
         buildnumber=123)
   )
 
@@ -109,8 +109,8 @@ def GenTests(api):
     api.test('one_fails') +
     api.properties(
         buildername='Linux Swarm',
-        mastername='chromium.swarm',
-        bot_id='TestSlave',
+        mainname='chromium.swarm',
+        bot_id='TestSubordinate',
         buildnumber=123) +
     api.override_step_data(
         'read test spec (chromium.swarm.json)',

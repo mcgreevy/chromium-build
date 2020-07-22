@@ -38,7 +38,7 @@ default_envs = {
 }
 
 builders = {
-  # This is used by recipe coverage tests, not by any actual master.
+  # This is used by recipe coverage tests, not by any actual main.
   'test-coverage-win': {
     'mode': 'release',
     'target_arch': 'x64',
@@ -212,14 +212,14 @@ def RunSteps(api):
 def GenTests(api):
    yield (
       api.test('vm-linux-release-x64-asan-be') + api.platform('linux', 64) +
-      api.properties.generic(mastername='client.dart',
+      api.properties.generic(mainname='client.dart',
                              buildername='vm-linux-release-x64-asan-be'))
    yield (
       api.test('test-coverage') + api.platform('win', 64) +
-      api.properties.generic(mastername='client.dart',
+      api.properties.generic(mainname='client.dart',
                              buildername='test-coverage-win-be',
                              clobber=''))
    yield (
       api.test('precomp-linux-debug-x64') + api.platform('linux', 64) +
-      api.properties.generic(mastername='client.dart',
+      api.properties.generic(mainname='client.dart',
                              buildername='precomp-linux-debug-x64-be'))

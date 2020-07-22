@@ -38,7 +38,7 @@ def GenTests(api):
     + api.properties(
       buildername='ios debug',
       buildnumber='0',
-      mastername='chromium.fake',
+      mainname='chromium.fake',
       bot_id='fake-vm',
       path_config='kitchen',
     )
@@ -73,7 +73,7 @@ def GenTests(api):
     + api.properties(
       buildername='ios',
       buildnumber='0',
-      mastername='chromium.fake',
+      mainname='chromium.fake',
       bot_id='fake-vm',
       path_config='kitchen',
     )
@@ -98,7 +98,7 @@ def GenTests(api):
     + api.properties(
       buildername='ios',
       buildnumber='0',
-      mastername='chromium.fake',
+      mainname='chromium.fake',
       bot_id='fake-vm',
       path_config='kitchen',
       issue=666666,

@@ -58,10 +58,10 @@ def RunSteps(api):
 def GenTests(api):
    yield (
       api.test('linux64') + api.platform('linux', 64) +
-      api.properties.generic(mastername='client.dart.FYI'))
+      api.properties.generic(mainname='client.dart.FYI'))
    yield (
       api.test('test-coverage') + api.platform('linux', 64) +
-      api.properties.generic(mastername='client.dart.FYI',
+      api.properties.generic(mainname='client.dart.FYI',
                              buildername='vm-precomp-android-release',
                              target_arch='arm',
                              build_args=['--os=android'],

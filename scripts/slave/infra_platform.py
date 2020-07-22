@@ -111,7 +111,7 @@ def cipd_platform():
 
 
 def cipd_all_targets():
-  """Returns an iterable of (platform, arch) tuples for all supported buildslave
+  """Returns an iterable of (platform, arch) tuples for all supported buildsubordinate
   platforms that we expect CIPD packages to exist for.
 
   This is used for CIPD presubmit validation.

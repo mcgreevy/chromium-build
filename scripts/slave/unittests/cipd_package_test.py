@@ -14,8 +14,8 @@ from multiprocessing.pool import ThreadPool
 
 import test_env  # pylint: disable=W0403,W0611
 
-import slave.infra_platform
-import slave.robust_tempdir
+import subordinate.infra_platform
+import subordinate.robust_tempdir
 
 
 # Instance-wide logger.
@@ -46,28 +46,28 @@ def resolve_package(pkg):
 
 def run_presubmit(basedir):
   """Validates that all of the referenced CIPD packages exist at their specified
-  versions for all supported slave platforms.
+  versions for all supported subordinate platforms.
 
-  Any slave-side software that has CIPD package expectations should add their
+  Any subordinate-side software that has CIPD package expectations should add their
   packages to this validation in order to assert their existence via PRESUBMIT.
 
   Returns (int): 0 if all packages exist, 1 if some are missing.
   """
   # Ensure that CIPD exists on this platform.
   #
-  # We want to run this here so we can use the CIPD version that the slave
+  # We want to run this here so we can use the CIPD version that the subordinate
   # system uses. However, if this fails, we will fall back to the local system's
   # CIPD binary (in PATH) for the remainder of the tests.
   cipd_bootstrap_succeeded = False
   try:
-    from slave import cipd_bootstrap_v2
+    from subordinate import cipd_bootstrap_v2
     cipd_bootstrap_v2.high_level_ensure_cipd_client(basedir, None)
     cipd_bootstrap_succeeded = True
   except Exception:
     LOGGER.exception('Failed to ensure CIPD bootstrap.')
 
   # Collect our expected packages.
-  from slave import logdog_bootstrap, remote_run
+  from subordinate import logdog_bootstrap, remote_run
   packages = set()
   def _add_packages(src_fn):
     src_packages = set(src_fn())
@@ -82,7 +82,7 @@ def run_presubmit(basedir):
   # Validate the set of packages.
   all_packages = set()
   for base_pkg in packages:
-    for os_name, arch in slave.infra_platform.cipd_all_targets():
+    for os_name, arch in subordinate.infra_platform.cipd_all_targets():
       pkg = base_pkg._replace(name=string.Template(base_pkg.name).substitute(
           os=os_name, arch=arch, platform='%s-%s' % (os_name, arch)))
       all_packages.add(pkg)
@@ -126,7 +126,7 @@ def main(argv):
   logging.getLogger().setLevel(level)
 
   basedir = os.path.join(test_env.BASE_DIR, 'cipd_presubmit')
-  with slave.robust_tempdir.RobustTempdir(basedir) as rt:
+  with subordinate.robust_tempdir.RobustTempdir(basedir) as rt:
     return run_presubmit(rt.tempdir())
 
 

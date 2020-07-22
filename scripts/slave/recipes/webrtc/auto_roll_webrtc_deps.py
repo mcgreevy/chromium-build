@@ -44,8 +44,8 @@ def RunSteps(api):
 
   with api.context(cwd=api.path['checkout']):
     # Enforce a clean state, and discard any local commits from previous runs.
-    api.git('checkout', '-f', 'master')
-    api.git('pull', 'origin', 'master')
+    api.git('checkout', '-f', 'main')
+    api.git('pull', 'origin', 'main')
     api.git('clean', '-ffd')
 
     # Run the roll script. It will take care of branch creation, modifying DEPS,
@@ -60,11 +60,11 @@ def RunSteps(api):
 def GenTests(api):
   yield (
       api.test('rolling_activated') +
-      api.properties.generic(mastername='client.webrtc.fyi',
+      api.properties.generic(mainname='client.webrtc.fyi',
                              buildername='Auto-roll - WebRTC DEPS')
   )
   yield (api.test('rolling_deactivated') +
-      api.properties.generic(mastername='client.webrtc.fyi',
+      api.properties.generic(mainname='client.webrtc.fyi',
                              buildername='Auto-roll - WebRTC DEPS') +
       api.override_step_data('check roll status',
                              api.raw_io.stream_output('0', stream='stdout'))

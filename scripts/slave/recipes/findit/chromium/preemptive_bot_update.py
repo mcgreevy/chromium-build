@@ -25,8 +25,8 @@ DEPS = [
     'recipe_engine/time',
 ]
 
-# Which master/builder config to use for the bot_update step based on the
-# current master/builder.
+# Which main/builder config to use for the bot_update step based on the
+# current main/builder.
 TARGET_MAPPING = {
     'tryserver.chromium.linux': {
         'linux_chromium_variable': [
@@ -61,15 +61,15 @@ TARGET_MAPPING = {
 NOT_FRESH = 600  # seconds
 
 
-def TargetMasterAndBuilder(api):
-  mastername = api.properties.get('mastername')
+def TargetMainAndBuilder(api):
+  mainname = api.properties.get('mainname')
   buildername = api.properties.get('buildername')
-  return TARGET_MAPPING[mastername][buildername]
+  return TARGET_MAPPING[mainname][buildername]
 
 
 def RunSteps(api):
   bot_config = api.chromium_tests.create_bot_config_object(
-      *TargetMasterAndBuilder(api))
+      *TargetMainAndBuilder(api))
   api.chromium_tests.configure_build(
       bot_config, override_bot_type='builder_tester')
 
@@ -79,7 +79,7 @@ def RunSteps(api):
   # Most recent commit in local checkout
   with api.context(cwd=checkout_dir):
     step_result = api.git(
-        'log', '-1', '--pretty=format:%ct', 'refs/remotes/origin/master',
+        'log', '-1', '--pretty=format:%ct', 'refs/remotes/origin/main',
         stdout=api.raw_io.output_text(),
         step_test_data=lambda: api.raw_io.test_api.stream_output('1333700000'))
   last_commit_ts = float(step_result.stdout)
@@ -94,7 +94,7 @@ def GenTests(api):
   yield (
       api.test('linux') +
       api.properties(**{
-          'mastername': 'tryserver.chromium.linux',
+          'mainname': 'tryserver.chromium.linux',
           'buildername': 'linux_chromium_variable',
           'bot_id': 'build1-a1',
           'buildnumber': '1',
@@ -103,7 +103,7 @@ def GenTests(api):
   yield (
       api.test('win') +
       api.properties(**{
-          'mastername': 'tryserver.chromium.win',
+          'mainname': 'tryserver.chromium.win',
           'buildername': 'win_chromium_variable',
           'bot_id': 'build1-a1',
           'buildnumber': '1',
@@ -112,7 +112,7 @@ def GenTests(api):
   yield (
       api.test('mac') +
       api.properties(**{
-          'mastername': 'tryserver.chromium.mac',
+          'mainname': 'tryserver.chromium.mac',
           'buildername': 'mac_chromium_variable',
           'bot_id': 'build1-a1',
           'buildnumber': '1',

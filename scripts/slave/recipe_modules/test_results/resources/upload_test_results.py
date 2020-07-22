@@ -5,9 +5,9 @@
 
 """See README.md for usage instructions.
 
-This file heavily modified from build/scripts/slave/gtest_slave_utils.py and
+This file heavily modified from build/scripts/subordinate/gtest_subordinate_utils.py and
 is intended to replace it as all tests move to swarming.
-TODO(estaab): Remove build/scripts/slave/gtest.* once this is fully deployed.
+TODO(estaab): Remove build/scripts/subordinate/gtest.* once this is fully deployed.
 """
 
 
@@ -51,7 +51,7 @@ def get_results_map_from_json(gtest_json):
 
 def generate_json_results_file_for_json(
     results_json, builder_name, build_number,
-    results_directory, chrome_revision, master_name):
+    results_directory, chrome_revision, main_name):
   """Generates JSON results file from the given |results_json|.
 
   Args:
@@ -69,7 +69,7 @@ def generate_json_results_file_for_json(
   results_json['builder_name'] = builder_name
   results_json['build_number'] = build_number
   results_json['chromium_revision'] = chrome_revision
-  results_json['master_name'] = master_name
+  results_json['main_name'] = main_name
   with open(json_results_file_path, 'w') as f:
     json.dump(results_json, f)
   return [(FULL_RESULTS_FILENAME, json_results_file_path)]
@@ -77,7 +77,7 @@ def generate_json_results_file_for_json(
 
 def generate_json_results_file_for_gtest(
     gtest_json, builder_name, build_number, results_directory, chrome_revision,
-    master_name):
+    main_name):
   """Generates JSON results files from the given |gtest_json|.
 
   Args:
@@ -96,11 +96,11 @@ def generate_json_results_file_for_gtest(
         'builder_name:%s, build_number:%s, '
         'results_directory:%s, '
         'chrome_revision:%s '
-        'master_name:%s' %
+        'main_name:%s' %
         (builder_name, build_number,
          results_directory,
          chrome_revision,
-         master_name))
+         main_name))
 
   # TODO(estaab): This doesn't need to be an object. Make it a simple function.
   generator = JSONResultsGenerator(
@@ -108,7 +108,7 @@ def generate_json_results_file_for_gtest(
       results_directory,
       test_results_map,
       svn_revisions=[('chromium', chrome_revision)],
-      master_name=master_name)
+      main_name=main_name)
   generator.generate_json_output()
   generator.generate_times_ms_file()
   return [(f, os.path.join(results_directory, f)) for f in
@@ -134,9 +134,9 @@ def main(args):
   option_parser.add_option('--test-results-server',
                            help='The test results server to upload the '
                                 'results.')
-  option_parser.add_option('--master-name',
-                           help='The name of the buildbot master. '
-                                'Both test-results-server and master-name '
+  option_parser.add_option('--main-name',
+                           help='The name of the buildbot main. '
+                                'Both test-results-server and main-name '
                                 'need to be specified to upload the results '
                                 'to the server.')
   option_parser.add_option('--chrome-revision', default='0',
@@ -154,9 +154,9 @@ def main(args):
     option_parser.error('--input-json needs to be specified.')
     return 1
 
-  if options.test_results_server and not options.master_name:
+  if options.test_results_server and not options.main_name:
     logging.warn('--test-results-server is given but '
-                 '--master-name is not specified; the results won\'t be '
+                 '--main-name is not specified; the results won\'t be '
                  'uploaded to the server.')
 
   with file(options.input_json) as json_file:
@@ -170,7 +170,7 @@ def main(args):
       build_number=options.build_number,
       results_directory=options.results_directory,
       chrome_revision=options.chrome_revision,
-      master_name=options.master_name)
+      main_name=options.main_name)
   else:
     print ('Input JSON file probably has gtest format. Converting to full json'
            ' results format')
@@ -179,15 +179,15 @@ def main(args):
         build_number=options.build_number,
         results_directory=options.results_directory,
         chrome_revision=options.chrome_revision,
-        master_name=options.master_name)
+        main_name=options.main_name)
 
   # Upload to a test results server if specified.
-  if options.test_results_server and options.master_name:
+  if options.test_results_server and options.main_name:
     print 'Uploading JSON files for builder "%s" to server "%s"' % (
         options.builder_name, options.test_results_server)
     attrs = [('builder', options.builder_name),
              ('testtype', options.test_type),
-             ('master', options.master_name)]
+             ('main', options.main_name)]
 
     # Set uploading timeout in case appengine server is having problem.
     # 120 seconds are more than enough to upload test results.

@@ -43,9 +43,9 @@ BUILDERS = freeze({
 REPO_URL = 'https://chromium.googlesource.com/chromium/src.git'
 
 def RunSteps(api):
-  mastername = api.properties['mastername']
+  mainname = api.properties['mainname']
   buildername = api.properties['buildername']
-  builder = BUILDERS[mastername][buildername]
+  builder = BUILDERS[mainname][buildername]
   api.chromium_android.configure_from_properties(
       builder['config'],
       REPO_NAME='src',
@@ -102,11 +102,11 @@ def GenTests(api):
       api.properties.generic(
           buildername='Android ChromeDriver Tests (dbg)',
           bot_id='bot_id',
-          mastername='chromium.fyi') +
+          mainname='chromium.fyi') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
           got_revision='4f4b02f6b7fa20a3a25682c457bbc8ad589c8a00',
-          got_revision_cp='refs/heads/master@{#333333}'))
+          got_revision_cp='refs/heads/main@{#333333}'))
 
   yield (
       api.test(
@@ -114,9 +114,9 @@ def GenTests(api):
       api.properties.generic(
           buildername='Android ChromeDriver Tests (dbg)',
           bot_id='bot_id',
-          mastername='chromium.fyi') +
+          mainname='chromium.fyi') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
           got_revision='4f4b02f6b7fa20a3a25682c457bbc8ad589c8a00',
-          got_revision_cp='refs/heads/master@{#333333}') +
+          got_revision_cp='refs/heads/main@{#333333}') +
       api.step_data('java_tests chrome_stable.Run Tests', retcode=1))

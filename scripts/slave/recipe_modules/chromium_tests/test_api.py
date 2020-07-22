@@ -29,7 +29,7 @@ class ChromiumTestsApi(recipe_test_api.RecipeTestApi):
   @staticmethod
   def bot_config(
       builder_dict,
-      mastername='test_mastername',
+      mainname='test_mainname',
       buildername='test_buildername'):
     """Returns a synthesized BotConfig instance based on |builder_dict|.
 
@@ -37,5 +37,5 @@ class ChromiumTestsApi(recipe_test_api.RecipeTestApi):
     referencing production data.
     """
     return bdb_module.BotConfig(
-        {mastername: {'builders': {buildername: builder_dict}}},
-        [{'mastername': mastername, 'buildername': buildername}])
+        {mainname: {'builders': {buildername: builder_dict}}},
+        [{'mainname': mainname, 'buildername': buildername}])

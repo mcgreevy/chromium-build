@@ -3,20 +3,20 @@
 # found in the LICENSE file.
 
 # This file was generated from
-# scripts/tools/buildbot_tool_templates/master_site_config.py
+# scripts/tools/buildbot_tool_templates/main_site_config.py
 # by "../../build/scripts/tools/buildbot-tool gen .".
 # DO NOT EDIT BY HAND!
 
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class ChromiumGPUFYI(Master.Master1):
+class ChromiumGPUFYI(Main.Main1):
   project_name = 'ChromiumGPUFYI'
-  master_port = 8017
-  slave_port = 8117
-  master_port_alt = 8217
+  main_port = 8017
+  subordinate_port = 8117
+  main_port_alt = 8217
   buildbot_url = 'https://build.chromium.org/p/chromium.gpu.fyi/'
   buildbucket_bucket = None
   service_account_file = None

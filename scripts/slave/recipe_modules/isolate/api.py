@@ -102,7 +102,7 @@ class IsolateApi(recipe_api.RecipeApi):
     this step can currently only be run once per recipe.
     """
     # TODO(tansell): Make all steps in this function nested under one overall
-    # 'isolate tests' master step.
+    # 'isolate tests' main step.
 
     # TODO(vadimsh): Always require |targets| to be passed explicitly. Currently
     # chromium_trybot, blink_trybot and swarming/canary recipes rely on targets
@@ -175,7 +175,7 @@ class IsolateApi(recipe_api.RecipeApi):
                 **kwargs))
 
       # TODO(tansell): Change this to return a dummy "isolate results" or the
-      # top level master step.
+      # top level main step.
       return isolate_steps[-1]
     finally:
       step_result = self.m.step.active_result

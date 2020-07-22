@@ -8,7 +8,7 @@
 This is helpful for running scripts locally on a development machine.
 
 Try `scripts/tools/runit.py python`
-or  (in scripts/slave): `../tools/runit.py runtest.py --help`
+or  (in scripts/subordinate): `../tools/runit.py runtest.py --help`
 """
 
 import optparse

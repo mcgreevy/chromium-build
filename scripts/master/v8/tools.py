@@ -3,13 +3,13 @@
 # found in the LICENSE file.
 
 
-def distribute_subdir_slaves(master, builders, hostnames, slaves):
+def distribute_subdir_subordinates(main, builders, hostnames, subordinates):
   """Distributes a list of builders to a list of hostnames with subdirs.
 
-  Each builder will be assigned to one (subdir) slave. The different hosts will
-  have an equal number (+/- 1) of subdir slaves.
+  Each builder will be assigned to one (subdir) subordinate. The different hosts will
+  have an equal number (+/- 1) of subdir subordinates.
 
-  Example: Distributing builders [A, B, C, D, E] to slaves [X, Y] will result
+  Example: Distributing builders [A, B, C, D, E] to subordinates [X, Y] will result
   in [AX0, BY0, CX1, DY1, EX2], where e.g. CX1 is builder C on host X with
   subdir 1.
   """
@@ -27,8 +27,8 @@ def distribute_subdir_slaves(master, builders, hostnames, slaves):
       # All hostnames were used, rotate and advance the subdir index.
       hostname_index = 0
       subdir_index += 1
-    slaves.append({
-      'master': master,
+    subordinates.append({
+      'main': main,
       'builder': builder,
       'hostname': hostnames[hostname_index],
       'os': 'linux',
@@ -39,10 +39,10 @@ def distribute_subdir_slaves(master, builders, hostnames, slaves):
     hostname_index += 1
 
 
-def verify_subdir_slaves(c):
-  """Checks that subdir slaves are not auto-rebooted."""
-  for s in c['slaves']:
-    # Note, we can't import the class AutoRebootBuildSlave
-    if '#' in s.slavename and s.__class__.__name__ == 'AutoRebootBuildSlave':
+def verify_subdir_subordinates(c):
+  """Checks that subdir subordinates are not auto-rebooted."""
+  for s in c['subordinates']:
+    # Note, we can't import the class AutoRebootBuildSubordinate
+    if '#' in s.subordinatename and s.__class__.__name__ == 'AutoRebootBuildSubordinate':
       raise Exception(
-          'Subdir slaves must not auto-reboot. But found %s' % s.slavename)
+          'Subdir subordinates must not auto-reboot. But found %s' % s.subordinatename)

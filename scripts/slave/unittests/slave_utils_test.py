@@ -10,10 +10,10 @@ import unittest
 import test_env  # pylint: disable=W0403,W0611
 
 import mock
-import slave.slave_utils as slave_utils
+import subordinate.subordinate_utils as subordinate_utils
 from common import chromium_utils
 
-# build/scripts/slave/unittests
+# build/scripts/subordinate/unittests
 _SCRIPT_DIR = os.path.dirname(__file__)
 _BUILD_DIR = os.path.abspath(os.path.join(
     _SCRIPT_DIR, os.pardir, os.pardir))
@@ -35,7 +35,7 @@ BUG=405646
 
 Review URL: https://codereview.chromium.org/468103003
 
-Cr-Commit-Position: refs/heads/master@{#291141}
+Cr-Commit-Position: refs/heads/main@{#291141}
 git-svn-id: svn://svn.chromium.org/chrome/trunk/src@291140 0039d316-1c4b-4281
 """
 
@@ -61,31 +61,31 @@ class TestGetZipFileNames(unittest.TestCase):
     chromium_utils.OverridePlatformName(sys.platform)
 
   def testNormalBuildName(self):
-    (base_name, version_suffix) = slave_utils.GetZipFileNames(
+    (base_name, version_suffix) = subordinate_utils.GetZipFileNames(
         '', None, None, 123)
     self._verifyBaseName(base_name)
     self.assertEqual('_123', version_suffix)
 
   def testNormalBuildNameTryBot(self):
-    (base_name, version_suffix) = slave_utils.GetZipFileNames(
-        'master.tryserver.chromium.linux', 666, None, 123)
+    (base_name, version_suffix) = subordinate_utils.GetZipFileNames(
+        'main.tryserver.chromium.linux', 666, None, 123)
     self._verifyBaseName(base_name)
     self.assertEqual('_666', version_suffix)
 
   def testNormalBuildNameTryBotExtractNoParentBuildNumber(self):
     def dummy():
-      slave_utils.GetZipFileNames(
-          'master.tryserver.chromium.linux', 666, None, 123, extract=True)
+      subordinate_utils.GetZipFileNames(
+          'main.tryserver.chromium.linux', 666, None, 123, extract=True)
     self.assertRaises(Exception, dummy)
 
   def testNormalBuildNameTryBotExtractWithParentBuildNumber(self):
-    (base_name, version_suffix) = slave_utils.GetZipFileNames(
-        'master.tryserver.chromium.linux', 666, 999, 123, extract=True)
+    (base_name, version_suffix) = subordinate_utils.GetZipFileNames(
+        'main.tryserver.chromium.linux', 666, 999, 123, extract=True)
     self._verifyBaseName(base_name)
     self.assertEqual('_999', version_suffix)
 
   def testWebKitName(self):
-    (base_name, version_suffix) = slave_utils.GetZipFileNames(
+    (base_name, version_suffix) = subordinate_utils.GetZipFileNames(
         '', None, None, 123, 456)
     self._verifyBaseName(base_name)
     self.assertEqual('_wk456_123', version_suffix)
@@ -96,32 +96,32 @@ class TestGetZipFileNames(unittest.TestCase):
 
 class TestGetBuildRevisions(unittest.TestCase):
   def testNormal(self):
-    (build_revision, webkit_revision) = slave_utils.GetBuildRevisions(
+    (build_revision, webkit_revision) = subordinate_utils.GetBuildRevisions(
         _BUILD_DIR)
     self.assertTrue(build_revision > 0)
     self.assertEquals(None, webkit_revision)
 
   def testWebKitDir(self):
-    (build_revision, webkit_revision) = slave_utils.GetBuildRevisions(
+    (build_revision, webkit_revision) = subordinate_utils.GetBuildRevisions(
         _BUILD_DIR, webkit_dir=_BUILD_DIR)
     self.assertTrue(build_revision > 0)
     self.assertTrue(webkit_revision > 0)
 
   def testRevisionDir(self):
-    (build_revision, webkit_revision) = slave_utils.GetBuildRevisions(
+    (build_revision, webkit_revision) = subordinate_utils.GetBuildRevisions(
         _BUILD_DIR, revision_dir=_BUILD_DIR)
     self.assertTrue(build_revision > 0)
     self.assertEquals(None, webkit_revision)
 
 
-@mock.patch('__main__.slave_utils.GSUtilSetup',
+@mock.patch('__main__.subordinate_utils.GSUtilSetup',
       mock.MagicMock(side_effect=lambda: ['/mock/gsutil']))
 @mock.patch('__main__.chromium_utils.RunCommand')
 class TestGSUtil(unittest.TestCase):
 
   def testGSUtilCopyCacheControl(self,  # pylint: disable=no-self-use
                                  run_command_mock):
-    slave_utils.GSUtilCopyFile('foo', 'bar', cache_control='mock_cache')
+    subordinate_utils.GSUtilCopyFile('foo', 'bar', cache_control='mock_cache')
     run_command_mock.assert_called_with([
       '/mock/gsutil',
       '-h',
@@ -130,7 +130,7 @@ class TestGSUtil(unittest.TestCase):
       'file://foo',
       'file://bar/foo',
     ])
-    slave_utils.GSUtilCopyDir('foo', 'bar', cache_control='mock_cache')
+    subordinate_utils.GSUtilCopyDir('foo', 'bar', cache_control='mock_cache')
     run_command_mock.assert_called_with([
       '/mock/gsutil',
       '-m',
@@ -144,7 +144,7 @@ class TestGSUtil(unittest.TestCase):
 
   def testGSUtilCopyFileWithDestFilename(self, # pylint: disable=no-self-use
                                          run_command_mock):
-    slave_utils.GSUtilCopyFile(
+    subordinate_utils.GSUtilCopyFile(
         '/my/local/path/foo.txt', 'gs://bucket/dest/dir',
         dest_filename='bar.txt')
     run_command_mock.assert_called_with([
@@ -156,7 +156,7 @@ class TestGSUtil(unittest.TestCase):
 
   def testGSUtilCopyFileWithQuietFlag(self, # pylint: disable=no-self-use
                                       run_command_mock):
-    slave_utils.GSUtilCopyFile('foo', 'bar', add_quiet_flag=True)
+    subordinate_utils.GSUtilCopyFile('foo', 'bar', add_quiet_flag=True)
     run_command_mock.assert_called_with([
       '/mock/gsutil',
       '-q',
@@ -167,7 +167,7 @@ class TestGSUtil(unittest.TestCase):
 
   def testGSUtilCopyDirWithQuietFlag(self, #  pylint: disable=no-self-use
                                      run_command_mock):
-    slave_utils.GSUtilCopyDir('foo', 'bar', add_quiet_flag=True)
+    subordinate_utils.GSUtilCopyDir('foo', 'bar', add_quiet_flag=True)
     run_command_mock.assert_called_with([
       '/mock/gsutil',
       '-m',
@@ -183,19 +183,19 @@ class GetGitRevisionTest(unittest.TestCase):
   """Tests related to getting revisions from a directory."""
   def test_GitSvnCase(self):
     # pylint: disable=W0212
-    self.assertEqual(slave_utils._GetGitCommitPositionFromLog(CHROMIUM_LOG),
+    self.assertEqual(subordinate_utils._GetGitCommitPositionFromLog(CHROMIUM_LOG),
                      '291141')
     # pylint: disable=W0212
-    self.assertEqual(slave_utils._GetGitCommitPositionFromLog(BLINK_LOG),
+    self.assertEqual(subordinate_utils._GetGitCommitPositionFromLog(BLINK_LOG),
                      '180728')
 
   def test_GetCommitPosFromBuildPropTest(self):
     """Tests related to getting a commit position from build properties."""
     # pylint: disable=W0212
-    self.assertEqual(slave_utils._GetCommitPos(
-        {'got_revision_cp': 'refs/heads/master@{#12345}'}), 12345)
+    self.assertEqual(subordinate_utils._GetCommitPos(
+        {'got_revision_cp': 'refs/heads/main@{#12345}'}), 12345)
     # pylint: disable=W0212
-    self.assertIsNone(slave_utils._GetCommitPos({'got_revision': 12345}))
+    self.assertIsNone(subordinate_utils._GetCommitPos({'got_revision': 12345}))
 
 class TelemetryRevisionTest(unittest.TestCase):
   def test_GetPerfDashboardRevisions(self):
@@ -207,7 +207,7 @@ class TelemetryRevisionTest(unittest.TestCase):
       'got_v8_revision': 'undefined',
       'git_revision': '9a7b354',
     }
-    versions = slave_utils.GetPerfDashboardRevisions(
+    versions = subordinate_utils.GetPerfDashboardRevisions(
         build_properties, revision,  webkit_revision, point_id)
     self.assertEqual(
         {'rev': '294850', 'webkit_rev': '34f9d01', 'git_revision': '9a7b354',

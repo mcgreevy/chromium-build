@@ -25,9 +25,9 @@ For more information about recipes, see: https://goo.gl/xKnjz6
 
 def RunSteps(api):
   # Dupe of bisection/desktop_bisect recipe.
-  mastername = api.properties.get('mastername')
+  mainname = api.properties.get('mainname')
   buildername = api.properties.get('buildername')
-  bot_config = api.chromium_tests.create_bot_config_object(mastername,
+  bot_config = api.chromium_tests.create_bot_config_object(mainname,
                                                            buildername)
   api.chromium_tests.configure_build(bot_config)
   api.gclient.apply_config('perf')
@@ -45,7 +45,7 @@ def GenTests(api):
   yield (
       api.test('basic_linux_bisect')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -98,7 +98,7 @@ def GenTests(api):
       api.test('basic_win64_bisect')
       + api.platform('win', 64)
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='winx64_zen_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -151,7 +151,7 @@ def GenTests(api):
       api.test('basic_win32_bisect')
       + api.platform('win', 32)
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='win_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -204,7 +204,7 @@ def GenTests(api):
       api.test('basic_mac_bisect')
       + api.platform('mac', 64)
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='mac_10_11_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -256,7 +256,7 @@ def GenTests(api):
   yield (
       api.test('basic_buildbot_bisect')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -308,7 +308,7 @@ def GenTests(api):
   yield (
       api.test('basic_resource_sizes_bisect')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -361,7 +361,7 @@ def GenTests(api):
   yield (
       api.test('v8_roll_bisect_bis')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -433,7 +433,7 @@ def GenTests(api):
   yield (
       api.test('v8_roll_bisect')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -505,7 +505,7 @@ def GenTests(api):
   yield (
       api.test('retest_bisect')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -544,7 +544,7 @@ def GenTests(api):
   yield (
       api.test('bad_config')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -568,7 +568,7 @@ def GenTests(api):
   yield (
       api.test('return_code')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -616,7 +616,7 @@ def GenTests(api):
   yield (
       api.test('return_code_fail')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -652,7 +652,7 @@ def GenTests(api):
   yield (
       api.test('basic_bisect_other_direction')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -703,7 +703,7 @@ def GenTests(api):
   yield (
       api.test('no_repro')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -741,7 +741,7 @@ def GenTests(api):
   yield (
       api.test('gathering_references_no_values')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -779,7 +779,7 @@ def GenTests(api):
   yield (
       api.test('failed_build')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -823,7 +823,7 @@ def GenTests(api):
   yield (
       api.test('failed_buildbucket_get')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -865,7 +865,7 @@ def GenTests(api):
   yield (
       api.test('no_values')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -908,7 +908,7 @@ def GenTests(api):
   yield (
       api.test('failed_build_inconclusive_1')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,
@@ -958,7 +958,7 @@ def GenTests(api):
   yield (
       api.test('failed_build_inconclusive_11')
       + api.properties(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           bot_id='dummybot',
           buildnumber=571,

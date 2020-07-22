@@ -296,7 +296,7 @@ def GenTests(api):
   def properties_for(buildername):
     return api.properties.generic(
         buildername=buildername,
-        bot_id='tehslave',
+        bot_id='tehsubordinate',
         repo_name='src/repo',
         issue='123456789',
         patchset='1',
@@ -364,7 +364,7 @@ def GenTests(api):
   yield (api.test('gerrit_refs') +
       api.properties.generic(
         buildername='gerrit_try_builder',
-        bot_id='testslave',
+        bot_id='testsubordinate',
         repo_name='src/repo',
         issue='123456789',
         patchset='1',

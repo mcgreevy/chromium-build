@@ -16,10 +16,10 @@ import sys
 from common import annotator
 from common import chromium_utils
 from common import env
-from slave import cipd
-from slave import cipd_bootstrap_v2
-from slave import gce
-from slave import infra_platform
+from subordinate import cipd
+from subordinate import cipd_bootstrap_v2
+from subordinate import gce
+from subordinate import infra_platform
 
 
 LOGGER = logging.getLogger('logdog_bootstrap')
@@ -34,7 +34,7 @@ class BootstrapError(Exception):
 
 
 # Path to the "cipd.py" library.
-_CIPD_PY_PATH = os.path.join(env.Build, 'scripts', 'slave', 'cipd.py')
+_CIPD_PY_PATH = os.path.join(env.Build, 'scripts', 'subordinate', 'cipd.py')
 
 
 # CIPD tag for LogDog Butler/Annotee to use.
@@ -108,11 +108,11 @@ _PLATFORM_CONFIG = {
 }
 
 
-# Params are parameters for this specific master/builder configuration.
+# Params are parameters for this specific main/builder configuration.
 #
 # Loaded by '_get_params'.
 Params = collections.namedtuple('Params', (
-    'project', 'cipd_tag', 'api', 'mastername', 'buildername', 'buildnumber',
+    'project', 'cipd_tag', 'api', 'mainname', 'buildername', 'buildnumber',
     'logdog_only', 'generation',
 ))
 
@@ -147,8 +147,8 @@ def all_cipd_packages():
       yield cipd.CipdPackage(name=name, version=version)
 
 
-def _load_params_dict(mastername):
-  """Returns (dict or None): The parameters for the specified master.
+def _load_params_dict(mainname):
+  """Returns (dict or None): The parameters for the specified main.
 
   The parameters are loaded by locating the 'logdog-params.pyl' file for the
   currently-executing waterfall. If found, it will be parsed and the waterfall's
@@ -158,27 +158,27 @@ def _load_params_dict(mastername):
   specified waterfall, None will be returned.
 
   Args:
-    mastername (str): The name of the master whose parameters will be loaded.
+    mainname (str): The name of the main whose parameters will be loaded.
 
   Raises:
     NotBootstrapped: If the parameters dictionary could not be loaded.
   """
-  # Identify the directory where the master is located.
+  # Identify the directory where the main is located.
   try:
-    master_dir = chromium_utils.MasterPath(mastername)
+    main_dir = chromium_utils.MainPath(mainname)
   except LookupError as e:
-    LOGGER.warning('Unable to find directory for master [%s] (%s)',
-                   mastername, e)
-    raise NotBootstrapped('No master directory')
+    LOGGER.warning('Unable to find directory for main [%s] (%s)',
+                   mainname, e)
+    raise NotBootstrapped('No main directory')
 
-  # 'master_dir' is:
-  #   <build_dir>/masters/<master_name>
+  # 'main_dir' is:
+  #   <build_dir>/mains/<main_name>
   #
   #  We want to look up:
-  #   <build_dir>/scripts/slave/logdog-params.pyl
+  #   <build_dir>/scripts/subordinate/logdog-params.pyl
   #
-  params_path = os.path.join(master_dir, os.pardir, os.pardir, 'scripts',
-                             'slave', 'logdog-params.pyl')
+  params_path = os.path.join(main_dir, os.pardir, os.pardir, 'scripts',
+                             'subordinate', 'logdog-params.pyl')
   if not os.path.isfile(params_path):
     LOGGER.warning('No LogDog parameters at: [%s]', params_path)
     raise NotBootstrapped('No parameters file.')
@@ -214,26 +214,26 @@ def _get_params(properties):
     properties (dict): Build property dictionary.
 
   Raises:
-    NotBootstrapped: If parameters could not be built, or if this master/builder
+    NotBootstrapped: If parameters could not be built, or if this main/builder
         is disabled.
   """
   # Extract our required properties.
   props = tuple(properties.get(f) for f in (
-      'mastername', 'buildername', 'buildnumber'))
+      'mainname', 'buildername', 'buildnumber'))
   if not all(props):
-    LOGGER.warning('Missing mastername/buildername/buildnumber properties.')
+    LOGGER.warning('Missing mainname/buildername/buildnumber properties.')
     raise NotBootstrapped('Insufficient properties.')
-  mastername, buildername, buildnumber = props
+  mainname, buildername, buildnumber = props
 
-  # Find our project name and master config.
+  # Find our project name and main config.
   project = None
-  for project, masters in sorted(_load_params_dict(mastername).items()):
-    master_config = masters.get(mastername)
-    if master_config is not None:
+  for project, mains in sorted(_load_params_dict(mainname).items()):
+    main_config = mains.get(mainname)
+    if main_config is not None:
       break
   else:
-    LOGGER.info('No master config found for [%s].', mastername)
-    raise NotBootstrapped('No master config.')
+    LOGGER.info('No main config found for [%s].', mainname)
+    raise NotBootstrapped('No main config.')
 
   # Get builder config map, allowing overrides if one is defined for either the
   # specific builder or all builders ('*').
@@ -244,15 +244,15 @@ def _get_params(properties):
     'generation': None,
   }
   for bn in (buildername, '*'):
-    bn_map = master_config.get(bn)
+    bn_map = main_config.get(bn)
     if bn_map is not None:
       builder_map.update(bn_map)
       break
 
   # If our builder is not enabled, we are done.
   if not builder_map['enabled']:
-    LOGGER.info('LogDog is disabled for master / builder [%s / %s].',
-                mastername, buildername)
+    LOGGER.info('LogDog is disabled for main / builder [%s / %s].',
+                mainname, buildername)
     raise NotBootstrapped('LogDog is disabled.')
 
   # Resolve our CIPD tag.
@@ -266,7 +266,7 @@ def _get_params(properties):
       project=project,
       cipd_tag=cipd_tag,
       api=api,
-      mastername=mastername,
+      mainname=mainname,
       buildername=buildername,
       buildnumber=buildnumber,
       logdog_only=builder_map['logdog_only'],
@@ -343,7 +343,7 @@ def _build_prefix(params):
   """Constructs a LogDog stream prefix and tags from the supplied properties.
 
   The returned prefix is of the form:
-  bb/<mastername>/<buildername>/<buildnumber>
+  bb/<mainname>/<buildername>/<buildnumber>
 
   Any path-incompatible characters will be flattened to underscores.
 
@@ -362,20 +362,20 @@ def _build_prefix(params):
       parts.insert(0, 's_')
     return ''.join(parts)
 
-  mastername, buildername, buildnumber = (normalize(p) for p in (
-      params.mastername, params.buildername, params.buildnumber))
+  mainname, buildername, buildnumber = (normalize(p) for p in (
+      params.mainname, params.buildername, params.buildnumber))
 
-  parts = ['bb', mastername, buildername]
+  parts = ['bb', mainname, buildername]
   if params.generation:
     parts += [params.generation]
   parts += [buildnumber]
   prefix = '/'.join(str(x) for x in parts)
 
   viewer_url = (
-      'https://luci-milo.appspot.com/buildbot/%(mastername)s/%(buildername)s/'
+      'https://luci-milo.appspot.com/buildbot/%(mainname)s/%(buildername)s/'
       '%(buildnumber)d' % params._asdict())
   tags = collections.OrderedDict((
-      ('buildbot.master', mastername),
+      ('buildbot.main', mainname),
       ('buildbot.builder', buildername),
       ('buildbot.buildnumber', str(buildnumber)),
       ('logdog.viewer_url', viewer_url),
@@ -429,7 +429,7 @@ def get_config(opts, properties):
     raise NotBootstrapped(
        'LOGDOG_STREAM_PREFIX in enviornment, refusing to nest bootstraps.')
 
-  # Load our bootstrap parameters based on our master/builder.
+  # Load our bootstrap parameters based on our main/builder.
   params = _get_params(properties)
 
   # Get our platform configuration. This will fail if any fields are missing.

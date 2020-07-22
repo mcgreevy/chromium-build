@@ -24,7 +24,7 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng') +
       api.override_step_data(
           'read test spec (chromium.linux.json)',
@@ -40,21 +40,21 @@ def GenTests(api):
   yield (
       api.test('analyze_compile_mode') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_clobber_rel_ng')
   )
 
   yield (
       api.test('no_compile') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng')
   )
 
   yield (
       api.test('no_compile_no_source') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng') +
       api.override_step_data(
           'git diff to analyze patch',
@@ -65,7 +65,7 @@ def GenTests(api):
   yield (
       api.test('blink_linux') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng') +
       api.override_step_data(
           'git diff to analyze patch',
@@ -77,7 +77,7 @@ def GenTests(api):
       api.test('blink_mac') +
       api.platform.name('mac') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.mac',
+          mainname='tryserver.chromium.mac',
           buildername='mac_chromium_rel_ng') +
       api.override_step_data(
           'git diff to analyze patch',
@@ -128,7 +128,7 @@ def GenTests(api):
   yield (
     api.test('supresses_swarming_layout_tests_via_src_side_config') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='linux_chromium_rel_ng',
         swarm_hashes = {
             'webkit_layout_tests_exparchive':
@@ -154,7 +154,7 @@ def GenTests(api):
   yield (
     api.test('add_swarming_layout_tests_via_src_side_config') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='linux_chromium_rel_ng',
         swarm_hashes = {
             'webkit_layout_tests_exparchive':

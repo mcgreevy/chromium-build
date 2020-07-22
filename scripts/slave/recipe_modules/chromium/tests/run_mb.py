@@ -19,7 +19,7 @@ def RunSteps(api):
     api.chromium.apply_config(config)
 
   api.chromium.run_mb(
-      mastername='test_mastername',
+      mainname='test_mainname',
       buildername='test_buildername',
       phase='test_phase',
       isolated_targets=['base_unittests_run'],

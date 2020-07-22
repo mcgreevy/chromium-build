@@ -16,7 +16,7 @@ DEPS = [
 ]
 
 builders = {
-  # This is used by recipe coverage tests, not by any actual master.
+  # This is used by recipe coverage tests, not by any actual main.
   'test-coverage': {
     'mode': 'release',
     'target_arch': 'x64',
@@ -141,27 +141,27 @@ def GenTests(api):
    yield (
       api.test('vm-kernel-linux-debug-x64') +
       api.platform('linux', 64) +
-      api.properties.generic(mastername='client.dart.internal',
+      api.properties.generic(mainname='client.dart.internal',
                              buildername='vm-kernel-linux-debug-x64'))
    yield (
       api.test('vm-kernel-precomp-linux-debug-x64-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-          mastername='client.dart.internal',
+          mainname='client.dart.internal',
           buildername='vm-kernel-precomp-linux-debug-x64-be'))
    yield (
       api.test('vm-kernel-precomp-linux-debug-x64-1-4-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-          mastername='client.dart.internal',
+          mainname='client.dart.internal',
           buildername='vm-kernel-precomp-linux-debug-x64-1-4-be'))
    yield (
       api.test('test-coverage') +
       api.platform('linux', 32) +
-      api.properties.generic(mastername='client.dart.internal',
+      api.properties.generic(mainname='client.dart.internal',
                              buildername='test-coverage'))
    yield (
       api.test('test-coverage-win') +
       api.platform('win', 64) +
-      api.properties.generic(mastername='client.dart.internal',
+      api.properties.generic(mainname='client.dart.internal',
                              buildername='test-coverage-win'))

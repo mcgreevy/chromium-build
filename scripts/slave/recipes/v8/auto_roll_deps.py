@@ -121,7 +121,7 @@ def RunSteps(api):
     gitiles_deps = api.gitiles.download_file(
         'https://chromium.googlesource.com/chromium/src',
         'DEPS',
-        branch='refs/heads/master',
+        branch='refs/heads/main',
         step_test_data= lambda: api.json.test_api.output({
           'value': base64.b64encode(TEST_DEPS_FILE % 'deadbeef'),
         }),
@@ -181,14 +181,14 @@ def RunSteps(api):
 
 def GenTests(api):
   yield (api.test('standard') + api.properties.generic(
-      mastername='client.v8.fyi') +
+      mainname='client.v8.fyi') +
       api.url.json('check active roll', {'results': []}))
   yield (api.test('rolling_deactivated') +
-      api.properties.generic(mastername='client.v8') +
+      api.properties.generic(mainname='client.v8') +
       api.url.text('check roll status', '0')
     )
   yield (api.test('active_roll') +
-      api.properties.generic(mastername='client.v8') +
+      api.properties.generic(mainname='client.v8') +
       api.url.json('check active roll', {
           'results': [{
             'subject': 'Update V8 to foo',
@@ -198,7 +198,7 @@ def GenTests(api):
       })
     )
   yield (api.test('stale_roll') +
-      api.properties.generic(mastername='client.v8') +
+      api.properties.generic(mainname='client.v8') +
       api.url.json('check active roll', {
           'results': [{
             'subject': 'Update V8 to foo',
@@ -208,7 +208,7 @@ def GenTests(api):
       })
     )
   yield (api.test('inconsistent_state') +
-      api.properties.generic(mastername='client.v8') +
+      api.properties.generic(mainname='client.v8') +
       api.url.json('check active roll', {'results': []}) +
       api.override_step_data(
           'git cat-file', api.raw_io.stream_output(

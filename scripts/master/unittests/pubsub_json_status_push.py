@@ -11,7 +11,7 @@ from cStringIO import StringIO
 
 import test_env  # pylint: disable=W0611,W0403
 
-from master.pubsub_json_status_push import StatusPush, MessageTooBigError
+from main.pubsub_json_status_push import StatusPush, MessageTooBigError
 
 
 class PubSubJsonStatusPush(unittest.TestCase):
@@ -25,27 +25,27 @@ class PubSubJsonStatusPush(unittest.TestCase):
 
 
   def test_batch_data_no_builds(self):
-    master = {'foo': 'bar'}
+    main = {'foo': 'bar'}
     builds = []
     sp = StatusPush(None, 'fake', None)
-    data = list(sp._get_pubsub_messages(master, builds))
+    data = list(sp._get_pubsub_messages(main, builds))
     self.assertEquals(len(data), 1)
 
   def test_batch_data_5_builds(self):
-    master = {'foo': 'bar'}
+    main = {'foo': 'bar'}
     builds = ['#' * 1000000 for _ in xrange(5)]
     sp = StatusPush(None, 'fake', None)
-    data = list(sp._get_pubsub_messages(master, builds))
+    data = list(sp._get_pubsub_messages(main, builds))
     self.assertEquals(len(data), 1)
 
   def test_batch_data_10_builds(self):
-    master = {'foo': 'bar'}
+    main = {'foo': 'bar'}
     builds = ['#' * 1000000 for _ in xrange(10)]
     sp = StatusPush(None, 'fake', None)
     self.assertRaises(
-        MessageTooBigError, list, sp._get_pubsub_messages(master, builds))
+        MessageTooBigError, list, sp._get_pubsub_messages(main, builds))
     self.assertEquals(sp._splits, 2)
-    data = list(sp._get_pubsub_messages(master, builds))
+    data = list(sp._get_pubsub_messages(main, builds))
     self.assertEquals(len(data), 2)
 
 

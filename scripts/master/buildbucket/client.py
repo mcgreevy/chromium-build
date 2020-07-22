@@ -9,9 +9,9 @@ import json
 import os
 import urlparse
 
-from master import auth
-from master import deferred_resource
-from master.buildbucket import common
+from main import auth
+from main import deferred_resource
+from main.buildbucket import common
 import apiclient
 import httplib2
 
@@ -22,22 +22,22 @@ THIS_DIR = os.path.dirname(os.path.abspath(os.path.realpath(__file__)))
 DISCOVERY_DOC_PATH = os.path.join(THIS_DIR, 'discovery_doc.json')
 
 
-def get_default_buildbucket_hostname(master):
+def get_default_buildbucket_hostname(main):
   return (
-      BUILDBUCKET_HOSTNAME_PRODUCTION if master.is_production_host
+      BUILDBUCKET_HOSTNAME_PRODUCTION if main.is_production_host
       else BUILDBUCKET_HOSTNAME_TESTING)
 
 
-def create_buildbucket_service(master, hostname=None, verbose=None):
+def create_buildbucket_service(main, hostname=None, verbose=None):
   """Asynchronously creates buildbucket API resource.
 
   Returns:
     A DeferredResource as Deferred.
   """
-  hostname = hostname or get_default_buildbucket_hostname(master)
+  hostname = hostname or get_default_buildbucket_hostname(main)
 
   cred_factory = deferred_resource.CredentialFactory(
-    lambda: auth.create_credentials_for_master(master),
+    lambda: auth.create_credentials_for_main(main),
     ttl=datetime.timedelta(minutes=5),
   )
 

@@ -17,20 +17,20 @@ def GenTests(api):
   yield (
       api.test('builder') +
       api.chromium_tests.platform([{
-          'mastername': 'chromium.linux',
+          'mainname': 'chromium.linux',
           'buildername': 'Linux Builder'}]) +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder')
   )
 
   yield (
       api.test('tester') +
       api.chromium_tests.platform([{
-          'mastername': 'chromium.linux',
+          'mainname': 'chromium.linux',
           'buildername': 'Linux Tests'}]) +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Tests',
           parent_buildername='Linux Builder') +
       api.override_step_data(

@@ -2,20 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class WebRTCPerf(Master.Master3a):
+class WebRTCPerf(Main.Main3a):
   project_name = 'WebRTC Perf'
-  master_port = 20309
-  slave_port = 30309
-  master_port_alt = 25309
+  main_port = 20309
+  subordinate_port = 30309
+  main_port_alt = 25309
   server_url = 'http://webrtc.googlecode.com'
   project_url = 'http://webrtc.googlecode.com'
   from_address = 'webrtc-cb-perf-watchlist@google.com'
   tree_closing_notification_recipients = ['webrtc-cb-perf-watchlist@google.com']
-  master_domain = 'webrtc.org'
+  main_domain = 'webrtc.org'
   permitted_domains = ('google.com', 'chromium.org', 'webrtc.org')
   buildbot_url = 'http://build.chromium.org/p/client.webrtc.perf/'
   service_account_file = 'service-account-webrtc.json'

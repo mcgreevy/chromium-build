@@ -11,7 +11,7 @@ DEPS = [
 
 def RunSteps(api):
   bot_config_object = api.chromium_tests.create_bot_config_object(
-      api.properties['mastername'], api.properties['buildername'])
+      api.properties['mainname'], api.properties['buildername'])
   api.chromium_tests.configure_build(bot_config_object)
 
   api.chromium.apply_config('lto')
@@ -23,6 +23,6 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder')
   )

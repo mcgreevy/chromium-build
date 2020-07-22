@@ -2,15 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class ChromiumPerfTryServer(Master.Master4):
+class ChromiumPerfTryServer(Main.Main4):
   project_name = 'Chromium Perf Try Server'
-  master_port = 8041
-  slave_port = 8141
-  master_port_alt = 8241
+  main_port = 8041
+  subordinate_port = 8141
+  main_port_alt = 8241
   try_job_port = 8341
   buildbot_url = 'http://build.chromium.org/p/tryserver.chromium.perf/'
   # Select tree status urls and codereview location.
@@ -20,7 +20,7 @@ class ChromiumPerfTryServer(Master.Master4):
   store_revisions_url = base_app_url + '/revisions'
   last_good_url = base_app_url + '/lkgr'
   service_account_file = 'service-account-chromium-tryserver.json'
-  buildbucket_bucket = 'master.tryserver.chromium.perf'
+  buildbucket_bucket = 'main.tryserver.chromium.perf'
   pubsub_service_account_file = 'service-account-luci-milo.json'
   pubsub_topic = 'projects/luci-milo/topics/public-buildbot'
   name = 'tryserver.chromium.perf'

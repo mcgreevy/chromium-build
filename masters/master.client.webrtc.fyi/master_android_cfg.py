@@ -4,15 +4,15 @@
 
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import remote_run_factory
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.WebRTCFYI
+import main_site_config
+ActiveMain = main_site_config.WebRTCFYI
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -22,7 +22,7 @@ def m_remote_run(recipe, **kwargs):
 def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='webrtc_android_scheduler',
-                            branch='master',
+                            branch='main',
                             treeStableTimer=0,
                             builderNames=[
           'Android Archive',
@@ -43,6 +43,6 @@ def Update(c):
         'factory': m_remote_run(spec.get('recipe', 'webrtc/standalone')),
         'notify_on_missing': True,
         'category': 'android',
-        'slavebuilddir': spec.get('slavebuilddir', 'android'),
+        'subordinatebuilddir': spec.get('subordinatebuilddir', 'android'),
       } for spec in specs
   ])

@@ -33,7 +33,7 @@ class TestResultsApi(recipe_api.RecipeApi):
           name='Upload to test-results [%s]' % test_type,
           script=self.resource('upload_test_results.py'),
           args=['--input-json', results_file,
-                '--master-name', self.m.properties['mastername'],
+                '--main-name', self.m.properties['mainname'],
                 '--builder-name', '%s%s' % (
                     self.m.properties['buildername'], builder_name_suffix),
                 '--build-number', self.m.properties['buildnumber'],

@@ -10,7 +10,7 @@ import json
 import os
 import sys
 
-from slave import goma_utils
+from subordinate import goma_utils
 
 
 def main():
@@ -64,12 +64,12 @@ def main():
   parser.add_argument('--buildbot-buildername',
                       default='unknown',
                       help='buildbot buildername')
-  parser.add_argument('--buildbot-mastername',
+  parser.add_argument('--buildbot-mainname',
                       default='unknown',
-                      help='buildbot mastername')
-  parser.add_argument('--buildbot-slavename',
+                      help='buildbot mainname')
+  parser.add_argument('--buildbot-subordinatename',
                       default='unknown',
-                      help='buildbot slavename')
+                      help='buildbot subordinatename')
   parser.add_argument('--buildbot-clobber', default='',
                       help='buildbot clobber')
 
@@ -86,8 +86,8 @@ def main():
   if args.upload_compiler_proxy_info:
     viewer_url = goma_utils.UploadGomaCompilerProxyInfo(
         builder=args.buildbot_buildername,
-        master=args.buildbot_mastername,
-        slave=args.buildbot_slavename,
+        main=args.buildbot_mainname,
+        subordinate=args.buildbot_subordinatename,
         clobber=args.buildbot_clobber,
         override_gsutil=override_gsutil
     )
@@ -116,8 +116,8 @@ def main():
         args.goma_stats_file,
         args.build_data_dir,
         builder=args.buildbot_buildername,
-        master=args.buildbot_mastername,
-        slave=args.buildbot_slavename,
+        main=args.buildbot_mainname,
+        subordinate=args.buildbot_subordinatename,
         clobber=args.buildbot_clobber)
     if counter:
       tsmon_counters.append(counter)
@@ -135,8 +135,8 @@ def main():
         args.json_status,
         args.ninja_log_exit_status,
         builder=args.buildbot_buildername,
-        master=args.buildbot_mastername,
-        slave=args.buildbot_slavename,
+        main=args.buildbot_mainname,
+        subordinate=args.buildbot_subordinatename,
         clobber=args.buildbot_clobber)
     if counter:
       tsmon_counters.append(counter)

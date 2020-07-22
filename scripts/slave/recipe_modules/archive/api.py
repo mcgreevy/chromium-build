@@ -43,7 +43,7 @@ class ArchiveApi(recipe_api.RecipeApi):
         '--staging-dir', self.m.path['cache'].join('chrome_staging'),
         '--src-dir', src_dir,
     ]
-    args += self.m.build.slave_utils_args
+    args += self.m.build.subordinate_utils_args
     if 'build_archive_url' in self.m.properties:
       args.extend(['--use-build-url-name', '--build-url',
                    self.m.properties['build_archive_url']])
@@ -91,7 +91,7 @@ class ArchiveApi(recipe_api.RecipeApi):
     kwargs['allow_subannotations'] = True
     self.m.build.python(
       step_name,
-      self.package_repo_resource('scripts', 'slave', 'zip_build.py'),
+      self.package_repo_resource('scripts', 'subordinate', 'zip_build.py'),
       args,
       infra_step=True,
       **kwargs
@@ -135,7 +135,7 @@ class ArchiveApi(recipe_api.RecipeApi):
 
   def _get_comparable_upload_path_for_sort_key(self, branch, number):
     """Returns a sortable string corresponding to the commit position."""
-    if branch and branch != 'refs/heads/master':
+    if branch and branch != 'refs/heads/main':
       branch = branch.replace('/', '_')
       return '%s-%s' % (branch, number)
     return str(number)
@@ -161,11 +161,11 @@ class ArchiveApi(recipe_api.RecipeApi):
 
     Example: cool-project-mac-debug-x10-component-234.zip
     The archive name is "cool-project" and the component's name is "x10". The
-    component is checked out in branch master with commit position number 234.
+    component is checked out in branch main with commit position number 234.
 
     Args:
       build_dir: The absolute path to the build output directory, e.g.
-                 [slave-build]/src/out/Release
+                 [subordinate-build]/src/out/Release
       update_properties: The properties from the bot_update step (containing
                          commit information)
       gs_bucket: Name of the google storage bucket to upload to
@@ -290,7 +290,7 @@ class ArchiveApi(recipe_api.RecipeApi):
         '--target', target,
         '--src-dir', src_dir,
     ]
-    args += self.m.build.slave_utils_args
+    args += self.m.build.subordinate_utils_args
     if build_archive_url:
       args.extend(['--build-archive-url', build_archive_url])
     else:
@@ -299,11 +299,11 @@ class ArchiveApi(recipe_api.RecipeApi):
         args.extend(['--build_revision', build_revision])
 
     properties = (
-      ('mastername', '--master-name'),
+      ('mainname', '--main-name'),
       ('buildnumber', '--build-number'),
       ('parent_builddir', '--parent-build-dir'),
       ('parentname', '--parent-builder-name'),
-      ('parentslavename', '--parent-slave-name'),
+      ('parentsubordinatename', '--parent-subordinate-name'),
       ('parent_buildnumber', '--parent-build-number'),
       ('webkit_dir', '--webkit-dir'),
       ('revision_dir', '--revision-dir'),
@@ -318,7 +318,7 @@ class ArchiveApi(recipe_api.RecipeApi):
 
     self.m.build.python(
       step_name,
-      self.package_repo_resource('scripts', 'slave', 'extract_build.py'),
+      self.package_repo_resource('scripts', 'subordinate', 'extract_build.py'),
       args,
       infra_step=True,
       **kwargs
@@ -336,7 +336,7 @@ class ArchiveApi(recipe_api.RecipeApi):
 
     The reason this is named 'legacy' is that there are a large number
     of dependencies on the exact form of this URL. The combination of
-    zip_build.py, extract_build.py, slave_utils.py, and runtest.py
+    zip_build.py, extract_build.py, subordinate_utils.py, and runtest.py
     require that:
 
     * The platform name be exactly one of 'win32', 'mac', or 'linux'

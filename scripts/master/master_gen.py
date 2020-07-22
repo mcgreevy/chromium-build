@@ -11,65 +11,65 @@ from buildbot.schedulers.basic import SingleBranchScheduler
 from buildbot.schedulers.timed import Nightly
 from buildbot import util
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
 from common import chromium_utils
 
-from master import gitiles_poller
-from master import master_utils
-from master import repo_poller
-from master import slaves_list
-from master.factory import annotator_factory
-from master.factory import remote_run_factory
+from main import gitiles_poller
+from main import main_utils
+from main import repo_poller
+from main import subordinates_list
+from main.factory import annotator_factory
+from main.factory import remote_run_factory
 
 
-def PopulateBuildmasterConfig(BuildmasterConfig, builders_path,
-                              active_master_cls):
-  """Read builders_path and populate a build master config dict."""
+def PopulateBuildmainConfig(BuildmainConfig, builders_path,
+                              active_main_cls):
+  """Read builders_path and populate a build main config dict."""
   builders = chromium_utils.ReadBuildersFile(builders_path)
-  _Populate(BuildmasterConfig, builders, active_master_cls)
+  _Populate(BuildmainConfig, builders, active_main_cls)
 
 
-_revision_getter = master_utils.ConditionalProperty(
+_revision_getter = main_utils.ConditionalProperty(
     lambda build: build.getProperty('revision'),
     WithProperties('%(revision)s'),
-    'master')
+    'main')
 
 
-def _Populate(BuildmasterConfig, builders, active_master_cls):
-  m_annotator = annotator_factory.AnnotatorFactory(active_master_cls)
+def _Populate(BuildmainConfig, builders, active_main_cls):
+  m_annotator = annotator_factory.AnnotatorFactory(active_main_cls)
 
-  c = BuildmasterConfig
+  c = BuildmainConfig
   c['logCompressionLimit'] = builders.get('logCompressionLimit', False)
-  c['projectName'] = active_master_cls.project_name
-  c['projectURL'] = Master.project_url
-  c['buildbotURL'] = active_master_cls.buildbot_url
+  c['projectName'] = active_main_cls.project_name
+  c['projectURL'] = Main.project_url
+  c['buildbotURL'] = active_main_cls.buildbot_url
 
   # This sets c['db_url'] to the database connect string in found in
-  # the .dbconfig in the master directory, if it exists.
+  # the .dbconfig in the main directory, if it exists.
   chromium_utils.DatabaseSetup(c)
 
-  c['builders'] = _ComputeBuilders(builders, m_annotator, active_master_cls)
+  c['builders'] = _ComputeBuilders(builders, m_annotator, active_main_cls)
 
   c['schedulers'] = _ComputeSchedulers(builders)
 
   c['change_source'], tag_comparator = _ComputeChangeSourceAndTagComparator(
       builders)
 
-  # The 'slaves' list defines the set of allowable buildslaves. List all the
-  # slaves registered to a builder. Remove dupes.
-  c['slaves'] = master_utils.AutoSetupSlaves(
+  # The 'subordinates' list defines the set of allowable buildsubordinates. List all the
+  # subordinates registered to a builder. Remove dupes.
+  c['subordinates'] = main_utils.AutoSetupSubordinates(
       c['builders'],
-      Master.GetBotPassword())
+      Main.GetBotPassword())
 
   # This does some sanity checks on the configuration.
-  slaves = slaves_list.BaseSlavesList(
+  subordinates = subordinates_list.BaseSubordinatesList(
       chromium_utils.GetBotsFromBuilders(builders),
-      builders['master_classname'])
-  master_utils.VerifySetup(c, slaves)
+      builders['main_classname'])
+  main_utils.VerifySetup(c, subordinates)
 
   default_public_html = os.path.join(chromium_utils.BUILD_DIR,
-                                     'masters', 'master.chromium',
+                                     'mains', 'main.chromium',
                                      'public_html')
   public_html = builders.get('public_html', default_public_html)
 
@@ -77,26 +77,26 @@ def _Populate(BuildmasterConfig, builders, active_master_cls):
 
   order_console_by_time = builders.get('order_console_by_time')
 
-  # Adds common status and tools to this master.
+  # Adds common status and tools to this main.
   # TODO: Look at the logic in this routine to see if any of the logic
   # in this routine can be moved there to simplify things.
-  master_utils.AutoSetupMaster(c, active_master_cls,
+  main_utils.AutoSetupMain(c, active_main_cls,
       mail_notifier=mail_notifier,
       public_html=public_html,
       templates=builders['templates'],
       order_console_by_time=order_console_by_time,
       tagComparator=tag_comparator,
-      enable_http_status_push=active_master_cls.is_production_host)
+      enable_http_status_push=active_main_cls.is_production_host)
 
-  # TODO: AutoSetupMaster's settings for the following are too low to be
+  # TODO: AutoSetupMain's settings for the following are too low to be
   # useful for most projects. We should fix that.
   c['buildHorizon'] = 3000
   c['logHorizon'] = 3000
-  # Must be at least 2x the number of slaves.
+  # Must be at least 2x the number of subordinates.
   c['eventHorizon'] = 200
 
 
-def _ComputeBuilders(builders, m_annotator, active_master_cls):
+def _ComputeBuilders(builders, m_annotator, active_main_cls):
   actual_builders = []
 
   def cmp_fn(a, b):
@@ -136,7 +136,7 @@ def _ComputeBuilders(builders, m_annotator, active_master_cls):
 
     if builder_data.get('use_remote_run'):
       factory = remote_run_factory.RemoteRunFactory(
-          active_master=active_master_cls,
+          active_main=active_main_cls,
           repository=builder_data.get(
               'repository', builders.get('default_remote_run_repository')),
           recipe=builder_data['recipe'],
@@ -160,8 +160,8 @@ def _ComputeBuilders(builders, m_annotator, active_master_cls):
         'mergeRequests': merge_requests,
         'name': builder_name,
         'factory': factory,
-        'slavebuilddir': botbuilddir,
-        'slavenames': chromium_utils.GetBotNamesForBuilder(builders,
+        'subordinatebuilddir': botbuilddir,
+        'subordinatenames': chromium_utils.GetBotNamesForBuilder(builders,
                                                            builder_name),
         'category': builder_data.get('category'),
         'trybot': builder_data.get('trybot'),
@@ -195,7 +195,7 @@ def _ComputeSchedulers(builders):
           name=scheduler_name,
           change_filter=ChangeFilter(
               repository=scheduler_values['git_repo_url'],
-              branch=scheduler_values.get('branch', 'master'),
+              branch=scheduler_values.get('branch', 'main'),
           ),
           treeStableTimer=scheduler_values.get('treeStableTimer', 60),
           builderNames=builder_names))
@@ -215,7 +215,7 @@ def _ComputeSchedulers(builders):
     elif scheduler_type == 'cron':
       schedulers.append(Nightly(
           name=scheduler_name,
-          branch='master',
+          branch='main',
           minute=scheduler_values['minute'],
           hour=scheduler_values['hour'],
           builderNames=builder_names))
@@ -236,7 +236,7 @@ def _ComputeChangeSourceAndTagComparator(builders):
       continue
 
     url = scheduler_config['git_repo_url']
-    branch = scheduler_config.get('branch', 'master')
+    branch = scheduler_config.get('branch', 'main')
     git_urls_to_branches.setdefault(url, set()).add(branch)
 
   for url, branches in git_urls_to_branches.iteritems():

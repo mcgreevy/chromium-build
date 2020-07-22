@@ -78,21 +78,21 @@ def GenTests(api):
   yield (
     api.test('dartium-win-ia32-be') +
     api.properties.generic(
-      mastername='client.dart',
+      mainname='client.dart',
       buildername='dartium-win-ia32-be',
       revision='12345') +
     api.platform('win', 32))
   yield (
     api.test('dartium-linux-x64-dev') +
     api.properties.generic(
-      mastername='client.dart',
+      mainname='client.dart',
       buildername='dartium-linux-x64-dev',
       revision='12345') +
     api.platform('linux', 64))
   yield (
     api.test('dartium-mac-ia32-inc-stable') +
     api.properties.generic(
-      mastername='client.dart',
+      mainname='client.dart',
       buildername='dartium-mac-ia32-inc-stable',
       revision='12345') +
     api.platform('mac', 32))

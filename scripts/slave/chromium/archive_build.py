@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""A tool to archive a build and its symbols, executed by a buildbot slave.
+"""A tool to archive a build and its symbols, executed by a buildbot subordinate.
 
   This script is used for developer builds.
 
@@ -32,8 +32,8 @@ from common.chromium_utils import GS_COMMIT_POSITION_NUMBER_KEY, \
                                   GS_COMMIT_POSITION_KEY, \
                                   GS_GIT_COMMIT_KEY
 from common import chromium_utils
-from slave import build_directory
-from slave import slave_utils
+from subordinate import build_directory
+from subordinate import subordinate_utils
 
 
 # TODO(mmoss): tests should be added to FILES.cfg, then TESTS can go away.
@@ -87,7 +87,7 @@ class StagerBase(object):
       raise NotImplementedError(
           'Platform "%s" is not currently supported.' % sys.platform)
     self._staging_dir = (options.staging_dir or
-                         slave_utils.GetStagingDir(self._src_dir))
+                         subordinate_utils.GetStagingDir(self._src_dir))
     if not os.path.exists(self._staging_dir):
       os.makedirs(self._staging_dir)
 
@@ -97,7 +97,7 @@ class StagerBase(object):
     if options.build_name:
       self._build_name = options.build_name
     else:
-      self._build_name = slave_utils.SlaveBuildName(self._src_dir)
+      self._build_name = subordinate_utils.SubordinateBuildName(self._src_dir)
 
     self._symbol_dir_base = os.path.join(self._symbol_dir_base,
                                          self._build_name)
@@ -156,7 +156,7 @@ class StagerBase(object):
     except chromium_utils.NoIdentifiedRevision:
       pass
 
-    status = slave_utils.GSUtilCopyFile(filename,
+    status = subordinate_utils.GSUtilCopyFile(filename,
                                         gs_base,
                                         gs_subdir,
                                         mimetype,
@@ -619,18 +619,18 @@ def main():
   option_parser.add_option('--build-name',
                            default=None,
                            help="Name to use for build directory instead of "
-                                "the slave build name")
+                                "the subordinate build name")
   option_parser.add_option('--staging-dir',
                          help='Directory to use for staging the archives. '
                               'Default behavior is to automatically detect '
-                              'slave\'s build directory.')
+                              'subordinate\'s build directory.')
   chromium_utils.AddPropertiesOptions(option_parser)
-  slave_utils_callback = slave_utils.AddOpts(option_parser)
+  subordinate_utils_callback = subordinate_utils.AddOpts(option_parser)
   options, args = option_parser.parse_args()
 
   if args:
     raise archive_utils.StagingError('Unknown arguments: %s' % args)
-  slave_utils_callback(options)
+  subordinate_utils_callback(options)
 
   if not options.ignore:
     # Independent of any other configuration, these exes and any symbol files

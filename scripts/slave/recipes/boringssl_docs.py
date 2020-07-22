@@ -42,7 +42,7 @@ def RunSteps(api):
 def GenTests(api):
   yield (
     api.test('boringssl-docs') +
-    api.properties.generic(mastername='client.boringssl',
+    api.properties.generic(mainname='client.boringssl',
                            buildername='docs',
                            bot_id='bot_id')
   )
@@ -52,6 +52,6 @@ def GenTests(api):
     api.properties.tryserver(
         gerrit_project='boringssl',
         gerrit_url='https://boringssl-review.googlesource.com',
-        mastername='actually-no-master', buildername='docs',
-        bot_id='swarming-slave')
+        mainname='actually-no-main', buildername='docs',
+        bot_id='swarming-subordinate')
   )

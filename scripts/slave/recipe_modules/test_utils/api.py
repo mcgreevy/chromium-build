@@ -203,14 +203,14 @@ class TestUtilsApi(recipe_api.RecipeApi):
     """Archives the retry summary as JSON, storing it alongside the results
     from the first run."""
     script = self.m.chromium.package_repo_resource(
-        'scripts', 'slave', 'chromium', 'archive_layout_test_retry_summary.py')
+        'scripts', 'subordinate', 'chromium', 'archive_layout_test_retry_summary.py')
     args = [
         '--retry-summary-json', self.m.json.input(retry_summary),
         '--build-number', self.m.properties['buildnumber'],
         '--builder-name', self.m.properties['buildername'],
         '--gs-bucket', 'gs://chromium-layout-test-archives',
     ]
-    args += self.m.build.slave_utils_args
+    args += self.m.build.subordinate_utils_args
     self.m.python('archive_retry_summary', script, args)
 
   def create_results_from_json(self, data):

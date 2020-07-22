@@ -52,11 +52,11 @@ def GenTests(api):
 
   # Don't use api.chromium.gen_tests_for_builders because that looks at a
   # builder's name to set the platform, but we want to set 'win'.
-  for mastername in TEST_BUILDERS:
-    for buildername in TEST_BUILDERS[mastername]['builders']:
+  for mainname in TEST_BUILDERS:
+    for buildername in TEST_BUILDERS[mainname]['builders']:
       yield (
-        api.test('full_%s_%s' % (_sanitize_nonalpha(mastername),
+        api.test('full_%s_%s' % (_sanitize_nonalpha(mainname),
                                  _sanitize_nonalpha(buildername))) +
-        api.properties.generic(mastername=mastername, buildername=buildername) +
+        api.properties.generic(mainname=mainname, buildername=buildername) +
         api.platform('win', 64)
       )

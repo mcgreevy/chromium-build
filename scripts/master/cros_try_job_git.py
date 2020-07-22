@@ -28,8 +28,8 @@ from twisted.mail.smtp import SMTPSenderFactory
 from twisted.python import log
 
 from common.twisted_util.response import StringResponse
-from master import gitiles_poller
-from master.try_job_base import BadJobfile
+from main import gitiles_poller
+from main.try_job_base import BadJobfile
 
 
 def compress_extra_args(extra_args):
@@ -56,7 +56,7 @@ class CbuildbotConfigs(object):
   _ETC_TARGET_RE = re.compile(r'^[a-zA-Z][\w-]+\w$')
 
   def __init__(self, configs, etc_builder=None):
-    """Holds base state of the master's try job related configuration.
+    """Holds base state of the main's try job related configuration.
 
     configs (dict): A dictionary of all known CrOS configs. This will be as
         up-to-date as the Chromite pin.
@@ -82,7 +82,7 @@ class CbuildbotConfigs(object):
     - `cbb_config` property must be set to the build's cbuildbot config target.
     - `cbb_extra_args` property (optional) may be a JSON-encoded list of
       additional parameters to pass to the tryjob.
-    - `slaves_request` property (optional) may be a JSON-encoded list of slaves
+    - `subordinates_request` property (optional) may be a JSON-encoded list of subordinates
       on which this build may run.
     - Additional BuildBot properties may be added.
 
@@ -104,9 +104,9 @@ class CbuildbotConfigs(object):
       if extra_args and isinstance(extra_args, list):
         properties['cbb_extra_args'] = compress_extra_args(extra_args)
 
-      # The "slaves_request" field must be a list, if present.
-      if not isinstance(properties.get('slaves_request', []), list):
-        raise ValueError('`slaves_request` is not a list.')
+      # The "subordinates_request" field must be a list, if present.
+      if not isinstance(properties.get('subordinates_request', []), list):
+        raise ValueError('`subordinates_request` is not a list.')
 
       # Add mandatory properties to build.
       params['properties'] = properties
@@ -155,7 +155,7 @@ class CrOSTryJobGit(TryBase):
   # Name of property source for generated properties.
   _PROPERTY_SOURCE = 'Try Job'
 
-  # The version of tryjob that the master is expecting.
+  # The version of tryjob that the main is expecting.
   _TRYJOB_FORMAT_VERSION = 3
 
   # Functions that translate from one tryjob version to another.
@@ -223,7 +223,7 @@ class CrOSTryJobGit(TryBase):
               ('bot', list, True),
               ('extra_args', list, False),
               ('version', int, True),
-              ('slaves_request', list, False),
+              ('subordinates_request', list, False),
     ]
 
     error_msgs = []
@@ -252,7 +252,7 @@ class CrOSTryJobGit(TryBase):
     """Overriding base class method."""
     props = Properties()
 
-    props.setProperty('slaves_request', options.get('slaves_request', []),
+    props.setProperty('subordinates_request', options.get('subordinates_request', []),
                       self._PROPERTY_SOURCE)
     props.setProperty('cbb_config', config, self._PROPERTY_SOURCE)
 
@@ -341,7 +341,7 @@ see<br>this message please contact chromeos-build@google.com.<br>
       raise
 
     # The sourcestamp/buildsets created will be merge-able.
-    ssid = yield self.master.db.sourcestamps.addSourceStamp(
+    ssid = yield self.main.db.sourcestamps.addSourceStamp(
         branch=change.branch,
         revision=change.revision,
         project=change.project,

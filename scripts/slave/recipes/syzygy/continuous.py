@@ -8,12 +8,12 @@ To be tested using a command-line like:
 
   /build/scripts/tools/run_recipe.py syzygy/continuous
       revision=0e9f25b1098271be2b096fd1c095d6d907cf86f7
-      mastername=master.client.syzygy
+      mainname=main.client.syzygy
       "buildername=Syzygy Debug"
-      bot_id=fake_slave
+      bot_id=fake_subordinate
       buildnumber=1
 
-Places resulting output in build/slave/fake_slave.
+Places resulting output in build/subordinate/fake_subordinate.
 """
 
 from recipe_engine.types import freeze
@@ -57,7 +57,7 @@ PROPERTIES = {
 
 
 def RunSteps(api, buildername, blamelist, revision):
-  """Generates the sequence of steps that will be run by the slave."""
+  """Generates the sequence of steps that will be run by the subordinate."""
   assert buildername in BUILDERS
 
   # Configure the build environment.
@@ -68,7 +68,7 @@ def RunSteps(api, buildername, blamelist, revision):
   api.gclient.set_config(config, **kwargs)
   is_x64_build = 'x64' in buildername
 
-  # Clean up any running processes on the slave.
+  # Clean up any running processes on the subordinate.
   s.taskkill()
 
   # Checkout and compile the project.

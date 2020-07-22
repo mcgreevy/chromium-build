@@ -14,7 +14,7 @@ DEPS = [
 
 def RunSteps(api):
   bot_config_object = api.chromium_tests.create_bot_config_object(
-      api.properties['mastername'], api.properties['buildername'])
+      api.properties['mainname'], api.properties['buildername'])
   api.chromium_tests.configure_build(bot_config_object)
 
 
@@ -22,7 +22,7 @@ def GenTests(api):
   yield (
       api.test('set_component_rev') +
       api.properties.generic(
-          mastername='client.v8.fyi',
+          mainname='client.v8.fyi',
           buildername='Linux Tests (dbg)(1)') +
       api.post_process(post_process.DropExpectation)
   )
@@ -30,7 +30,7 @@ def GenTests(api):
   yield (
       api.test('android_apply_config') +
       api.properties.generic(
-          mastername='chromium.android',
+          mainname='chromium.android',
           buildername='KitKat Tablet Tester') +
       api.post_process(post_process.DropExpectation)
   )

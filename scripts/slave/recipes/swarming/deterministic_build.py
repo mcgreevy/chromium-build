@@ -173,7 +173,7 @@ def RunSteps(api, buildername):
   # Do a first build and move the build artifact to the temp directory.
   api.chromium.ensure_goma()
   api.chromium.runhooks()
-  api.chromium.run_mb(api.properties.get('mastername'), buildername)
+  api.chromium.run_mb(api.properties.get('mainname'), buildername)
   api.chromium.compile(targets, name='First build', use_goma_module=True)
   api.isolate.remove_build_metadata()
   if enable_isolate:
@@ -184,7 +184,7 @@ def RunSteps(api, buildername):
 
   # Do the second build and move the build artifact to the temp directory.
   api.chromium.runhooks()
-  api.chromium.run_mb(api.properties.get('mastername'), buildername)
+  api.chromium.run_mb(api.properties.get('mainname'), buildername)
   api.chromium.compile(targets, name='Second build', use_goma_module=True)
   api.isolate.remove_build_metadata()
   if enable_isolate:
@@ -206,15 +206,15 @@ def _sanitize_nonalpha(text):
 
 
 def GenTests(api):
-  mastername = 'chromium.swarm'
+  mainname = 'chromium.swarm'
   for buildername in DETERMINISTIC_BUILDERS:
-    test_name = 'full_%s_%s' % (_sanitize_nonalpha(mastername),
+    test_name = 'full_%s_%s' % (_sanitize_nonalpha(mainname),
                                 _sanitize_nonalpha(buildername))
     yield (
       api.test(test_name) +
       api.properties.scheduled() +
       api.properties.generic(buildername=buildername,
-                             mastername=mastername) +
+                             mainname=mainname) +
       api.platform(DETERMINISTIC_BUILDERS[buildername]['platform'], 32) +
       api.properties(configuration='Release') +
       api.step_data('remove_build_metadata', retcode=1)
@@ -223,7 +223,7 @@ def GenTests(api):
       api.test(test_name + '_fail') +
       api.properties.scheduled() +
       api.properties.generic(buildername=buildername,
-                             mastername=mastername) +
+                             mainname=mainname) +
       api.platform(DETERMINISTIC_BUILDERS[buildername]['platform'], 32) +
       api.properties(configuration='Release') +
       api.step_data('remove_build_metadata', retcode=1) +

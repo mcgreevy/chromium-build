@@ -84,7 +84,7 @@ def generate_tests(api, test_suite, revision, enable_swarming=False):
   if test_suite == 'webrtc':
     for test, extra_args in sorted(NORMAL_TESTS.items()):
       tests.append(SwarmingTest(test, **extra_args))
-    if api.mastername == 'client.webrtc.fyi' and api.m.platform.is_win:
+    if api.mainname == 'client.webrtc.fyi' and api.m.platform.is_win:
       tests.append(WebRTCTest(
           'modules_tests',
           name='modules_tests (screen capture disabled tests)',
@@ -149,7 +149,7 @@ def generate_tests(api, test_suite, revision, enable_swarming=False):
                              override_isolate_target=test,
                              cipd_packages=ANDROID_CIPD_PACKAGES))
     for test in ANDROID_JUNIT_TESTS:
-      if api.mastername == 'client.webrtc.fyi':
+      if api.mainname == 'client.webrtc.fyi':
         tests.append(GTestTest(test, enable_swarming=enable_swarming,
                                override_isolate_target=test))
       else:

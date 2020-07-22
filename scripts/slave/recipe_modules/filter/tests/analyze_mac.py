@@ -26,6 +26,6 @@ def GenTests(api):
       api.test('basic') +
       api.platform('mac', 64) +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername')
   )

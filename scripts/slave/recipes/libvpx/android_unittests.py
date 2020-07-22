@@ -109,7 +109,7 @@ def RunSteps(api, libvpx_git_url, buildername):
 
   api.python(
       'transfer_files',
-      api.package_repo_resource('scripts', 'slave', 'android',
+      api.package_repo_resource('scripts', 'subordinate', 'android',
                              'transfer_files.py'),
       args=[adb, DEVICE_ROOT, test_data])
 
@@ -191,7 +191,7 @@ def GenTests(api):
     api.properties(
         libvpx_git_url='https://chromium.googlesource.com/webm/libvpx',
         bot_id='libvpx-bot', buildername='Nexus 5 Builder',
-        mastername='client.libvpx', buildnumber='75') +
+        mainname='client.libvpx', buildnumber='75') +
     api.step_data('git number', stdout=api.raw_io.output_text('42')) +
     api.step_data('adb_wrap',
         api.raw_io.output_text("This is text with json inside normally")) +

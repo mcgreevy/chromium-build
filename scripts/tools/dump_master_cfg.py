@@ -4,9 +4,9 @@
 # found in the LICENSE file.
 
 """
-Dumps master config as JSON.
+Dumps main config as JSON.
 
-Uses master_cfg_utils.LoadConfig, which should be called at most once
+Uses main_cfg_utils.LoadConfig, which should be called at most once
 in the same process. That's why this is a separate utility.
 """
 
@@ -25,8 +25,8 @@ from common import env
 
 env.Install()
 
-from common import master_cfg_utils
-from master.factory.build_factory import BuildFactory
+from common import main_cfg_utils
+from main.factory.build_factory import BuildFactory
 
 SELF = sys.argv[0]
 
@@ -39,7 +39,7 @@ class BuildbotJSONEncoder(json.JSONEncoder):
     return repr(obj)
 
 
-def _dump_master((name, path)):
+def _dump_main((name, path)):
   data = subprocess.check_output(
       [sys.executable, SELF, path, '-'])
   try:
@@ -48,32 +48,32 @@ def _dump_master((name, path)):
     return (name, e)
 
 
-def dump_all_masters(glob):
-  # Selective imports. We do this here b/c "dump_master_cfg" is part of
+def dump_all_mains(glob):
+  # Selective imports. We do this here b/c "dump_main_cfg" is part of
   # a lot of production paths, and we don't want random import/pathing errors
   # to break that.
   import fnmatch
   import multiprocessing
 
   import config_bootstrap
-  from slave import bootstrap
+  from subordinate import bootstrap
 
-  # Homogenize master names: remove "master." from glob if present. We'll do the
-  # same with master names.
+  # Homogenize main names: remove "main." from glob if present. We'll do the
+  # same with main names.
   def strip_prefix(v, pfx):
     if v.startswith(pfx):
       v = v[len(pfx):]
     return v
-  glob = strip_prefix(glob, 'master.')
+  glob = strip_prefix(glob, 'main.')
 
-  bootstrap.ImportMasterConfigs(include_internal=True)
-  all_masters = {
-      strip_prefix(os.path.basename(mc.local_config_path), 'master.'): mc
-      for mc in config_bootstrap.Master.get_all_masters()}
+  bootstrap.ImportMainConfigs(include_internal=True)
+  all_mains = {
+      strip_prefix(os.path.basename(mc.local_config_path), 'main.'): mc
+      for mc in config_bootstrap.Main.get_all_mains()}
 
   pool = multiprocessing.Pool(multiprocessing.cpu_count())
-  m = dict(pool.map(_dump_master, (
-      (k, v.local_config_path) for k, v in sorted(all_masters.items())
+  m = dict(pool.map(_dump_main, (
+      (k, v.local_config_path) for k, v in sorted(all_mains.items())
       if fnmatch.fnmatch(k, glob))))
   pool.close()
   pool.join()
@@ -89,19 +89,19 @@ def dump_all_masters(glob):
 def main(argv):
   parser = argparse.ArgumentParser()
   parser.add_argument('-m', '--multi', action='store_true',
-      help='If specified, produce multi-master format and interpret the '
-           '"master" argument as a glob expression of masters to match.')
-  parser.add_argument('master',
-      help='The path of the master to dump. If "*" is provided, produce a '
-           'multi-master-format output list of all master configs.')
+      help='If specified, produce multi-main format and interpret the '
+           '"main" argument as a glob expression of mains to match.')
+  parser.add_argument('main',
+      help='The path of the main to dump. If "*" is provided, produce a '
+           'multi-main-format output list of all main configs.')
   parser.add_argument('output', type=argparse.FileType('w'), default=sys.stdout)
 
   args = parser.parse_args(argv)
 
   if args.multi:
-    data = dump_all_masters(args.master)
+    data = dump_all_mains(args.main)
   else:
-    data = master_cfg_utils.LoadConfig(args.master)['BuildmasterConfig']
+    data = main_cfg_utils.LoadConfig(args.main)['BuildmainConfig']
 
   json.dump(data,
             args.output,

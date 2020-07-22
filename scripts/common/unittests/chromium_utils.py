@@ -121,10 +121,10 @@ SAMPLE_BUILDERS_PY = """\
     }
   },
   "git_repo_url": "https://chromium.googlesource.com/test/test.git",
-  "master_base_class": "_FakeBaseMaster",
-  "master_classname": "_FakeMaster",
-  "master_port": 20999,
-  "master_port_alt": 40999,
+  "main_base_class": "_FakeBaseMain",
+  "main_classname": "_FakeMain",
+  "main_port": 20999,
+  "main_port_alt": 40999,
   "bot_port": 30999,
   "bot_pools": {
     "main": {
@@ -152,7 +152,7 @@ class GetBotsFromBuilders(unittest.TestCase):
       self.assertEqual([{
           'hostname': 'vm9999-m1',
           'builder': ['Test Linux'],
-          'master': '_FakeMaster',
+          'main': '_FakeMain',
           'os': 'linux',
           'version': 'precise',
           'bits': 64,
@@ -172,7 +172,7 @@ class GetBotsFromBuilders(unittest.TestCase):
         {
           'hostname': 'vm1-m1',
           'builder': ['Test Linux'],
-          'master': '_FakeMaster',
+          'main': '_FakeMain',
           'os': 'linux',
           'version': 'precise',
           'bits': 64,
@@ -180,7 +180,7 @@ class GetBotsFromBuilders(unittest.TestCase):
         {
           'hostname': 'vm2-m1',
           'builder': ['Test Linux'],
-          'master': '_FakeMaster',
+          'main': '_FakeMain',
           'os': 'linux',
           'version': 'precise',
           'bits': 64,
@@ -188,7 +188,7 @@ class GetBotsFromBuilders(unittest.TestCase):
         {
           'hostname': 'vm3-m1',
           'builder': ['Test Linux'],
-          'master': '_FakeMaster',
+          'main': '_FakeMain',
           'os': 'linux',
           'version': 'precise',
           'bits': 64,

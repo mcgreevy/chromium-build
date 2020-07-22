@@ -19,7 +19,7 @@ import urllib2
 
 import test_env  # pylint: disable=W0403,W0611
 
-from slave import build_scan
+from subordinate import build_scan
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,7 +27,7 @@ class BuildScanTest(unittest.TestCase):
   def testURLRetry(self):
     wanted = {'a': 'hi'}
 
-    with mock.patch('slave.build_scan.time.sleep') as sleep_mock:
+    with mock.patch('subordinate.build_scan.time.sleep') as sleep_mock:
       err_resp = mock.Mock()
       err_resp.status = 500
       resp = mock.Mock()

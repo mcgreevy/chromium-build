@@ -40,7 +40,7 @@ def UpdateWindowsEnvironment(envfile_dir, env, update_keys):
   """
   # envvars_to_save come from _ExtractImportantEnvironment in
   # https://chromium.googlesource.com/external/gyp/+/\
-  # master/pylib/gyp/msvs_emuation.py
+  # main/pylib/gyp/msvs_emuation.py
   # You must update this when the original code is updated.
   envvars_to_save = (
       'goma_.*', # TODO(scottmg): This is ugly, but needed for goma.

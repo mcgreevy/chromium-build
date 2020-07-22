@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This recipe module allows triggering builds within the same master.
+"""This recipe module allows triggering builds within the same main.
 
 See README.md.
 """
@@ -39,7 +39,7 @@ class TriggerApi(recipe_api.RecipeApi):
           bucket (str): buildbucket bucket where the triggered builds will be
             placed.
           critical (bool): if True (default) and triggering fails on the
-            buildbot master side, mark entire build as failed (exception).
+            buildbot main side, mark entire build as failed (exception).
           properties (dict): build properties for a new build.
           buildbot_changes (list of dict): list of Buildbot changes to create.
             See below.
@@ -74,20 +74,20 @@ class TriggerApi(recipe_api.RecipeApi):
       Using BuildBucket:
         api.trigger({
             'builder_name': 'Release',
-            'bucket': 'master.tryserver.chromium.linux',
+            'bucket': 'main.tryserver.chromium.linux',
             'properties': {
                 'my_prop': 123,
             },
         })
       WARNING: on buildbot, this requires certain configuration on the
-      master prior first use. See ./README.md.
+      main prior first use. See ./README.md.
 
       Create Buildbot changes:
         api.trigger({
             'builder_name': 'Release',
             'buildbot_changes': [{
                 'author': 'someone@chromium.org',
-                'branch': 'master',
+                'branch': 'main',
                 'files': ['a.txt.'],
                 'comments': 'Refactoring',
                 'revision': 'deadbeef',

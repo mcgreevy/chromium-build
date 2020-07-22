@@ -27,7 +27,7 @@ def BaseConfig(CBB_CONFIG=None, CBB_BRANCH=None, CBB_BUILD_NUMBER=None,
     repositories = Dict(value_type=Set(basestring)),
 
     # Checkout Chromite at this branch. "origin/" will be prepended.
-    chromite_branch = Single(basestring, empty_val=CBB_BRANCH or 'master'),
+    chromite_branch = Single(basestring, empty_val=CBB_BRANCH or 'main'),
 
     # Should the Chrome version be supplied to cbuildbot?
     use_chrome_version = Single(bool),
@@ -41,7 +41,7 @@ def BaseConfig(CBB_CONFIG=None, CBB_BRANCH=None, CBB_BUILD_NUMBER=None,
       # The Chromite configuration to use.
       config = Single(basestring, empty_val=CBB_CONFIG),
 
-      # If supplied, forward to cbuildbot as '--master-build-id'.
+      # If supplied, forward to cbuildbot as '--main-build-id'.
       build_id = Single(basestring, empty_val=CBB_MASTER_BUILD_ID),
 
       # If supplied, forward to cbuildbot as '--buildnumber'.
@@ -95,13 +95,13 @@ def base(c):
   chromite_branch = c.chromite_branch
   for idx, arg in enumerate(c.cbb.extra_args):
     if arg == '--branch':
-      # Two-argument form: "--branch master"
+      # Two-argument form: "--branch main"
       idx += 1
       if idx < len(c.cbb.extra_args):
         chromite_branch = c.cbb.extra_args[idx]
         break
 
-    # One-argument form: "--branch=master"
+    # One-argument form: "--branch=main"
     branch_flag = '--branch'
     if arg.startswith(branch_flag):
       chromite_branch = arg[len(branch_flag):]
@@ -113,7 +113,7 @@ def base(c):
   if version:
     c.branch_version = int(version.group(1))
 
-  # If running on a testing slave, enable "--debug" so Chromite doesn't cause
+  # If running on a testing subordinate, enable "--debug" so Chromite doesn't cause
   # actual production effects.
   if 'TESTING_MASTER_HOST' in os.environ:  # pragma: no cover
     c.cbb.debug = True
@@ -137,24 +137,24 @@ def external(c):
       'https://chromium.googlesource.com/chromiumos/manifest-versions')
 
 
-@config_ctx(group='master', includes=['external'])
-def master_swarming(c):
+@config_ctx(group='main', includes=['external'])
+def main_swarming(c):
   pass
 
-@config_ctx(group='master', includes=['external'])
-def master_chromiumos_chromium(c):
+@config_ctx(group='main', includes=['external'])
+def main_chromiumos_chromium(c):
   c.use_chrome_version = True
 
 
-@config_ctx(group='master', includes=['external'])
-def master_chromiumos(c):
+@config_ctx(group='main', includes=['external'])
+def main_chromiumos(c):
   pass
 
-@config_ctx(group='master', includes=['external'])
-def master_chromiumos_tryserver(c):
+@config_ctx(group='main', includes=['external'])
+def main_chromiumos_tryserver(c):
   pass
 
-@config_ctx(includes=['master_chromiumos'])
+@config_ctx(includes=['main_chromiumos'])
 def chromiumos_coverage(c):
   c.use_chrome_version = True
   c.cbb.config_repo = 'https://example.com/repo.git'

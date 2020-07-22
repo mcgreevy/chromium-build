@@ -23,12 +23,12 @@ def RunSteps(api):
   api.chromium.ensure_goma()
   api.chromium.runhooks()
   api.chromium.run_mb(
-      api.properties.get('mastername'), api.properties.get('buildername'))
+      api.properties.get('mainname'), api.properties.get('buildername'))
   api.chromium.compile(['chrome'], use_goma_module=True)
   api.python(
       'annotated_steps',
       api.package_repo_resource(
-          'scripts', 'slave', 'chromium', 'nacl_sdk_buildbot_run.py'),
+          'scripts', 'subordinate', 'chromium', 'nacl_sdk_buildbot_run.py'),
       allow_subannotations=True)
 
 

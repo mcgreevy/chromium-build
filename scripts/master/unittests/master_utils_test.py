@@ -3,176 +3,176 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Source file for master_utils testcases."""
+"""Source file for main_utils testcases."""
 
 
 import unittest
 
 import test_env  # pylint: disable=W0611,W0403
 
-from buildbot.buildslave import BuildSlave
+from buildbot.buildsubordinate import BuildSubordinate
 from buildbot.process.properties import Properties
-from master import master_utils
-from master.autoreboot_buildslave import AutoRebootBuildSlave
+from main import main_utils
+from main.autoreboot_buildsubordinate import AutoRebootBuildSubordinate
 
-def remove_slave(slaves, name):
-  for i, s in enumerate(slaves):
+def remove_subordinate(subordinates, name):
+  for i, s in enumerate(subordinates):
     if s.name == name:
-      del(slaves[i])
+      del(subordinates[i])
       break
   else:
-    assert False, 'slave %s does not exist' % name
+    assert False, 'subordinate %s does not exist' % name
 
 
-class MasterUtilsTest(unittest.TestCase):
+class MainUtilsTest(unittest.TestCase):
 
   def testPartition(self):
-    partitions = master_utils.Partition([(1, 'a'),
+    partitions = main_utils.Partition([(1, 'a'),
                                          (2, 'b'),
                                          (3, 'c'),
                                          ], 2)
     self.assertEquals([['a', 'b'], ['c']], partitions)
 
-  def testAutoSetupSlaves(self):
-    def B(name, slavenames, auto_reboot):
+  def testAutoSetupSubordinates(self):
+    def B(name, subordinatenames, auto_reboot):
       return {
         'name': name,
-        'slavenames': slavenames,
+        'subordinatenames': subordinatenames,
         'auto_reboot' : auto_reboot,
       }
     builders = [
-      # Bot sharing two slaves.
+      # Bot sharing two subordinates.
       B('B1', ['S1', 'S2'], True),
       B('B2', ['S3', 'S4'], False),
-      # Slave sharing two bots.
+      # Subordinate sharing two bots.
       B('B3', ['S5'], True),
       B('B4', ['S5'], False),
-      # Slave sharing two bots (inverse auto-reboot).
+      # Subordinate sharing two bots (inverse auto-reboot).
       B('B5', ['S6'], False),
       B('B6', ['S6'], True),
-      # Two builders heterogeneously sharing one slave.
+      # Two builders heterogeneously sharing one subordinate.
       B('B7', ['S7'], True),
       B('B8', ['S7', 'S8'], False),
     ]
-    slaves = dict(
-      (slave.slavename, slave)
-      for slave in master_utils.AutoSetupSlaves(builders, 'pwd')
+    subordinates = dict(
+      (subordinate.subordinatename, subordinate)
+      for subordinate in main_utils.AutoSetupSubordinates(builders, 'pwd')
     )
-    self.assertTrue(isinstance(slaves['S1'], AutoRebootBuildSlave))
-    self.assertTrue(isinstance(slaves['S2'], AutoRebootBuildSlave))
-    self.assertFalse(isinstance(slaves['S3'], AutoRebootBuildSlave))
-    self.assertFalse(isinstance(slaves['S4'], AutoRebootBuildSlave))
-    self.assertTrue(isinstance(slaves['S5'], AutoRebootBuildSlave))
-    self.assertTrue(isinstance(slaves['S6'], AutoRebootBuildSlave))
-    self.assertTrue(isinstance(slaves['S7'], AutoRebootBuildSlave))
-    self.assertFalse(isinstance(slaves['S8'], AutoRebootBuildSlave))
+    self.assertTrue(isinstance(subordinates['S1'], AutoRebootBuildSubordinate))
+    self.assertTrue(isinstance(subordinates['S2'], AutoRebootBuildSubordinate))
+    self.assertFalse(isinstance(subordinates['S3'], AutoRebootBuildSubordinate))
+    self.assertFalse(isinstance(subordinates['S4'], AutoRebootBuildSubordinate))
+    self.assertTrue(isinstance(subordinates['S5'], AutoRebootBuildSubordinate))
+    self.assertTrue(isinstance(subordinates['S6'], AutoRebootBuildSubordinate))
+    self.assertTrue(isinstance(subordinates['S7'], AutoRebootBuildSubordinate))
+    self.assertFalse(isinstance(subordinates['S8'], AutoRebootBuildSubordinate))
 
 
 class MockBuilder(object):
   def __init__(self, name):
     self.name = name
 
-class MockSlave(object):
+class MockSubordinate(object):
   def __init__(self, name, properties):
     self.properties = Properties()
-    self.properties.update(properties, "BuildSlave")
-    self.properties.setProperty("slavename", name, "BuildSlave")
+    self.properties.update(properties, "BuildSubordinate")
+    self.properties.setProperty("subordinatename", name, "BuildSubordinate")
 
-class MockSlaveBuilder(object):
+class MockSubordinateBuilder(object):
   def __init__(self, name, properties):
     self.name = name
-    self.slave = MockSlave(name, properties)
+    self.subordinate = MockSubordinate(name, properties)
 
-class PreferredBuilderNextSlaveFuncTest(unittest.TestCase):
-  def testNextSlave(self):
+class PreferredBuilderNextSubordinateFuncTest(unittest.TestCase):
+  def testNextSubordinate(self):
     builder1 = MockBuilder('builder1')
     builder2 = MockBuilder('builder2')
     builder3 = MockBuilder('builder3')
 
-    slaves = [
-        MockSlaveBuilder('slave1', {'preferred_builder': 'builder1'}),
-        MockSlaveBuilder('slave2', {'preferred_builder': 'builder2'}),
-        MockSlaveBuilder('slave3', {'preferred_builder': 'builder3'}),
+    subordinates = [
+        MockSubordinateBuilder('subordinate1', {'preferred_builder': 'builder1'}),
+        MockSubordinateBuilder('subordinate2', {'preferred_builder': 'builder2'}),
+        MockSubordinateBuilder('subordinate3', {'preferred_builder': 'builder3'}),
     ]
 
-    f = master_utils.PreferredBuilderNextSlaveFunc()
-    self.assertEqual('slave1', f(builder1, slaves).name)
-    self.assertEqual('slave2', f(builder2, slaves).name)
-    self.assertEqual('slave3', f(builder3, slaves).name)
+    f = main_utils.PreferredBuilderNextSubordinateFunc()
+    self.assertEqual('subordinate1', f(builder1, subordinates).name)
+    self.assertEqual('subordinate2', f(builder2, subordinates).name)
+    self.assertEqual('subordinate3', f(builder3, subordinates).name)
 
-    remove_slave(slaves, 'slave3')
+    remove_subordinate(subordinates, 'subordinate3')
 
-    # When there is no slave that matches preferred_builder,
-    # any slave builder might be chosen.
-    self.assertTrue(f(builder3, slaves).name in ['slave1', 'slave2'])
+    # When there is no subordinate that matches preferred_builder,
+    # any subordinate builder might be chosen.
+    self.assertTrue(f(builder3, subordinates).name in ['subordinate1', 'subordinate2'])
 
-  def testNextSlaveEmpty(self):
+  def testNextSubordinateEmpty(self):
     builder = MockBuilder('builder')
-    slaves = []
+    subordinates = []
 
-    f = master_utils.PreferredBuilderNextSlaveFunc()
+    f = main_utils.PreferredBuilderNextSubordinateFunc()
 
-    self.assertIsNone(f(builder, slaves))
+    self.assertIsNone(f(builder, subordinates))
 
-  def testNextSlaveNG(self):
+  def testNextSubordinateNG(self):
     builder1 = MockBuilder('builder1')
     builder2 = MockBuilder('builder2')
     builder3 = MockBuilder('builder3')
 
-    slaves = [
-        MockSlaveBuilder('s1', {'preferred_builder': 'builder1'}),
-        MockSlaveBuilder('s2', {'preferred_builder': 'builder2'}),
-        MockSlaveBuilder('s3', {'preferred_builder': 'builder3'}),
-        MockSlaveBuilder('s4', {'preferred_builder': 'builder1'}),
-        MockSlaveBuilder('s5', {'preferred_builder': 'builder2'}),
-        MockSlaveBuilder('s6', {'preferred_builder': 'builder3'}),
+    subordinates = [
+        MockSubordinateBuilder('s1', {'preferred_builder': 'builder1'}),
+        MockSubordinateBuilder('s2', {'preferred_builder': 'builder2'}),
+        MockSubordinateBuilder('s3', {'preferred_builder': 'builder3'}),
+        MockSubordinateBuilder('s4', {'preferred_builder': 'builder1'}),
+        MockSubordinateBuilder('s5', {'preferred_builder': 'builder2'}),
+        MockSubordinateBuilder('s6', {'preferred_builder': 'builder3'}),
         # Fall-over pool with no preference.
-        MockSlaveBuilder('s7', {'preferred_builder': None}),
-        MockSlaveBuilder('s8', {'preferred_builder': None}),
+        MockSubordinateBuilder('s7', {'preferred_builder': None}),
+        MockSubordinateBuilder('s8', {'preferred_builder': None}),
     ]
 
-    def f(builder, slaves):
+    def f(builder, subordinates):
       # Call original method for code coverage only.
-      master_utils.PreferredBuilderNextSlaveFuncNG()(builder, slaves)
+      main_utils.PreferredBuilderNextSubordinateFuncNG()(builder, subordinates)
 
       # Mock random.choice on function return for determinism and to check the
       # full choice range.
-      mocked_func = master_utils.PreferredBuilderNextSlaveFuncNG(choice=list)
-      return set([s.name for s in mocked_func(builder, slaves)])
+      mocked_func = main_utils.PreferredBuilderNextSubordinateFuncNG(choice=list)
+      return set([s.name for s in mocked_func(builder, subordinates)])
 
-    self.assertEqual(set(['s1', 's4']), f(builder1, slaves))
-    self.assertEqual(set(['s2', 's5']), f(builder2, slaves))
-    self.assertEqual(set(['s3', 's6']), f(builder3, slaves))
+    self.assertEqual(set(['s1', 's4']), f(builder1, subordinates))
+    self.assertEqual(set(['s2', 's5']), f(builder2, subordinates))
+    self.assertEqual(set(['s3', 's6']), f(builder3, subordinates))
 
-    remove_slave(slaves, 's3')
+    remove_subordinate(subordinates, 's3')
 
-    # There's still a preferred slave left.
-    self.assertEqual(set(['s6']), f(builder3, slaves))
+    # There's still a preferred subordinate left.
+    self.assertEqual(set(['s6']), f(builder3, subordinates))
 
-    remove_slave(slaves, 's6')
+    remove_subordinate(subordinates, 's6')
 
-    # No preferred slave. Slave will be choosen from fall-over pool (i.e.
-    # slaves with no preference).
-    self.assertEqual(set(['s7', 's8']), f(builder3, slaves))
+    # No preferred subordinate. Subordinate will be choosen from fall-over pool (i.e.
+    # subordinates with no preference).
+    self.assertEqual(set(['s7', 's8']), f(builder3, subordinates))
 
-    # We could also test the case where two slave sets are equal (e.g.
+    # We could also test the case where two subordinate sets are equal (e.g.
     # removing now 7 and 8), but that'd require making the most_common
     # method deterministic.
 
-    remove_slave(slaves, 's1')
-    remove_slave(slaves, 's7')
-    remove_slave(slaves, 's8')
+    remove_subordinate(subordinates, 's1')
+    remove_subordinate(subordinates, 's7')
+    remove_subordinate(subordinates, 's8')
 
-    # Now only slaves preferring builder2 have most capacity.
-    self.assertEqual(set(['s2', 's5']), f(builder3, slaves))
+    # Now only subordinates preferring builder2 have most capacity.
+    self.assertEqual(set(['s2', 's5']), f(builder3, subordinates))
 
-  def testNextSlaveEmptyNG(self):
+  def testNextSubordinateEmptyNG(self):
     builder = MockBuilder('builder')
-    slaves = []
+    subordinates = []
 
-    f = master_utils.PreferredBuilderNextSlaveFuncNG(choice=list)
+    f = main_utils.PreferredBuilderNextSubordinateFuncNG(choice=list)
 
-    self.assertIsNone(f(builder, slaves))
+    self.assertIsNone(f(builder, subordinates))
 
 if __name__ == '__main__':
   unittest.main()

@@ -20,7 +20,7 @@ SPEC = {
         'TARGET_PLATFORM': 'android',
       },
       'bot_type': 'tester',
-      'parent_mastername': 'chromium.android',
+      'parent_mainname': 'chromium.android',
       'parent_buildername': 'Android arm Builder (dbg)',
       'android_config': 'non_device_wipe_provisioning',
       'remove_system_webview': True,
@@ -44,7 +44,7 @@ SPEC = {
         'TARGET_PLATFORM': 'android',
       },
       'parent_buildername': 'Android arm Builder (dbg)',
-      'parent_mastername': 'chromium.android',
+      'parent_mainname': 'chromium.android',
       'bot_type': 'tester',
       'android_config': 'main_builder_mb',
       'android_apply_config': ['use_devil_provision'],
@@ -63,7 +63,7 @@ SPEC = {
         'TARGET_PLATFORM': 'android',
       },
       'parent_buildername': 'Android arm64 Builder (dbg)',
-      'parent_mastername': 'chromium.android',
+      'parent_mainname': 'chromium.android',
       'bot_type': 'tester',
       'android_config': 'arm64_builder_mb',
       'android_apply_config': ['use_devil_provision'],
@@ -84,7 +84,7 @@ SPEC = {
         'TARGET_PLATFORM': 'android',
       },
       'parent_buildername': 'Android arm Builder (dbg)',
-      'parent_mastername': 'chromium.android',
+      'parent_mainname': 'chromium.android',
       'bot_type': 'tester',
       'android_config': 'main_builder_mb',
       'android_apply_config': ['use_devil_provision'],
@@ -188,7 +188,7 @@ SPEC = {
     },
 
 
-    # These don't actually run on the master. They're here to configure
+    # These don't actually run on the main. They're here to configure
     # stand-alone trybots on tryserver.chromium.android.
     'Unswarmed N5 Tests Dummy Builder': {
       'chromium_config': 'android',
@@ -239,7 +239,7 @@ SPEC = {
         'TARGET_PLATFORM': 'android',
       },
       'parent_buildername': 'Android arm64 Builder (dbg)',
-      'parent_mastername': 'chromium.android',
+      'parent_mainname': 'chromium.android',
       'bot_type': 'tester',
       'android_config': 'arm64_builder_mb',
       'android_apply_config': ['use_devil_provision'],

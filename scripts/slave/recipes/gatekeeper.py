@@ -17,8 +17,8 @@ def RunSteps(api):
   api.gatekeeper.c.use_new_logic = True
 
   api.gatekeeper(
-    api.package_repo_resource('scripts', 'slave', 'gatekeeper.json'),
-    api.package_repo_resource('scripts', 'slave', 'gatekeeper_trees.json'),
+    api.package_repo_resource('scripts', 'subordinate', 'gatekeeper.json'),
+    api.package_repo_resource('scripts', 'subordinate', 'gatekeeper_trees.json'),
   )
 
 
@@ -41,7 +41,7 @@ def GenTests(api):
   )
 
   whitelist_data = api.gatekeeper.fake_test_json()
-  whitelist_data['blink']['masters'][
+  whitelist_data['blink']['mains'][
       'https://build.chromium.org/p/chromium.webkit'] = ['foobar', 'coolbar']
 
   yield (

@@ -113,7 +113,7 @@ def _DeviceCheckStep(api):
   except api.step.InfraFailure as f:
     params = {
       'summary': ('Device Offline on %s %s' %
-                   (api.properties['mastername'], api.properties['bot_id'])),
+                   (api.properties['mainname'], api.properties['bot_id'])),
       'comment': ('Buildbot: %s\n(Please do not change any labels)' %
                    api.properties['buildername']),
       'labels': 'Restrict-View-Google,OS-Android,Infra-Client,Infra-Labs',
@@ -154,7 +154,7 @@ def _GetTestConfig(api):
   if 'ASan' in buildername:
     test_config['sanitizer'] = 'asan'
 
-  test_config['master_name'] = api.properties.get('mastername')
+  test_config['main_name'] = api.properties.get('mainname')
   test_config['builder_name'] = api.properties.get('buildername')
   test_config['build_number'] = api.properties.get('buildnumber')
   test_config['test_results_server'] = api.properties.get(

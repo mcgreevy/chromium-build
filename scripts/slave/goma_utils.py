@@ -23,7 +23,7 @@ import tempfile
 import time
 
 from common import chromium_utils
-from slave import slave_utils
+from subordinate import subordinate_utils
 
 # The Google Cloud Storage bucket to store logs related to goma.
 GOMA_LOG_GS_BUCKET = 'chrome-goma-log'
@@ -146,7 +146,7 @@ def UploadToGomaLogGS(file_path, gs_filename,
           shutil.copyfileobj(f_in, gzipf_out)
         if text_to_append:
           gzipf_out.write(text_to_append)
-    slave_utils.GSUtilCopy(temp.name, gs_path,
+    subordinate_utils.GSUtilCopy(temp.name, gs_path,
                            metadata=metadata, override_gsutil=override_gsutil)
     print "Copied log file to %s" % gs_path
   finally:
@@ -155,23 +155,23 @@ def UploadToGomaLogGS(file_path, gs_filename,
 
 
 def UploadGomaCompilerProxyInfo(override_gsutil=None,
-                                builder='unknown', master='unknown',
-                                slave='unknown', clobber=''):
+                                builder='unknown', main='unknown',
+                                subordinate='unknown', clobber=''):
   """Upload compiler_proxy{,-subproc}.INFO and gomacc.INFO to Google Storage.
 
   Args:
     override_gsutil: gsutil path to override.
     builder: a string name of a builder.
-    master: a string name of a master.
-    slave: a string name of a slave.
+    main: a string name of a main.
+    subordinate: a string name of a subordinate.
     clobber: set something if clobber (to be removed)
   """
   latest_subproc_info = GetLatestGomaCompilerProxySubprocInfo()
 
   builderinfo = {
     'builder': builder,
-    'master': master,
-    'slave': slave,
+    'main': main,
+    'subordinate': subordinate,
     'clobber': True if clobber else False,
     'os': chromium_utils.PlatformName(),
   }
@@ -285,8 +285,8 @@ def IsCompilerProxyKilledByFatalError():
 
 
 def MakeGomaExitStatusCounter(goma_stats_file, goma_crash_report,
-                              builder='unknown', master='unknown',
-                              slave='unknown', clobber=''):
+                              builder='unknown', main='unknown',
+                              subordinate='unknown', clobber=''):
   """Make Goma exit status counter. This counter indicates compiler_proxy
      has finished without problem, crashed, or killed. This counter will
      be used to alert to goma team.
@@ -295,8 +295,8 @@ def MakeGomaExitStatusCounter(goma_stats_file, goma_crash_report,
     goma_stats_file: path to goma stats file if any
     goma_crash_report: path to goma crash report file if any
     builder: builder name
-    master: master name
-    slave: slave name
+    main: main name
+    subordinate: subordinate name
     clobber: non false if clobber build
   """
 
@@ -305,8 +305,8 @@ def MakeGomaExitStatusCounter(goma_stats_file, goma_crash_report,
         'name': 'goma/status',
         'value': 1,
         'builder': builder,
-        'master': master,
-        'slave': slave,
+        'main': main,
+        'subordinate': subordinate,
         'clobber': 1 if clobber else 0,
         'os': chromium_utils.PlatformName(),
     }
@@ -470,7 +470,7 @@ def SendCountersToTsMon(counters):
 
 
 def MakeGomaStatusCounter(json_file, exit_status,
-                          builder='unknown', master='unknown', slave='unknown',
+                          builder='unknown', main='unknown', subordinate='unknown',
                           clobber=''):
   """Make latest Goma status counter which will be sent to ts_mon.
 
@@ -522,8 +522,8 @@ def MakeGomaStatusCounter(json_file, exit_status,
         'name': 'goma/failure',
         'value': num_failure,
         'builder': builder,
-        'master': master,
-        'slave': slave,
+        'main': main,
+        'subordinate': subordinate,
         'clobber': 1 if clobber else 0,
         'os': chromium_utils.PlatformName(),
         'ping_status_code': ping_status_code,
@@ -559,7 +559,7 @@ def DetermineGomaJobs():
   # so we would be able to use 10 * number_of_processors.
   # For safety, we'd like to set the upper limit to 200.
   #
-  # Note that currently most try-bot build slaves have 8 processors.
+  # Note that currently most try-bot build subordinates have 8 processors.
   if chromium_utils.IsMac() or chromium_utils.IsWindows():
     return min(10 * number_of_processors, 200)
 
@@ -572,9 +572,9 @@ def DetermineGomaJobs():
       # Also increasing cpus for v8/blink trybots.
       ['build%d-m4' % x for x in xrange(45, 48)] +
       # Also increasing cpus for LTO buildbots.
-      ['slave%d-c1' % x for x in [20, 33] + range(78, 108)] +
+      ['subordinate%d-c1' % x for x in [20, 33] + range(78, 108)] +
       # Also increasing cpus for Findit trybots.
-      ['slave%d-c4' % x for x in [799] + range(873, 878)]):
+      ['subordinate%d-c4' % x for x in [799] + range(873, 878)]):
     return min(10 * number_of_processors, 200)
 
   return 50
@@ -599,8 +599,8 @@ def StopGomaClientAndUploadInfo(options, env, exit_status):
         options.goma_jsonstatus,
         exit_status,
         builder=options.buildbot_buildername,
-        master=options.buildbot_mastername,
-        slave=options.buildbot_slavename,
+        main=options.buildbot_mainname,
+        subordinate=options.buildbot_subordinatename,
         clobber=options.buildbot_clobber)
     if counter:
       tsmon_counters.append(counter)
@@ -617,8 +617,8 @@ def StopGomaClientAndUploadInfo(options, env, exit_status):
     override_gsutil = [sys.executable, options.gsutil_py_path, '--']
   UploadGomaCompilerProxyInfo(override_gsutil=override_gsutil,
                               builder=options.buildbot_buildername,
-                              master=options.buildbot_mastername,
-                              slave=options.buildbot_slavename,
+                              main=options.buildbot_mainname,
+                              subordinate=options.buildbot_subordinatename,
                               clobber=options.buildbot_clobber)
 
   # Upload GomaStats to make it monitored.
@@ -629,8 +629,8 @@ def StopGomaClientAndUploadInfo(options, env, exit_status):
         env['GOMA_DUMP_STATS_FILE'],
         options.build_data_dir,
         builder=options.buildbot_buildername,
-        master=options.buildbot_mastername,
-        slave=options.buildbot_slavename,
+        main=options.buildbot_mainname,
+        subordinate=options.buildbot_subordinatename,
         clobber=options.buildbot_clobber)
     if counter:
       tsmon_counters.append(counter)

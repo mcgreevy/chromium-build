@@ -62,6 +62,6 @@ def GenTests(api):
       api.test('ddc-linux-release-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='ddc-linux-release-be',
         revision='hash_of_revision'))

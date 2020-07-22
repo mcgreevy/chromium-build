@@ -92,12 +92,12 @@ def GenTests(api):
       api.test('analyze-linux-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart.fyi',
+        mainname='client.dart.fyi',
         buildername='analyze-linux-be',
         revision='hash_of_revision'))
    yield (
       api.test('analyze-win-dev') + api.platform('win', 32) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='analyze-win-dev',
         revision='hash_of_revision'))

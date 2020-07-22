@@ -37,7 +37,7 @@ def RunSteps(api):
   for test in api.chromium_tests.steps.generate_isolated_script(
       api,
       api.chromium_tests,
-      'test_mastername',
+      'test_mainname',
       'test_buildername',
       test_spec,
       update_step,

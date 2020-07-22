@@ -18,9 +18,9 @@ import subprocess
 import sys
 
 from common import chromium_utils
-from slave import build_directory
-from slave import goma_utils
-from slave import update_windows_env
+from subordinate import build_directory
+from subordinate import goma_utils
+from subordinate import update_windows_env
 
 # Define a bunch of directory paths (same as bot_update.py)
 CURRENT_DIR = os.path.abspath(os.getcwd())
@@ -29,11 +29,11 @@ SLAVE_DIR = os.path.dirname(BUILDER_DIR)
 # GOMA_CACHE_DIR used for caching long-term data.
 DEFAULT_GOMA_CACHE_DIR = os.path.join(SLAVE_DIR, 'goma_cache')
 
-# Path of the scripts/slave/ checkout on the slave, found by looking at the
+# Path of the scripts/subordinate/ checkout on the subordinate, found by looking at the
 # current compile.py script's path's dirname().
 SLAVE_SCRIPTS_DIR = os.path.dirname(os.path.abspath(__file__))
-# Path of the build/ checkout on the slave, found relative to the
-# scripts/slave/ directory.
+# Path of the build/ checkout on the subordinate, found relative to the
+# scripts/subordinate/ directory.
 BUILD_DIR = os.path.dirname(os.path.dirname(SLAVE_SCRIPTS_DIR))
 
 
@@ -132,7 +132,7 @@ def main_ninja(options, args, env):
       # build. Clobbering should run before runhooks (which creates .ninja
       # files). For now, only delete all non-.ninja files.
       # TODO(thakis): Make "clobber" a step that runs before "runhooks".
-      # Once the master has been restarted, remove all clobber handling
+      # Once the main has been restarted, remove all clobber handling
       # from compile.py, https://crbug.com/574557
       build_directory.RmtreeExceptNinjaOrGomaFiles(options.target_output_dir)
 
@@ -265,10 +265,10 @@ def get_parsed_options():
   # Arguments to pass buildbot properties.
   option_parser.add_option('--buildbot-buildername', default='unknown',
                            help='buildbot buildername')
-  option_parser.add_option('--buildbot-mastername', default='unknown',
-                           help='buildbot mastername')
-  option_parser.add_option('--buildbot-slavename', default='unknown',
-                           help='buildbot slavename')
+  option_parser.add_option('--buildbot-mainname', default='unknown',
+                           help='buildbot mainname')
+  option_parser.add_option('--buildbot-subordinatename', default='unknown',
+                           help='buildbot subordinatename')
   option_parser.add_option('--buildbot-clobber', help='buildbot clobber')
 
   options, args = option_parser.parse_args()

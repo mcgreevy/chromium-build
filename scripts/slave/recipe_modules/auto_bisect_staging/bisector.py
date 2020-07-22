@@ -69,7 +69,7 @@ class Bisector(object):
     self.flags = flags
     self._api = api
     self.result_codes = set()
-    self.ensure_sync_master_branch()
+    self.ensure_sync_main_branch()
     self.bisect_config = bisect_config
     self.config_step()
     self._validate_config()
@@ -145,7 +145,7 @@ class Bisector(object):
       return rev
     if rev.isdigit():
       commit_position = self._api.m.commit_position.construct(
-          branch='refs/heads/master', value=rev)
+          branch='refs/heads/main', value=rev)
       try:
         return self.api.m.crrev.to_commit_hash(
             commit_position,
@@ -744,19 +744,19 @@ class Bisector(object):
 
     return 'gs://chrome-perf/Linux Builder/full-build-linux_'
 
-  def ensure_sync_master_branch(self):
-    """Make sure the local master is in sync with the fetched origin/master.
+  def ensure_sync_main_branch(self):
+    """Make sure the local main is in sync with the fetched origin/main.
 
-    We have seen on several occasions that the local master branch gets reset
+    We have seen on several occasions that the local main branch gets reset
     to previous revisions and also detached head states. Running this should
     take care of either situation.
     """
     # TODO(robertocn): Investigate what causes the states mentioned in the
     # docstring in the first place.
     with self.api.m.context(cwd=self.api.m.path['checkout']):
-      self.api.m.git('update-ref', 'refs/heads/master',
-                     'refs/remotes/origin/master')
-      self.api.m.git('checkout', 'master')
+      self.api.m.git('update-ref', 'refs/heads/main',
+                     'refs/remotes/origin/main')
+      self.api.m.git('checkout', 'main')
 
   def is_return_code_mode(self):
     """Checks whether this is a bisect on the test's exit code."""

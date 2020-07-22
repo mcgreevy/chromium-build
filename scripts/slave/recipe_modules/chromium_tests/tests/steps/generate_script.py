@@ -32,7 +32,7 @@ def RunSteps(api):
   for test in api.chromium_tests.steps.generate_script(
       api,
       api.chromium_tests,
-      'test_mastername',
+      'test_mainname',
       'test_buildername',
       test_spec,
       update_step,
@@ -57,7 +57,7 @@ def GenTests(api):
               'name': 'base_unittests',
               'script': 'gtest_test.py',
           },
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           bot_id='test_bot_id',
           buildnumber=123,

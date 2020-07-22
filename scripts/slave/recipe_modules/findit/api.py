@@ -88,7 +88,7 @@ class FinditApi(recipe_api.RecipeApi):
     step_result.presentation.logs['revisions'] = revisions
     return revisions
 
-  def existing_targets(self, targets, mb_mastername, mb_buildername):
+  def existing_targets(self, targets, mb_mainname, mb_buildername):
     """Returns a sublist of the given targets that exist in the build graph.
 
     We test whether a target exists or not by ninja.
@@ -102,12 +102,12 @@ class FinditApi(recipe_api.RecipeApi):
 
     Args:
      targets (list): A list of targets to be tested for existence.
-     mb_mastername (str): The mastername to run MB with.
+     mb_mainname (str): The mainname to run MB with.
      mb_buildername (str): The buildername to run MB with.
     """
     # Run mb to generate or update ninja build files.
     if self.m.chromium.c.project_generator.tool == 'mb':
-      self.m.chromium.run_mb(mb_mastername, mb_buildername,
+      self.m.chromium.run_mb(mb_mainname, mb_buildername,
                              name='generate_build_files')
 
     # Run ninja to check existences of targets.
@@ -120,7 +120,7 @@ class FinditApi(recipe_api.RecipeApi):
         'check_targets', self.resource('check_target_existence.py'), args=args)
     return step.json.output['found']
 
-  def compile_and_test_at_revision(self, api, target_mastername,
+  def compile_and_test_at_revision(self, api, target_mainname,
                                    target_buildername, target_testername,
                                    revision, requested_tests, use_analyze,
                                    test_repeat_count=None):
@@ -128,7 +128,7 @@ class FinditApi(recipe_api.RecipeApi):
 
     Args:
       api (RecipeApi): With the dependencies injected by the calling recipe.
-      target_mastername (str): Which master to derive the configuration off of.
+      target_mainname (str): Which main to derive the configuration off of.
       target_buildername (str): likewise
       target_testername (str): likewise
       revision (str): A string representing the commit hash of the revision to
@@ -153,7 +153,7 @@ class FinditApi(recipe_api.RecipeApi):
     with api.m.step.nest('test %s' % str(abbreviated_revision)):
       # Checkout code at the given revision to recompile.
       bot_id = {
-          'mastername': target_mastername,
+          'mainname': target_mainname,
           'buildername': target_buildername,
           'tester': target_testername}
       bot_config = api.m.chromium_tests.create_generalized_bot_config_object(
@@ -184,7 +184,7 @@ class FinditApi(recipe_api.RecipeApi):
                 test_targets=requested_test_targets,
                 additional_compile_targets=[],
                 config_file_name='trybot_analyze_config.json',
-                mb_mastername=target_mastername,
+                mb_mainname=target_mainname,
                 mb_buildername=target_buildername,
                 additional_names=None))
 
@@ -209,7 +209,7 @@ class FinditApi(recipe_api.RecipeApi):
             bot_db,
             actual_compile_targets,
             tests_including_triggered=actual_tests_to_run,
-            mb_mastername=target_mastername,
+            mb_mainname=target_mainname,
             mb_buildername=target_buildername,
             override_bot_type='builder_tester')
 
@@ -272,7 +272,7 @@ class FinditApi(recipe_api.RecipeApi):
 
       return results, failed_tests_dict
 
-  def configure_and_sync(self, api, tests, buildbucket, target_mastername,
+  def configure_and_sync(self, api, tests, buildbucket, target_mainname,
                          target_testername, revision):
     """Loads tests from buildbucket, applies bot/swarming configs & syncs code.
 
@@ -292,7 +292,7 @@ class FinditApi(recipe_api.RecipeApi):
           JSON string or dict containing a buildbucket job spec from which to
           extract the tests to execute. Parsed if the `tests` parameter above is
           not provided.
-      target_mastername (str): Which master to derive the configuration off of.
+      target_mainname (str): Which main to derive the configuration off of.
       target_testername (str): likewise
       revision (str): A string representing the commit hash of the revision to
                       test.
@@ -321,13 +321,13 @@ class FinditApi(recipe_api.RecipeApi):
     # such cases, just treat the builder as a "tester". Thus, we default to
     # the target tester.
     tester_config = api.chromium_tests.builders.get(
-        target_mastername).get('builders', {}).get(target_testername)
+        target_mainname).get('builders', {}).get(target_testername)
     target_buildername = (tester_config.get('parent_buildername') or
                           target_testername)
 
     # Configure to match the compile config on the builder.
     bot_config = api.chromium_tests.create_bot_config_object(
-        target_mastername, target_buildername)
+        target_mainname, target_buildername)
     api.chromium_tests.configure_build(
         bot_config, override_bot_type='builder_tester')
 

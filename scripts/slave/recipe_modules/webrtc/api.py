@@ -54,14 +54,14 @@ class WebRTCApi(recipe_api.RecipeApi):
     return self.bot_config.get('parent_buildername')
 
   def apply_bot_config(self, builders, recipe_configs):
-    self.mastername = self.m.properties.get('mastername')
+    self.mainname = self.m.properties.get('mainname')
     self.buildername = self.m.properties.get('buildername')
-    master_dict = builders.get(self.mastername, {})
-    self.master_config = master_dict.get('settings', {})
+    main_dict = builders.get(self.mainname, {})
+    self.main_config = main_dict.get('settings', {})
 
-    self.bot_config = master_dict.get('builders', {}).get(self.buildername)
-    assert self.bot_config, ('Unrecognized builder name "%r" for master "%r".' %
-                             (self.buildername, self.mastername))
+    self.bot_config = main_dict.get('builders', {}).get(self.buildername)
+    assert self.bot_config, ('Unrecognized builder name "%r" for main "%r".' %
+                             (self.buildername, self.mainname))
 
     self.bot_type = self.bot_config.get('bot_type', 'builder_tester')
     recipe_config_name = self.bot_config['recipe_config']
@@ -123,7 +123,7 @@ class WebRTCApi(recipe_api.RecipeApi):
       self.m.chromium_swarming.configure_swarming(
           'webrtc',
           precommit=self.m.tryserver.is_tryserver,
-          mastername=self.mastername)
+          mainname=self.mainname)
       self.m.swarming.set_default_dimension(
           'os',
           self.m.swarming.prefered_os_dimension(
@@ -168,7 +168,7 @@ class WebRTCApi(recipe_api.RecipeApi):
 
   def run_mb(self):
     self.m.chromium.run_mb(
-      self.mastername, self.buildername, use_goma=True,
+      self.mainname, self.buildername, use_goma=True,
       mb_path=self.m.path['checkout'].join('tools_webrtc', 'mb'),
       isolated_targets=self._isolated_targets)
 
@@ -209,7 +209,7 @@ class WebRTCApi(recipe_api.RecipeApi):
 
           if run_android_device_steps:
             self.m.chromium_android.common_tests_final_steps(
-                logcat_gs_bucket=self.master_config.get('build_gs_bucket'),
+                logcat_gs_bucket=self.main_config.get('build_gs_bucket'),
                 force_latest_version=True)
 
 
@@ -277,8 +277,8 @@ class WebRTCApi(recipe_api.RecipeApi):
 
   def package_build(self):
     upload_url = self.m.archive.legacy_upload_url(
-        self.master_config.get('build_gs_bucket'),
-        extra_url_components=self.mastername)
+        self.main_config.get('build_gs_bucket'),
+        extra_url_components=self.mainname)
     self.m.archive.zip_and_upload_build(
         'package build',
         self.m.chromium.c.build_config_fs,
@@ -313,8 +313,8 @@ class WebRTCApi(recipe_api.RecipeApi):
         self.m.chromium.c.build_dir.join(self.m.chromium.c.build_config_fs))
 
     download_url = self.m.archive.legacy_download_url(
-       self.master_config.get('build_gs_bucket'),
-       extra_url_components=self.mastername)
+       self.main_config.get('build_gs_bucket'),
+       extra_url_components=self.mainname)
     self.m.archive.download_and_unzip_build(
         'extract build',
         self.m.chromium.c.build_config_fs,

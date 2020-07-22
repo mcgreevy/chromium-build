@@ -11,7 +11,7 @@ DEPS = [
 
 
 def RunSteps(api):
-  api.chromium_tests.create_bot_db_from_master_dict('test_mastername', {})
+  api.chromium_tests.create_bot_db_from_main_dict('test_mainname', {})
 
 
 def GenTests(api):

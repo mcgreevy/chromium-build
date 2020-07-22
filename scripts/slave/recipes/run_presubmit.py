@@ -99,7 +99,7 @@ def _RunStepsInternal(api):
 
 
   env = {}
-  if repo_name in ['build', 'build_internal', 'build_internal_scripts_slave']:
+  if repo_name in ['build', 'build_internal', 'build_internal_scripts_subordinate']:
     # This should overwrite the existing pythonpath which includes references to
     # the local build checkout (but the presubmit scripts should only pick up
     # the scripts from presubmit_build checkout).
@@ -127,13 +127,13 @@ def GenTests(api):
   # TODO(machenbach): This uses the same tryserver for all repos, which doesn't
   # reflect reality (cosmetical problem only).
   for repo_name in ['chromium', 'v8', 'nacl', 'webports', 'gyp',
-                    'build', 'build_internal', 'build_internal_scripts_slave',
-                    'master_deps', 'slave_deps', 'internal_deps',
+                    'build', 'build_internal', 'build_internal_scripts_subordinate',
+                    'main_deps', 'subordinate_deps', 'internal_deps',
                     'depot_tools', 'skia', 'chrome_golo', 'webrtc', 'catapult']:
     yield (
       api.test(repo_name) +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='%s_presubmit' % repo_name,
           repo_name=repo_name,
           patch_project=repo_name) +
@@ -144,7 +144,7 @@ def GenTests(api):
   yield (
     api.test('chromium_dry_run') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='chromium_presubmit',
         repo_name='chromium',
         patch_project='chromium',
@@ -156,7 +156,7 @@ def GenTests(api):
   yield (
     api.test('chromium_with_auth') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='chromium_presubmit',
         repo_name='chromium',
         codereview_auth=True,
@@ -169,7 +169,7 @@ def GenTests(api):
   yield (
     api.test('infra_with_runhooks') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='infra_presubmit',
         repo_name='infra',
         patch_project='infra',
@@ -183,7 +183,7 @@ def GenTests(api):
     api.properties.tryserver(
         gerrit_project='infra/infra',
         repo_name='infra',
-        mastername='tryserver.infra',
+        mainname='tryserver.infra',
         buildername='infra_presubmit',
         runhooks=True) +
     api.step_data('presubmit', api.json.output([['infra_presubmit',
@@ -195,7 +195,7 @@ def GenTests(api):
     api.properties.tryserver(
         gerrit_project='chromium/tools/depot_tools',
         repo_name='depot_tools',
-        mastername='tryserver.infra',
+        mainname='tryserver.infra',
         buildername='presubmit_depot_tools',
         runhooks=True) +
     api.step_data('presubmit', api.json.output([['depot_tools_presubmit',
@@ -205,7 +205,7 @@ def GenTests(api):
   yield (
     api.test('recipes-py') +
     api.properties.tryserver(
-        mastername='tryserver.infra',
+        mainname='tryserver.infra',
         buildername='infra_presubmit',
         repo_name='recipes_py',
         patch_project='recipes-py',
@@ -217,7 +217,7 @@ def GenTests(api):
   yield (
     api.test('presubmit-failure') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='chromium_presubmit',
         repo_name='chromium',
         patch_project='chromium') +
@@ -227,7 +227,7 @@ def GenTests(api):
   yield (
     api.test('presubmit-infra-failure') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='chromium_presubmit',
         repo_name='chromium',
         patch_project='chromium') +
@@ -237,7 +237,7 @@ def GenTests(api):
   yield (
     api.test('repository_url') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.linux',
+        mainname='tryserver.chromium.linux',
         buildername='chromium_presubmit',
         repository_url='https://skia.googlesource.com/skia.git',
         solution_name='skia') +

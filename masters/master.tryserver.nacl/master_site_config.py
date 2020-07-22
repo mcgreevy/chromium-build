@@ -2,20 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class NativeClientTryServer(Master.Master4):
+class NativeClientTryServer(Main.Main4):
   project_name = 'NativeClient-Try'
-  master_port = 8029
-  slave_port = 8129
-  master_port_alt = 8229
+  main_port = 8029
+  subordinate_port = 8129
+  main_port_alt = 8229
   try_job_port = 8329
   reply_to = 'chrome-troopers+tryserver@google.com'
   buildbot_url = 'http://build.chromium.org/p/tryserver.nacl/'
   service_account_file = 'service-account-nacl.json'
-  buildbucket_bucket = 'master.tryserver.nacl'
+  buildbucket_bucket = 'main.tryserver.nacl'
   pubsub_service_account_file = 'service-account-luci-milo.json'
   pubsub_topic = 'projects/luci-milo/topics/public-buildbot'
   name = 'tryserver.nacl'

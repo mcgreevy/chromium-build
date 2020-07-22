@@ -113,7 +113,7 @@ class BuildState(object):
     else:
       client_operation_id = uuid.uuid4().hex # pragma: no cover
     build_details = {
-      'bucket': 'master.' + self.api.m.properties['mastername'],
+      'bucket': 'main.' + self.api.m.properties['mainname'],
       'parameters': {
         'builder_name': bot_name,
         'properties': properties
@@ -153,9 +153,9 @@ class BuildState(object):
   def download_build(self, update_step, bot_db,
                      run_locally=False,
                      skip_download=False):
-    mastername = self.api.m.properties.get('mastername')
+    mainname = self.api.m.properties.get('mainname')
     buildername = self.api.m.properties.get('buildername')
-    bot_config = bot_db.get_bot_config(mastername, buildername)
+    bot_config = bot_db.get_bot_config(mainname, buildername)
     if not skip_download:
       if self.api.m.chromium.c.TARGET_PLATFORM == 'android':
         # The best way to ensure the old build directory is not used is to
@@ -192,7 +192,7 @@ class BuildState(object):
               args=[zip_dir, build_dir])
       else:
         self.api.m.chromium_tests.download_and_unzip_build(
-            mastername, buildername, update_step, bot_db,
+            mainname, buildername, update_step, bot_db,
             build_archive_url=self.build_file_path,
             build_revision=self.commit_hash,
             override_bot_type='tester')

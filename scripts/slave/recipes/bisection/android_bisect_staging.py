@@ -81,11 +81,11 @@ BUILDERS = freeze({
 
 from recipe_engine.recipe_api import Property
 
-PROPERTIES = {'mastername': Property(), 'buildername': Property(),}
+PROPERTIES = {'mainname': Property(), 'buildername': Property(),}
 
-def RunSteps(api, mastername, buildername):
-  master_dict = BUILDERS.get(mastername, {})
-  bot_config = master_dict.get('builders', {}).get(buildername)
+def RunSteps(api, mainname, buildername):
+  main_dict = BUILDERS.get(mainname, {})
+  bot_config = main_dict.get('builders', {}).get(buildername)
   # The following lines configures android bisect bot to to checkout codes,
   # executes runhooks, provisions devices and runs legacy bisect script.
   recipe_config = bot_config.get('recipe_config', 'perf')
@@ -114,8 +114,8 @@ def RunSteps(api, mastername, buildername):
       'bisect_results')
   api.chromium_android.clean_local_files()
 
-  bot_db = api.chromium_tests.create_bot_db_from_master_dict(mastername,
-                                                             master_dict)
+  bot_db = api.chromium_tests.create_bot_db_from_main_dict(mainname,
+                                                             main_dict)
 
   api.chromium_android.use_devil_adb()
 
@@ -204,7 +204,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
 
   buildbucket_get_response = {
     "build":{
-      "bucket": "master.tryserver.chromium.perf",
+      "bucket": "main.tryserver.chromium.perf",
       "id": "9009962699124567824",
       "result": "SUCCESS",
       "status": "COMPLETED",
@@ -216,15 +216,15 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
 }
 
 
-  for _, master_dict in BUILDERS.items():
-    for buildername in master_dict.get('builders', {}):
+  for _, main_dict in BUILDERS.items():
+    for buildername in main_dict.get('builders', {}):
       config_json = config_json_main.copy()
 
       yield (
           api.test('basic_perf_tryjob_' + buildername) +
           api.properties.tryserver(
         path_config='kitchen',
-        mastername='tryserver.chromium.perf',
+        mainname='tryserver.chromium.perf',
         buildername=buildername,
         patch_storage='rietveld',
         patchset='20001',
@@ -263,7 +263,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       yield (api.test('basic_perf_tryjob_with_metric_' + buildername) +
              api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername=buildername,
           patch_storage='rietveld',
           patchset='20001',
@@ -302,7 +302,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       yield (api.test('perf_tryjob_failed_test_' + buildername) +
           api.properties.tryserver(
               path_config='kitchen',
-              mastername='tryserver.chromium.perf',
+              mainname='tryserver.chromium.perf',
               buildername=buildername,
               patch_storage='rietveld',
               patchset='20001',
@@ -337,7 +337,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
           api.test('basic_perf_tryjob_with_revisions_' + buildername) +
           api.properties.tryserver(
               path_config='kitchen',
-              mastername='tryserver.chromium.perf',
+              mainname='tryserver.chromium.perf',
               buildername=buildername,
               patch_storage='rietveld',
               patchset='20001',
@@ -389,7 +389,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
           api.test('perf_tryjob_config_error_' + buildername) +
           api.properties.tryserver(
               path_config='kitchen',
-              mastername='tryserver.chromium.perf',
+              mainname='tryserver.chromium.perf',
               buildername=buildername) + api.properties(
                   requester='abcdxyz@chromium.org') + api.override_step_data(
                       'git diff to analyze patch',
@@ -407,13 +407,13 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
           'truncate_percent': '25',
           'bug_id': '425582',
           'gs_bucket': 'chrome-perf',
-          'builder_host': 'master4.golo.chromium.org',
+          'builder_host': 'main4.golo.chromium.org',
           'builder_port': '8341'
       }
       yield (api.test('basic_recipe_' + buildername) +
           api.properties.tryserver(
               path_config='kitchen',
-              mastername='tryserver.chromium.perf',
+              mainname='tryserver.chromium.perf',
               buildername=buildername) +
           api.properties(
                       bisect_config=bisect_config) + api.properties(
@@ -433,7 +433,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
           'truncate_percent': '25',
           'bug_id': '425582',
           'gs_bucket': 'chrome-perf',
-          'builder_host': 'master4.golo.chromium.org',
+          'builder_host': 'main4.golo.chromium.org',
           'builder_port': '8341',
           'good_revision': '306475',
           'bad_revision': '306476',
@@ -561,7 +561,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   # simulate the scenario when the first tested device works
   yield (api.test('local_basic_recipe_basic_device') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.perf', buildername=buildername) +
+        mainname='tryserver.chromium.perf', buildername=buildername) +
     api.properties(
         path_config='kitchen',
         bisect_config=local_bisect_config,
@@ -593,7 +593,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   # simulate the scenario when the no device is connected.
   yield (api.test('local_basic_recipe_no_device') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.perf', buildername=buildername) +
+        mainname='tryserver.chromium.perf', buildername=buildername) +
     api.properties(
         path_config='kitchen',
         bisect_config=local_bisect_config,
@@ -618,7 +618,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   # disconnection.
   yield (api.test('local_basic_recipe_failed_device') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.perf', buildername=buildername) +
+        mainname='tryserver.chromium.perf', buildername=buildername) +
     api.properties(
         path_config='kitchen',
         bisect_config=local_bisect_config,
@@ -653,7 +653,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   # simulate the scenario when tests fail because of device disconnection.
   yield (api.test('local_basic_recipe_disconnected_device') +
     api.properties.tryserver(
-        mastername='tryserver.chromium.perf', buildername=buildername) +
+        mainname='tryserver.chromium.perf', buildername=buildername) +
     api.properties(
         path_config='kitchen',
         bisect_config={

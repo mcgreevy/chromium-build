@@ -17,8 +17,8 @@ import urllib2
 
 import test_env  # pylint: disable=W0403,W0611
 
-from slave import results_dashboard
-from slave import slave_utils
+from subordinate import results_dashboard
+from subordinate import subordinate_utils
 from testing_support.super_mox import mox
 
 
@@ -48,8 +48,8 @@ class ResultsDashboardFormatTest(unittest.TestCase):
     self.internal_Test_MakeDashboardJsonV1(False)
 
   def internal_Test_MakeDashboardJsonV1(self, enabled=True):
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('ChromiumPerf')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('ChromiumPerf')
     self.mox.StubOutWithMock(results_dashboard, '_GetTimestamp')
     # pylint: disable=W0212
     results_dashboard._GetTimestamp().AndReturn(307226)
@@ -72,7 +72,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
         True)
     self.assertEqual(
         {
-            'master': 'ChromiumPerf',
+            'main': 'ChromiumPerf',
             'bot': 'my-bot',
             'chart_data': {'some_json': 'from_telemetry', 'enabled': enabled},
             'is_ref': True,
@@ -81,7 +81,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
             'supplemental': {
                 'annotation': 'xyz',
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
             'versions': {
@@ -95,10 +95,10 @@ class ResultsDashboardFormatTest(unittest.TestCase):
   def test_MakeListOfPoints_MinimalCase(self):
     """A very simple test of a call to MakeListOfPoints."""
 
-    # The master name is gotten when making the list of points,
+    # The main name is gotten when making the list of points,
     # so it must be stubbed out here.
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('MyMaster')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('MyMain')
     self.mox.ReplayAll()
 
     actual_points = results_dashboard.MakeListOfPoints(
@@ -111,7 +111,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
         'my-bot', 'foo_test', 'Builder', 10, {})
     expected_points = [
         {
-            'master': 'MyMaster',
+            'main': 'MyMain',
             'bot': 'my-bot',
             'test': 'foo_test/bar/baz',
             'revision': 307226,
@@ -120,7 +120,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
             'supplemental_columns': {
                 'r_commit_pos': 307226,
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
         }
@@ -130,10 +130,10 @@ class ResultsDashboardFormatTest(unittest.TestCase):
   def test_MakeListOfPoints_RevisionsDict(self):
     """A very simple test of a call to MakeListOfPoints."""
 
-    # The master name is gotten when making the list of points,
+    # The main name is gotten when making the list of points,
     # so it must be stubbed out here.
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('MyMaster')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('MyMain')
     self.mox.ReplayAll()
 
     actual_points = results_dashboard.MakeListOfPoints(
@@ -146,7 +146,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
         10, {}, revisions_dict={'rev': '377777'})
     expected_points = [
         {
-            'master': 'MyMaster',
+            'main': 'MyMain',
             'bot': 'my-bot',
             'test': 'foo_test/bar/baz',
             'revision': 377777,
@@ -155,7 +155,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
             'supplemental_columns': {
                 'r_commit_pos': 377777,
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
         }
@@ -164,10 +164,10 @@ class ResultsDashboardFormatTest(unittest.TestCase):
 
   def test_MakeListOfPoints_GeneralCase(self):
     """A test of making a list of points, including all optional data."""
-    # The master name is gotten when making the list of points,
+    # The main name is gotten when making the list of points,
     # so it must be stubbed out here.
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('MyMaster')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('MyMain')
     self.mox.ReplayAll()
 
     actual_points = results_dashboard.MakeListOfPoints(
@@ -201,7 +201,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
         })
     expected_points = [
         {
-            'master': 'MyMaster',
+            'main': 'MyMain',
             'bot': 'my-bot',
             'test': 'foo_test/bar', # Note that trace name is omitted.
             'revision': 12345,
@@ -213,13 +213,13 @@ class ResultsDashboardFormatTest(unittest.TestCase):
                 'r_bar': '89abcdef',
                 'r_chromium': '46790669f8a2ecd7249ab92418260316b1c60dbf',
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
                 # Note that v8 rev is not included since it was 'undefined'.
             },
         },
         {
-            'master': 'MyMaster',
+            'main': 'MyMain',
             'bot': 'my-bot',
             'test': 'foo_test/bar/ref',  # Note the change in trace name.
             'revision': 12345,
@@ -231,12 +231,12 @@ class ResultsDashboardFormatTest(unittest.TestCase):
                 'r_bar': '89abcdef',
                 'r_chromium': '46790669f8a2ecd7249ab92418260316b1c60dbf',
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
         },
         {
-            'master': 'MyMaster',
+            'main': 'MyMain',
             'bot': 'my-bot',
             'test': 'foo_test/x/y',
             'revision': 23456,
@@ -249,7 +249,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
                 'r_bar': '89abcdef',
                 'r_chromium': '46790669f8a2ecd7249ab92418260316b1c60dbf',
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
         },
@@ -260,8 +260,8 @@ class ResultsDashboardFormatTest(unittest.TestCase):
     """Tests sending data with a git hash as "revision"."""
     self.mox.StubOutWithMock(datetime, 'datetime')
     datetime.datetime.utcnow().AndReturn(FakeDateTime())
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('ChromiumPerf')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('ChromiumPerf')
     self.mox.ReplayAll()
 
     actual_points = results_dashboard.MakeListOfPoints(
@@ -274,7 +274,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
         'my-bot', 'foo_test', 'Builder', 10, {})
     expected_points = [
         {
-            'master': 'ChromiumPerf',
+            'main': 'ChromiumPerf',
             'bot': 'my-bot',
             'test': 'foo_test/bar/baz',
             # Corresponding timestamp for the fake datetime is used.
@@ -284,7 +284,7 @@ class ResultsDashboardFormatTest(unittest.TestCase):
             'supplemental_columns': {
                 'r_chromium': '2eca27b067e3e57c70e40b8b95d0030c5d7c1a7f',
                 'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                                '/my.master/builders/Builder/builds/10/steps/'
+                                '/my.main/builders/Builder/builds/10/steps/'
                                 'foo_test/logs/stdio)')
             },
         }
@@ -295,13 +295,13 @@ class ResultsDashboardFormatTest(unittest.TestCase):
   def test_GetStdioUri(self):
     self.mox.StubOutWithMock(datetime, 'datetime')
     datetime.datetime.utcnow().AndReturn(FakeDateTime())
-    self.mox.StubOutWithMock(slave_utils, 'GetActiveMaster')
-    slave_utils.GetActiveMaster().AndReturn('ChromiumPerf')
+    self.mox.StubOutWithMock(subordinate_utils, 'GetActiveMain')
+    subordinate_utils.GetActiveMain().AndReturn('ChromiumPerf')
     self.mox.ReplayAll()
 
     expected_supplemental_column = {
         'a_stdio_uri': ('[Buildbot stdio](http://build.chromium.org/p'
-                        '/my.master/builders/Builder/builds/10/steps/'
+                        '/my.main/builders/Builder/builds/10/steps/'
                         'foo_test/logs/stdio)')
     }
     stdio_uri_column = results_dashboard._GetStdioUriColumn(
@@ -372,19 +372,19 @@ class ResultsDashboardSendDataTest(unittest.TestCase):
     """After failing once, the same JSON is sent the next time."""
     # First, some data is sent but it fails for some reason.
     self._TestSendResults(
-        {'sample': 1, 'master': 'm', 'bot': 'b',
+        {'sample': 1, 'main': 'm', 'bot': 'b',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 1, "master": "m", "bot": "b", '
+        [('{"sample": 1, "main": "m", "bot": "b", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [urllib2.URLError('some reason')], True)
 
     # The next time, the old data is sent with the new data.
     self._TestSendResults(
-        {'sample': 2, 'master': 'm2', 'bot': 'b2',
+        {'sample': 2, 'main': 'm2', 'bot': 'b2',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 1, "master": "m", "bot": "b", '
+        [('{"sample": 1, "main": "m", "bot": "b", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}'),
-         ('{"sample": 2, "master": "m2", "bot": "b2", '
+         ('{"sample": 2, "main": "m2", "bot": "b2", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [None, None], True)
 
@@ -392,17 +392,17 @@ class ResultsDashboardSendDataTest(unittest.TestCase):
     """After being successfully sent, data is not re-sent."""
     # First, some data is sent.
     self._TestSendResults(
-        {'sample': 1, 'master': 'm', 'bot': 'b',
+        {'sample': 1, 'main': 'm', 'bot': 'b',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 1, "master": "m", "bot": "b", '
+        [('{"sample": 1, "main": "m", "bot": "b", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [None], True)
 
     # The next time, the old data is not sent with the new data.
     self._TestSendResults(
-        {'sample': 2, 'master': 'm2', 'bot': 'b2',
+        {'sample': 2, 'main': 'm2', 'bot': 'b2',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 2, "master": "m2", "bot": "b2", '
+        [('{"sample": 2, "main": "m2", "bot": "b2", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [None], True)
 
@@ -410,16 +410,16 @@ class ResultsDashboardSendDataTest(unittest.TestCase):
     """After two failures, SendResults should return False."""
     # First, some data is sent but it fails for some reason.
     self._TestSendResults(
-        {'sample': 1, 'master': 'm', 'bot': 'b',
+        {'sample': 1, 'main': 'm', 'bot': 'b',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 1, "master": "m", "bot": "b", '
+        [('{"sample": 1, "main": "m", "bot": "b", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [urllib2.URLError('some reason')], True)
     # Next, data is sent again, another failure.
     self._TestSendResults(
-        {'sample': 1, 'master': 'm', 'bot': 'b',
+        {'sample': 1, 'main': 'm', 'bot': 'b',
          'chart_data': {'benchmark_name': 'b'}, 'point_id': 1234},
-        [('{"sample": 1, "master": "m", "bot": "b", '
+        [('{"sample": 1, "main": "m", "bot": "b", '
           '"chart_data": {"benchmark_name": "b"}, "point_id": 1234}')],
         [urllib2.URLError('some reason'), urllib2.URLError('some reason')],
         False)
@@ -434,11 +434,11 @@ class ResultsDashboardTest(unittest.TestCase):
     self.assertEqual(
         ('@@@STEP_LINK@Results Dashboard@'
          'https://chromeperf.appspot.com/report'
-         '?masters=MyMaster&bots=b&tests=sunspider&rev=1234@@@'),
+         '?mains=MyMain&bots=b&tests=sunspider&rev=1234@@@'),
         results_dashboard._LinkAnnotation(
             'https://chromeperf.appspot.com',
             [{
-                'master': 'MyMaster',
+                'main': 'MyMain',
                 'bot': 'b',
                 'test': 'sunspider/Total',
                 'revision': 1234,

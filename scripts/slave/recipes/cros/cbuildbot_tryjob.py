@@ -14,10 +14,10 @@ DEPS = [
   'recipe_engine/properties',
 ]
 
-# Map master name to 'chromite' configuration name.
+# Map main name to 'chromite' configuration name.
 _MASTER_CONFIG_MAP = {
     'chromiumos.tryserver': {
-      'master_config': 'master_chromiumos_tryserver',
+      'main_config': 'main_chromiumos_tryserver',
     },
 }
 
@@ -94,12 +94,12 @@ def RunSteps(api):
 
 def GenTests(api):
   common_properties = {
-    'mastername': 'chromiumos.tryserver',
+    'mainname': 'chromiumos.tryserver',
     # chromite module uses path['root'] which exists only in Buildbot.
     'path_config': 'buildbot',
     'repository': 'https://chromium.googlesource.com/chromiumos/tryjobs.git',
     'revision': api.gitiles.make_hash('test'),
-    'slave_name': 'test',
+    'subordinate_name': 'test',
   }
 
 
@@ -143,7 +143,7 @@ def GenTests(api):
       + api.properties(
           buildername='paladin',
           cbb_config='x86-generic-full',
-          cbb_branch='master',
+          cbb_branch='main',
           cbb_extra_args=json.dumps([
               '--timeout', '14400', '--remote-trybot',
               '--remote-version=4', '--branch=release-R00-0000.B']),
@@ -156,7 +156,7 @@ def GenTests(api):
       + api.properties(
           buildername='paladin',
           cbb_config='x86-generic-full',
-          cbb_branch='master',
+          cbb_branch='main',
           cbb_extra_args=json.dumps([
               '--timeout', '14400', '--remote-trybot',
               '--remote-version=4', '--branch', 'release-R00-0000.B']),

@@ -85,7 +85,7 @@ def BuildExamples(api, git_hash, flutter_executable):
 
 
 def RunFindXcode(api, step_name, target_version=None):
-  """Runs the `build/scripts/slave/ios/find_xcode.py` utility.
+  """Runs the `build/scripts/subordinate/ios/find_xcode.py` utility.
 
      Retrieves information about xcode installations and to activate a specific
      version of Xcode.
@@ -95,7 +95,7 @@ def RunFindXcode(api, step_name, target_version=None):
   if target_version is not None:
     args.extend(['--version', target_version])
 
-  result = api.python(step_name, api.package_repo_resource('scripts', 'slave',
+  result = api.python(step_name, api.package_repo_resource('scripts', 'subordinate',
     'ios', 'find_xcode.py'), args)
 
   return result.json.output
@@ -157,7 +157,7 @@ def RunSteps(api):
   env = {
     'PATH': api.path.pathsep.join((str(flutter_bin), str(dart_bin), str(gradle_bin),
         '%(PATH)s')),
-    # Setup our own pub_cache to not affect other slaves on this machine.
+    # Setup our own pub_cache to not affect other subordinates on this machine.
     'PUB_CACHE': pub_cache,
     'ANDROID_HOME': checkout.join('dev', 'bots', 'android_tools'),
   }

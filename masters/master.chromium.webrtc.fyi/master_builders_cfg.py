@@ -6,15 +6,15 @@ from buildbot.changes.filter import ChangeFilter
 from buildbot.scheduler import Periodic
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import remote_run_factory
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.ChromiumWebRTCFYI
+import main_site_config
+ActiveMain = main_site_config.ChromiumWebRTCFYI
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -37,7 +37,7 @@ def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='webrtc_scheduler',
                             change_filter=ChangeFilter(project='webrtc',
-                                                       branch='master'),
+                                                       branch='main'),
                             treeStableTimer=0,
                             builderNames=all_builders),
       Periodic(name='hourly_periodic_scheduler',
@@ -62,7 +62,7 @@ def Update(c):
     {
       'name': 'Android Builder ARM64 (dbg)',
       'category': 'android',
-      'slavebuilddir': 'android_arm64',
+      'subordinatebuilddir': 'android_arm64',
     },
     {'name': 'Android Tests (dbg) (K Nexus5)', 'category': 'android'},
     {'name': 'Android Tests (dbg) (L Nexus5)', 'category': 'android'},
@@ -78,7 +78,7 @@ def Update(c):
       'category': spec['category'],
       'notify_on_missing': True,
     }
-    if 'slavebuilddir' in spec:
-      builder_dict['slavebuilddir'] = spec['slavebuilddir']
+    if 'subordinatebuilddir' in spec:
+      builder_dict['subordinatebuilddir'] = spec['subordinatebuilddir']
 
     c['builders'].append(builder_dict)

@@ -9,7 +9,7 @@ import json
 import logging
 
 from buildbot.util import deferredLocked
-from master.buildbucket import changestore
+from main.buildbucket import changestore
 from twisted.internet import defer, reactor, task
 from twisted.internet.defer import inlineCallbacks, returnValue
 
@@ -64,7 +64,7 @@ class BuildBucketIntegrator(object):
         INVALID_BUILD_DEFINITION failure and the error message will be
         propagated to the BuildBucket status.
       max_lease_count (int): maximum number of builds that can be leased at a
-        time. Defaults to the number of connected slaves.
+        time. Defaults to the number of connected subordinates.
       heartbeat_interval (datetime.timedelta): frequency of build heartbeats.
         Defaults to 1 minute.
       change_store_factory: function (BuildbotGateway) => ChangeStore.
@@ -92,7 +92,7 @@ class BuildBucketIntegrator(object):
       return self._max_lease_count
     if not self.buildbot:
       return 0
-    return len(self.buildbot.get_connected_slaves())
+    return len(self.buildbot.get_connected_subordinates())
 
   def log(self, message, level=None):
     common.log(message, level)
@@ -642,7 +642,7 @@ class BuildBucketIntegrator(object):
       del self._leases[build_id]
 
     if status == 'RETRY':
-      # Do not mark this build as failed. Either it will be retried when master
+      # Do not mark this build as failed. Either it will be retried when main
       # starts again and the build lease is still held, or the build lease will
       # expire.
       return
@@ -667,7 +667,7 @@ class BuildBucketIntegrator(object):
             'properties': properties_to_send,
         }, sort_keys=True),
         'new_tags': [
-          'bot_id:%s' % build.getSlavename(),
+          'bot_id:%s' % build.getSubordinatename(),
         ],
     }
     if status == 'SUCCESS':

@@ -12,8 +12,8 @@ import time
 LOGGER = logging.getLogger(__name__)
 
 import requests
-from slave import infra_platform
-from slave import cipd
+from subordinate import infra_platform
+from subordinate import cipd
 
 CLIENT_NAME = 'cipd' + infra_platform.exe_suffix()
 
@@ -24,11 +24,11 @@ STAGING_CIPD_VERSION = 'git_revision:76eadcd75c5ad2638e1fc098f81748aad150c7c0'
 STAGING = 'staging'
 CANARY = 'canary'
 
-# maps mastername (e.g. chromium.infra) as seen in the buildbot 'mastername'
+# maps mainname (e.g. chromium.infra) as seen in the buildbot 'mainname'
 # property to STAGING or CANARY.
 #
 # STAGING will get the STAGING_CIPD_VERSION, and CANARY will get 'latest'.
-# 'mastername' values not in this map will get DEFAULT_CIPD_VERSION.
+# 'mainname' values not in this map will get DEFAULT_CIPD_VERSION.
 MASTER_VERSION = {
   'chromium.infra': STAGING,
   'chromium.infra.cron': STAGING,
@@ -314,12 +314,12 @@ def install_auxiliary_path_packages(dest, selected):
     _add_to_path(dest)
 
 
-def high_level_ensure_cipd_client(b_dir, mastername):
+def high_level_ensure_cipd_client(b_dir, mainname):
   """Ensures that <b_dir>/cipd_client/ contains the cipd (or cipd.exe) client.
 
   Also sets the $CIPD_CACHE_DIR envvar to <b_dir>/c/cipd.
 
-  Will use mastername to determine which version of the client to ensure. See
+  Will use mainname to determine which version of the client to ensure. See
   MASTER_VERSION in this module to see how the version lookup works.
 
   Raises an exception if this fails.
@@ -329,7 +329,7 @@ def high_level_ensure_cipd_client(b_dir, mastername):
   b_dir = os.path.abspath(b_dir)
   cipd_dir = os.path.join(b_dir, 'cipd_client')
   cipd_version = DEFAULT_CIPD_VERSION
-  selected = MASTER_VERSION.get(mastername)
+  selected = MASTER_VERSION.get(mainname)
   if selected == STAGING:
     LOGGER.info("using staging revision")
     cipd_version = STAGING_CIPD_VERSION

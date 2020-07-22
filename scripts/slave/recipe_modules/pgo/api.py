@@ -21,7 +21,7 @@ class PGOApi(recipe_api.RecipeApi):
                                **bot_config.get('chromium_config_kwargs'))
     self.m.chromium.runhooks(name='Runhooks: Instrumentation phase.')
     self.m.chromium.run_mb(
-        self.m.properties['mastername'],
+        self.m.properties['mainname'],
         self.m.properties['buildername'],
         mb_config_path=mb_config_path,
         use_goma=False,
@@ -55,7 +55,7 @@ class PGOApi(recipe_api.RecipeApi):
                                **bot_config.get('chromium_config_kwargs'))
     self.m.chromium.runhooks(name='Runhooks: Optimization phase.')
     self.m.chromium.run_mb(
-        self.m.properties['mastername'],
+        self.m.properties['mainname'],
         self.m.properties['buildername'],
         mb_config_path=mb_config_path,
         use_goma=False,
@@ -105,7 +105,7 @@ class PGOApi(recipe_api.RecipeApi):
       self.m.gclient.c.solutions[0].deps_file = (
           self.m.gclient.c.solutions[0].deps_file % bot_config['bucket'])
 
-    if self.m.properties.get('bot_id') != 'fake_slave':
+    if self.m.properties.get('bot_id') != 'fake_subordinate':
       self.m.chromium.taskkill()
 
     update_step = self.m.bot_update.ensure_checkout()

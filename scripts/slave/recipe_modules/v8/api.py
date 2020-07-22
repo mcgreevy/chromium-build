@@ -75,17 +75,17 @@ class V8Api(recipe_api.RecipeApi):
   def apply_bot_config(self, builders, tryserver_check=True):
     """Entry method for using the v8 api.
 
-    Requires the presence of a bot_config dict for any master/builder pair.
+    Requires the presence of a bot_config dict for any main/builder pair.
     This bot_config will be used to refine other api methods.
     """
 
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
-    master_dict = builders.get(mastername, {})
-    self.bot_config = master_dict.get('builders', {}).get(buildername)
+    main_dict = builders.get(mainname, {})
+    self.bot_config = main_dict.get('builders', {}).get(buildername)
     assert self.bot_config, (
-        'Unrecognized builder name %r for master %r.' % (
-            buildername, mastername))
+        'Unrecognized builder name %r for main %r.' % (
+            buildername, mainname))
 
     kwargs = self.bot_config.get('v8_config_kwargs', {})
     self.set_config('v8', optional=True, **kwargs)
@@ -168,7 +168,7 @@ class V8Api(recipe_api.RecipeApi):
     revision = revision or self.m.properties.get(
         'parent_got_revision', self.m.properties.get('revision', 'HEAD'))
     solution = self.m.gclient.c.solutions[0]
-    branch = self.m.properties.get('branch', 'master')
+    branch = self.m.properties.get('branch', 'main')
     needs_branch_heads = False
     if RELEASE_BRANCH_RE.match(branch):
       revision = 'refs/branch-heads/%s:%s' % (branch, revision)
@@ -216,7 +216,7 @@ class V8Api(recipe_api.RecipeApi):
     """Calculates the commit hash a gerrit patch was branched off."""
     commits, _ = self.m.gitiles.log(
         url=V8_URL,
-        ref='master..%s' % self.m.properties['patch_ref'],
+        ref='main..%s' % self.m.properties['patch_ref'],
         limit=100,
         step_name='Get patches',
         step_test_data=lambda: self.test_api.example_patch_range(),
@@ -240,7 +240,7 @@ class V8Api(recipe_api.RecipeApi):
 
     self.m.swarming.default_idempotent = True
 
-    if self.m.properties['mastername'] == 'tryserver.v8':
+    if self.m.properties['mainname'] == 'tryserver.v8':
       self.m.swarming.add_default_tag('purpose:pre-commit')
       requester = self.m.properties.get('requester')
       if requester == 'commit-bot@chromium.org':
@@ -258,7 +258,7 @@ class V8Api(recipe_api.RecipeApi):
       if patch_project:
         self.m.swarming.add_default_tag('patch_project:%s' % patch_project)
     else:
-      if self.m.properties['mastername'] in ['client.v8', 'client.v8.ports']:
+      if self.m.properties['mainname'] in ['client.v8', 'client.v8.ports']:
         self.m.swarming.default_priority = 25
       else:
         # This should be lower than the CQ.
@@ -322,7 +322,7 @@ class V8Api(recipe_api.RecipeApi):
       use_goma = (self.m.chromium.c.compile_py.compiler and
                   'goma' in self.m.chromium.c.compile_py.compiler)
       self.m.chromium.run_mb(
-          self.m.properties['mastername'],
+          self.m.properties['mainname'],
           self.m.properties['buildername'],
           name='generate_build_files with gn (fyi)',
           use_goma=use_goma,
@@ -499,7 +499,7 @@ class V8Api(recipe_api.RecipeApi):
         )
       try:
         self.m.chromium.run_mb(
-            self.m.properties['mastername'],
+            self.m.properties['mainname'],
             self.m.properties['buildername'],
             use_goma=use_goma,
             mb_config_path=self.m.path['checkout'].join(
@@ -583,7 +583,7 @@ class V8Api(recipe_api.RecipeApi):
 
   def upload_isolated_json_generic(self):
     archive = 'chromium-v8/isolated/%s/%s' % (
-        self.m.properties['mastername'],
+        self.m.properties['mainname'],
         self.m.properties['buildername'],
     )
     self.m.gsutil.upload(
@@ -784,7 +784,7 @@ class V8Api(recipe_api.RecipeApi):
   def maybe_bisect(self, test_results):
     """Build-local bisection for one failure."""
     # Don't activate for branch or fyi bots.
-    if self.m.properties['mastername'] not in ['client.v8', 'client.v8.ports']:
+    if self.m.properties['mainname'] not in ['client.v8', 'client.v8.ports']:
       return
 
     if self.bot_config.get('disable_auto_bisect'):  # pragma: no cover
@@ -1130,7 +1130,7 @@ class V8Api(recipe_api.RecipeApi):
       if self.m.tryserver.is_tryserver:
         properties.update(
           category=self.m.properties.get('category', 'manual_ts'),
-          master=str(self.m.properties['master']),
+          main=str(self.m.properties['main']),
           reason=str(self.m.properties.get('reason', 'ManualTS')),
           requester=str(self.m.properties['requester']),
           # On tryservers, set revision to the same as on the current bot,
@@ -1179,7 +1179,7 @@ class V8Api(recipe_api.RecipeApi):
         proxy_properties.update(properties)
         self.m.trigger(*[{
           'builder_name': 'v8_trigger_proxy',
-          'bucket': 'master.internal.client.v8',
+          'bucket': 'main.internal.client.v8',
           'properties': proxy_properties,
           'buildbot_changes': [{
             'author': 'trigger_proxy',
@@ -1198,7 +1198,7 @@ class V8Api(recipe_api.RecipeApi):
     else:
       url = '%s/p/%s/builders/%s/builds/%s?json=1' % (
           CBE_URL,
-          self.m.properties['mastername'],
+          self.m.properties['mainname'],
           urllib.quote(self.m.properties['buildername']),
           str(self.m.properties['buildnumber']),
       )

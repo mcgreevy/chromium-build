@@ -74,7 +74,7 @@ def Linux32_steps(api):
   env = {'LANDMINES_VERBOSE': '1', 'DEPOT_TOOLS_UPDATE': '0'}
   with api.context(env=env):
     api.python("gclient runhooks wrapper", api.package_repo_resource("scripts",
-      "slave", "runhooks_wrapper.py"))
+      "subordinate", "runhooks_wrapper.py"))
   # meta build step
   goma_dir = api.goma.ensure_goma()
   api.python("meta build", api.path["checkout"].join("tools", "mb", "mb.py"),
@@ -88,7 +88,7 @@ def Linux32_steps(api):
   api.m.step('strip', cmd=['strip', str(api.path['checkout'].join(
       'out', 'Default', 'chromedriver'))])
   # annotated_steps step
-  api.python("annotated_steps", api.package_repo_resource("scripts", "slave",
+  api.python("annotated_steps", api.package_repo_resource("scripts", "subordinate",
     "chromium", "chromedriver_buildbot_run.py"),
     args=['--build-properties=%s' % api.json.dumps(build_properties,
       separators=(',', ':')), '--factory-properties={"annotated_script":'+\
@@ -141,7 +141,7 @@ def Mac_10_6_steps(api):
   env = {'LANDMINES_VERBOSE': '1', 'DEPOT_TOOLS_UPDATE': '0'}
   with api.context(env=env):
     api.python("gclient runhooks wrapper", api.package_repo_resource("scripts",
-      "slave", "runhooks_wrapper.py"))
+      "subordinate", "runhooks_wrapper.py"))
   # meta build step
   goma_dir = api.goma.ensure_goma()
   api.python("meta build", api.path["checkout"].join("tools", "mb", "mb.py"),
@@ -155,7 +155,7 @@ def Mac_10_6_steps(api):
   api.m.step('strip', cmd=['strip', str(api.path['checkout'].join(
       'out', 'Default', 'chromedriver'))])
   # annotated_steps step
-  api.python("annotated_steps", api.package_repo_resource("scripts", "slave",
+  api.python("annotated_steps", api.package_repo_resource("scripts", "subordinate",
     "chromium", "chromedriver_buildbot_run.py"),
     args=['--build-properties=%s' % api.json.dumps(build_properties,
       separators=(',', ':')), '--factory-properties={"annotated_script":"c'+\
@@ -167,7 +167,7 @@ def Mac_10_6_steps(api):
 def Win7_steps(api):
   # update scripts step; implicitly run by recipe engine.
   # taskkill step
-  api.python("taskkill", api.package_repo_resource("scripts", "slave",
+  api.python("taskkill", api.package_repo_resource("scripts", "subordinate",
     "kill_processes.py"))
   # bot_update step
   src_cfg = api.gclient.make_config()
@@ -210,7 +210,7 @@ def Win7_steps(api):
   env = {'LANDMINES_VERBOSE': '1', 'DEPOT_TOOLS_UPDATE': '0'}
   with api.context(env=env):
     api.python("gclient runhooks wrapper", api.package_repo_resource("scripts",
-      "slave", "runhooks_wrapper.py"))
+      "subordinate", "runhooks_wrapper.py"))
   # meta build step
   goma_dir = api.goma.ensure_goma()
   api.python("meta build", api.path["checkout"].join("tools", "mb", "mb.py"),
@@ -221,8 +221,8 @@ def Win7_steps(api):
   build_with_goma_module(api)
 
   # annotated_steps step
-  api.step("annotated_steps", ["python_slave", api.package_repo_resource("scripts",
-    "slave", "chromium", "chromedriver_buildbot_run.py"),
+  api.step("annotated_steps", ["python_subordinate", api.package_repo_resource("scripts",
+    "subordinate", "chromium", "chromedriver_buildbot_run.py"),
     '--build-properties=%s' % api.json.dumps(build_properties,
       separators=(',', ':')), '--factory-properties={"annotated_script":"chro'+\
           'medriver_buildbot_run.py","blink_config":"chromium","gclient_env":'+\
@@ -273,7 +273,7 @@ def Linux_steps(api):
   env = {'LANDMINES_VERBOSE': '1', 'DEPOT_TOOLS_UPDATE': '0'}
   with api.context(env=env):
     api.python("gclient runhooks wrapper", api.package_repo_resource("scripts",
-      "slave", "runhooks_wrapper.py"))
+      "subordinate", "runhooks_wrapper.py"))
   # meta build step
   goma_dir = api.goma.ensure_goma()
   api.python("meta build", api.path["checkout"].join("tools", "mb", "mb.py"),
@@ -287,7 +287,7 @@ def Linux_steps(api):
   api.m.step('strip', cmd=['strip', str(api.path['checkout'].join(
       'out', 'Default', 'chromedriver'))])
   # annotated_steps step
-  api.python("annotated_steps", api.package_repo_resource("scripts", "slave",
+  api.python("annotated_steps", api.package_repo_resource("scripts", "subordinate",
     "chromium", "chromedriver_buildbot_run.py"),
     args=['--build-properties=%s' % api.json.dumps(build_properties,
       separators=(',', ':')), '--factory-properties={"annotated_script":"chro'+\
@@ -313,27 +313,27 @@ def RunSteps(api):
 
 def GenTests(api):
   yield (api.test('Linux32') +
-    api.properties(mastername='chromium.chromedriver') +
+    api.properties(mainname='chromium.chromedriver') +
     api.properties(buildername='Linux32') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('Mac_10_6') +
-    api.properties(mastername='chromium.chromedriver') +
+    api.properties(mainname='chromium.chromedriver') +
     api.properties(buildername='Mac 10.6') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('Win7') +
-    api.properties(mastername='chromium.chromedriver') +
+    api.properties(mainname='chromium.chromedriver') +
     api.properties(buildername='Win7') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('Linux') +
-    api.properties(mastername='chromium.chromedriver') +
+    api.properties(mainname='chromium.chromedriver') +
     api.properties(buildername='Linux') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('builder_not_in_dispatch_directory') +
-    api.properties(mastername='chromium.chromedriver') +
+    api.properties(mainname='chromium.chromedriver') +
     api.properties(buildername='nonexistent_builder') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
