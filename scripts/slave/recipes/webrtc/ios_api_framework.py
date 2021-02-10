@@ -72,14 +72,14 @@ def RunSteps(api):
 def GenTests(api):
   yield (
     api.test('build_ok') +
-    api.properties.generic(mastername='client.webrtc',
+    api.properties.generic(mainname='client.webrtc',
                            buildername='iOS API Framework Builder',
                            path_config='kitchen')
   )
 
   yield (
     api.test('build_failure') +
-    api.properties.generic(mastername='client.webrtc',
+    api.properties.generic(mainname='client.webrtc',
                            buildername='iOS API Framework Builder',
                            path_config='kitchen') +
     api.step_data('build', retcode=1)
@@ -87,7 +87,7 @@ def GenTests(api):
 
   yield (
     api.test('trybot_build') +
-    api.properties.tryserver(mastername='tryserver.webrtc',
+    api.properties.tryserver(mainname='tryserver.webrtc',
                              buildername='ios_api_framework',
                              path_config='kitchen')
   )

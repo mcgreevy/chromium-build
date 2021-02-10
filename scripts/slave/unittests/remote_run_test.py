@@ -24,15 +24,15 @@ import mock
 from common import annotator
 from common import chromium_utils
 from common import env
-from slave import cleanup_temp
-from slave import logdog_bootstrap
-from slave import remote_run
-from slave import robust_tempdir
-from slave import update_scripts
-from slave.unittests.utils import FakeBuildRootTestCase
+from subordinate import cleanup_temp
+from subordinate import logdog_bootstrap
+from subordinate import remote_run
+from subordinate import robust_tempdir
+from subordinate import update_scripts
+from subordinate.unittests.utils import FakeBuildRootTestCase
 
-# <build>/scripts/slave
-BASE_DIR = os.path.join(env.Build, 'scripts', 'slave')
+# <build>/scripts/subordinate
+BASE_DIR = os.path.join(env.Build, 'scripts', 'subordinate')
 
 
 MockOptions = collections.namedtuple('MockOptions', (
@@ -48,9 +48,9 @@ class RemoteRunTest(FakeBuildRootTestCase):
 
   def test_example(self):
     build_properties = {
-      'mastername': 'tryserver.chromium.linux',
+      'mainname': 'tryserver.chromium.linux',
       'buildername': 'builder',
-      'slavename': 'bot42-m1',
+      'subordinatename': 'bot42-m1',
       'true_prop': True,
       'num_prop': 123,
       'string_prop': '321',
@@ -76,9 +76,9 @@ class RemoteRunTest(FakeBuildRootTestCase):
 
   def test_example_canary(self):
     build_properties = {
-      'mastername': 'tryserver.chromium.linux',
+      'mainname': 'tryserver.chromium.linux',
       'buildername': 'builder',
-      'slavename': 'bot42-m1',
+      'subordinatename': 'bot42-m1',
       'true_prop': True,
       'num_prop': 123,
       'string_prop': '321',
@@ -87,7 +87,7 @@ class RemoteRunTest(FakeBuildRootTestCase):
 
     # Emulate BuildBot enviornment.
     proc_env = self.get_test_env(
-        BUILDBOT_SLAVENAME=build_properties['slavename'],
+        BUILDBOT_SLAVENAME=build_properties['subordinatename'],
         # No active subdir.
         INFRA_BUILDBOT_SLAVE_ACTIVE_SUBDIR='')
 
@@ -115,11 +115,11 @@ class RemoteRunExecTest(unittest.TestCase):
 
     self.maxDiff = None
     map(lambda x: x.start(), (
-        mock.patch('slave.remote_run._call'),
-        mock.patch('slave.remote_run._get_is_canary'),
-        mock.patch('slave.remote_run._get_is_kitchen'),
-        mock.patch('slave.cipd_bootstrap_v2.high_level_ensure_cipd_client'),
-        mock.patch('slave.monitoring_utils.write_build_monitoring_event'),
+        mock.patch('subordinate.remote_run._call'),
+        mock.patch('subordinate.remote_run._get_is_canary'),
+        mock.patch('subordinate.remote_run._get_is_kitchen'),
+        mock.patch('subordinate.cipd_bootstrap_v2.high_level_ensure_cipd_client'),
+        mock.patch('subordinate.monitoring_utils.write_build_monitoring_event'),
         mock.patch('os.path.exists'),
         mock.patch('common.chromium_utils.RemoveDirectory'),
         mock.patch('common.chromium_utils.MoveFile'),
@@ -142,8 +142,8 @@ class RemoteRunExecTest(unittest.TestCase):
         logdog_disable=False,
         factory_properties={},
         build_properties={
-          'slavename': 'bot42-m1',
-          'mastername': 'tryserver.chromium.linux',
+          'subordinatename': 'bot42-m1',
+          'mainname': 'tryserver.chromium.linux',
           'buildername': 'builder',
         },
         kitchen=None,
@@ -154,7 +154,7 @@ class RemoteRunExecTest(unittest.TestCase):
         logdog_debug_out_file=None,
         canary=None,
     )
-    self.rpy_path = os.path.join(env.Build, 'scripts', 'slave', 'recipes.py')
+    self.rpy_path = os.path.join(env.Build, 'scripts', 'subordinate', 'recipes.py')
 
     self.recipe_remote_args = [
         sys.executable, self._bp('.remote_run_cipd', 'recipes.py'),
@@ -226,8 +226,8 @@ class RemoteRunExecTest(unittest.TestCase):
     with open(self._tp('kitchen_result.json'), 'w') as fd:
       json.dump(self.kitchen_result, fd)
 
-  @mock.patch('slave.update_scripts._run_command')
-  @mock.patch('slave.remote_run.main')
+  @mock.patch('subordinate.update_scripts._run_command')
+  @mock.patch('subordinate.remote_run.main')
   @mock.patch('sys.platform', return_value='win')
   @mock.patch('tempfile.mkstemp', side_effect=Exception('failure'))
   def test_update_scripts_must_run(self, _tempfile_mkstemp, _sys_platform,
@@ -251,10 +251,10 @@ class RemoteRunExecTest(unittest.TestCase):
         ])
     self.assertFalse(main.called)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap',
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap',
               side_effect=logdog_bootstrap.NotBootstrapped())
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_exec_without_logdog(self, rt_tempdir, _install_cipd_packages,
                                _logdog_bootstrap):
     remote_run._call.return_value = 0
@@ -269,10 +269,10 @@ class RemoteRunExecTest(unittest.TestCase):
     args = self.recipe_remote_args + ['--'] + self.recipe_args
     remote_run._call.assert_called_once_with(args)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap',
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap',
               side_effect=logdog_bootstrap.NotBootstrapped())
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_kitchen_exec_without_logdog(self, rt_tempdir, _install_cipd_packages,
                                       _logdog_bootstrap):
     self.is_kitchen = True
@@ -294,10 +294,10 @@ class RemoteRunExecTest(unittest.TestCase):
 
     remote_run._call.assert_called_once_with(kitchen_args, env=kitchen_env)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap',
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap',
               side_effect=logdog_bootstrap.NotBootstrapped())
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_kitchen_exec_canary_without_logdog(self, rt_tempdir,
                                               _install_cipd_packages,
                                               _logdog_bootstrap):
@@ -321,10 +321,10 @@ class RemoteRunExecTest(unittest.TestCase):
 
     remote_run._call.assert_called_once_with(kitchen_args, env=kitchen_env)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_exec_with_logdog(self, rt_tempdir, _install_cipd_packages,
                             _logdog_bootstrap_result, bootstrap):
 
@@ -365,10 +365,10 @@ class RemoteRunExecTest(unittest.TestCase):
         ]
     )
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_exec_with_logdog_failed(self, rt_tempdir, _install_cipd_packages,
                             _logdog_bootstrap_result, bootstrap):
 
@@ -413,10 +413,10 @@ class RemoteRunExecTest(unittest.TestCase):
         ]
     )
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_exec_with_logdog_only(self, rt_tempdir, _install_cipd_packages,
                                  _logdog_bootstrap_result, bootstrap):
 
@@ -458,10 +458,10 @@ class RemoteRunExecTest(unittest.TestCase):
         ]
     )
 
-  @mock.patch('slave.logdog_bootstrap.get_config')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
-  @mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap.get_config')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_kitchen_exec_with_logdog(self, rt_tempdir, _install_cipd_packages,
                                    _logdog_bootstrap_result, get_config):
     self.is_kitchen = True
@@ -483,7 +483,7 @@ class RemoteRunExecTest(unittest.TestCase):
     rt_tempdir.side_effect = [self.tempdir, self.build_data_dir]
     self._write_kitchen_result()
 
-    opts = self.opts._replace(revision='origin/master')
+    opts = self.opts._replace(revision='origin/main')
     rv = remote_run._exec_recipe(opts, self.rt, self.stream, self.basedir,
                                  self.buildbot_build_dir)
     self.assertEqual(rv, 0)
@@ -531,7 +531,7 @@ class ConfigurationTest(unittest.TestCase):
 
     self.buildbucket = {
       'build': {
-        'bucket': 'master.tryserver.chromium.linux',
+        'bucket': 'main.tryserver.chromium.linux',
         'created_by': 'user:iannucci@chromium.org',
         'created_ts': '1494616236661800',
         'id': '8979775000984247248',
@@ -539,18 +539,18 @@ class ConfigurationTest(unittest.TestCase):
         'tags': [
           'builder:linux_chromium_rel_ng',
           'buildset:patch/rietveld/codereview.chromium.org/2852733003/1',
-          'master:tryserver.chromium.linux',
+          'main:tryserver.chromium.linux',
           'user_agent:rietveld'
         ],
       },
     }
 
-    self._orig_canary_masters = remote_run._CANARY_MASTERS
+    self._orig_canary_mains = remote_run._CANARY_MASTERS
     remote_run._CANARY_MASTERS = set(('canary',))
 
   def tearDown(self):
     remote_run._KITCHEN_CONFIG_MASTERS = self._orig_kitchen_config
-    remote_run._CANARY_MASTERS = self._orig_canary_masters
+    remote_run._CANARY_MASTERS = self._orig_canary_mains
 
   def test_get_cipd_pins_stable(self):
     self.assertFalse(remote_run._get_is_canary('not.canary'))

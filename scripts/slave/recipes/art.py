@@ -50,12 +50,12 @@ _ANDROID_CLEAN_DIRS = ['/data/local/tmp', '/data/art-test',
 
 def checkout(api):
   api.repo.init('https://android.googlesource.com/platform/manifest',
-      '-b', 'master-art')
+      '-b', 'main-art')
   api.repo.sync()
 
 def full_checkout(api):
   api.repo.init('https://android.googlesource.com/platform/manifest',
-      '-b', 'master')
+      '-b', 'main')
   api.repo.sync()
 
 def clobber(api):
@@ -500,17 +500,17 @@ _CONFIG_DISPATCH_MAP = {
 }
 
 def RunSteps(api):
-  if api.properties['mastername'] not in _CONFIG_MAP: # pragma: no cover
-    error = "Master not found in recipe's local config!"
+  if api.properties['mainname'] not in _CONFIG_MAP: # pragma: no cover
+    error = "Main not found in recipe's local config!"
     raise KeyError(error)
 
   builder_found = False
-  config = _CONFIG_MAP[api.properties['mastername']]
+  config = _CONFIG_MAP[api.properties['mainname']]
   for builder_type in config:
     if api.properties['buildername'] in config[builder_type]:
       builder_found = True
       builder_dict = config[builder_type][api.properties['buildername']]
-      _CONFIG_DISPATCH_MAP[api.properties['mastername']][builder_type](api,
+      _CONFIG_DISPATCH_MAP[api.properties['mainname']][builder_type](api,
           **builder_dict)
       break
 
@@ -519,17 +519,17 @@ def RunSteps(api):
     raise KeyError(error)
 
 def GenTests(api):
-  for mastername, config_dict in _CONFIG_MAP.iteritems():
+  for mainname, config_dict in _CONFIG_MAP.iteritems():
     for builders in config_dict.values():
       for buildername in builders:
         for clb in (None, True):
           yield (
-              api.test("%s__ON__%s__%s" % (buildername, mastername,
+              api.test("%s__ON__%s__%s" % (buildername, mainname,
                 ("" if clb else "no") + "clobber")) +
               api.properties(
-                mastername=mastername,
+                mainname=mainname,
                 buildername=buildername,
-                bot_id='TestSlave',
+                bot_id='TestSubordinate',
                 # Buildbot uses clobber='' to mean clobber, however
                 # api.properties(clobber=None) will set clobber=None!
                 # so we have to not even mention it to avoid our
@@ -539,59 +539,59 @@ def GenTests(api):
   yield (
       api.test('x86_32_test_failure') +
       api.properties(
-        mastername='client.art',
+        mainname='client.art',
         buildername='host-x86-ndebug',
-        bot_id='TestSlave',
+        bot_id='TestSubordinate',
       ) +
       api.step_data('test jdwp aot', retcode=1))
   yield (
       api.test('target_angler_setup_failure') +
       api.properties(
-        mastername='client.art',
+        mainname='client.art',
         buildername='angler-armv7-ndebug',
-        bot_id='TestSlave',
+        bot_id='TestSubordinate',
       )
       + api.step_data('setup device', retcode=1))
   yield (
       api.test('target_angler_test_failure') +
       api.properties(
-        mastername='client.art',
+        mainname='client.art',
         buildername='angler-armv7-ndebug',
-        bot_id='TestSlave',
+        bot_id='TestSubordinate',
       ) +
       api.step_data('test jdwp aot', retcode=1))
   yield (
       api.test('target_angler_device_cleanup_failure') +
       api.properties(
-        mastername='client.art',
+        mainname='client.art',
         buildername='angler-armv7-ndebug',
-        bot_id='TestSlave',
+        bot_id='TestSubordinate',
       ) +
       api.step_data('device cleanup', retcode=1))
   yield (
       api.test('aosp_x86_build_failure') +
       api.properties(
-        mastername='client.art',
+        mainname='client.art',
         buildername='aosp-builder-cms',
-        bot_id='TestSlave',
+        bot_id='TestSubordinate',
       ) +
       api.step_data('build x86', retcode=1))
 #  These tests *should* exist, but can't be included as they cause the recipe
 #  simulation to error out, instead of showing that the build should become
 #  purple instead. This may need to be fixed in the simulation test script.
 #  yield (
-#      api.test('invalid mastername') +
+#      api.test('invalid mainname') +
 #      api.properties(
-#        mastername='client.art.does_not_exist',
+#        mainname='client.art.does_not_exist',
 #        buildername='aosp-builder-cms',
-#        bot_id='TestSlave',
+#        bot_id='TestSubordinate',
 #      )
 #    )
 #  yield (
 #      api.test('invalid buildername') +
 #      api.properties(
-#        mastername='client.art',
+#        mainname='client.art',
 #        buildername='builder_does_not_exist',
-#        bot_id='TestSlave',
+#        bot_id='TestSubordinate',
 #      )
 #    )

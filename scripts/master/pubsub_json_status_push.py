@@ -12,8 +12,8 @@ import time
 import zlib
 
 from buildbot.status.base import StatusReceiverMultiService
-from master import auth
-from master.deferred_resource import DeferredResource
+from main import auth
+from main.deferred_resource import DeferredResource
 from twisted.internet import defer, reactor
 from twisted.python import log
 
@@ -42,7 +42,7 @@ class BuildRequestObserver(object):
     self.request = request
 
   def __call__(self, _bs):
-    """Called by buildbot.status.master's "build_started" when the build for
+    """Called by buildbot.status.main's "build_started" when the build for
     this observer has started.
 
     Note that '_bs' may (Will probably? Will always?) be None, so don't rely
@@ -160,28 +160,28 @@ class StatusPush(StatusReceiverMultiService):
   verbose = True
 
   @classmethod
-  def CreateStatusPush(cls, activeMaster, pushInterval=None):
-    assert activeMaster, 'An active master must be supplied.'
+  def CreateStatusPush(cls, activeMain, pushInterval=None):
+    assert activeMain, 'An active main must be supplied.'
     if not (
-          activeMaster.is_production_host or os.environ.get('TESTING_MASTER')):
+          activeMain.is_production_host or os.environ.get('TESTING_MASTER')):
       log.msg(
           'Not a production host or testing, not loading the PubSub '
           'status listener.')
       return None
 
-    topic = getattr(activeMaster, 'pubsub_topic', None)
+    topic = getattr(activeMain, 'pubsub_topic', None)
     if not topic:
       log.msg('PubSub: Missing pubsub_topic, not enabling.')
       return None
 
-    # Set the master name, for indexing purposes.
-    name = getattr(activeMaster, 'name', None)
+    # Set the main name, for indexing purposes.
+    name = getattr(activeMain, 'name', None)
     if not name:
       raise ConfigError(
-          'A master name must be supplied for pubsub push support.')
+          'A main name must be supplied for pubsub push support.')
 
     service_account_file = getattr(
-        activeMaster, 'pubsub_service_account_file', None)
+        activeMain, 'pubsub_service_account_file', None)
     if not service_account_file:
       raise ConfigError('A service account file must be specified.')
 
@@ -203,7 +203,7 @@ class StatusPush(StatusReceiverMultiService):
     self.pushInterval = self._getTimeDelta(pushInterval or
                                            self.DEFAULT_PUSH_INTERVAL_SEC)
 
-    self.name = name  # Master name, since builds don't include this info.
+    self.name = name  # Main name, since builds don't include this info.
     self.topic = topic
     self._service_account_file = service_account_file
     self._client = None
@@ -244,7 +244,7 @@ class StatusPush(StatusReceiverMultiService):
       yield self._client.start()
     except Exception as e:
       # If we can't get a client started, then something has gone horribly
-      # wrong, we'll want to stop the buildbot master.
+      # wrong, we'll want to stop the buildbot main.
       log.msg('PubSub: ERROR - Failed to start PubSub client %s' % e)
       reactor.stop()
       return
@@ -285,7 +285,7 @@ class StatusPush(StatusReceiverMultiService):
       raise MessageTooBigError()
     return data
 
-  def _get_pubsub_messages(self, master, builds):
+  def _get_pubsub_messages(self, main, builds):
     splits = min(self._splits, max(len(builds), 1))
     for i in xrange(splits):
       start = int((i) * len(builds) / splits)
@@ -294,18 +294,18 @@ class StatusPush(StatusReceiverMultiService):
       if builds:
         data['builds'] = builds[start:end]
       if i == 0:
-        data['master'] = master
+        data['main'] = main
       try:
         yield self._build_pubsub_message(data)
       except MessageTooBigError:
         self._splits += 1
         raise
 
-  def _send_messages(self, master, builds):
+  def _send_messages(self, main, builds):
     done = False
     while not done:
       try:
-        messages = list(self._get_pubsub_messages(master, builds))
+        messages = list(self._get_pubsub_messages(main, builds))
         done = True
       except MessageTooBigError as e:
         log.msg('PubSub: Unable to send: could not break down: %s.' % (e,))
@@ -347,25 +347,25 @@ class StatusPush(StatusReceiverMultiService):
 
       # result is a (build, build_dict) tuple.
       _, send_build = result
-      send_build['master'] = self.name
+      send_build['main'] = self.name
       send_builds.append(send_build)
 
-    # Add in master builder state into the message.
-    master_data = yield self._getMasterData()
-    t_master_data = time.time()
-    d_master = t_master_data - t_load_build
+    # Add in main builder state into the message.
+    main_data = yield self._getMainData()
+    t_main_data = time.time()
+    d_main = t_main_data - t_load_build
 
     # Gather on statistics on how many pending builds we have, for logging.
     num_build_requests = sum([
-        bi['pendingBuilds'] for bi in master_data['builders'].itervalues()])
+        bi['pendingBuilds'] for bi in main_data['builders'].itervalues()])
     num_build_states = sum([
         len(bi['pendingBuildStates']) for bi
-        in master_data['builders'].itervalues()])
+        in main_data['builders'].itervalues()])
 
     # Split the data into batches because PubSub has a message limit of 10MB.
-    res = yield self._send_messages(master_data, send_builds)
+    res = yield self._send_messages(main_data, send_builds)
     t_send_messages = time.time()
-    d_send_messages = t_send_messages - t_master_data
+    d_send_messages = t_send_messages - t_main_data
     for success, result in res:
       if success:
         log.msg('PubSub: Send successful: %s' % result)
@@ -377,8 +377,8 @@ class StatusPush(StatusReceiverMultiService):
     d_total = t_complete - t_start
     len_tcq = len(reactor.threadCallQueue)
     log.msg('PubSub: Last send session took total %.1fs, %.1f load build, '
-            '%.1f master, %.1f send. len_tcq %d. br %d. bs %d' % (
-                d_total, d_load_build, d_master, d_send_messages, len_tcq,
+            '%.1f main, %.1f send. len_tcq %d. br %d. bs %d' % (
+                d_total, d_load_build, d_main, d_send_messages, len_tcq,
                 num_build_requests, num_build_states))
 
   def _pushTimerExpired(self):
@@ -484,7 +484,7 @@ class StatusPush(StatusReceiverMultiService):
     # Not included: basedir, cachedBuilds.
     # cachedBuilds isn't useful and takes a ton of resources to compute.
     builder_info = {
-      'slaves': builder.slavenames,
+      'subordinates': builder.subordinatenames,
       'currentBuilds': sorted(b.getNumber() for b in builder.currentBuilds),
       'pendingBuilds': num_pending,
       # p is a tuple of (success, payload)
@@ -495,15 +495,15 @@ class StatusPush(StatusReceiverMultiService):
     defer.returnValue((name, builder_info))
 
   @defer.inlineCallbacks
-  def _getMasterData(self):
-    """Loads and returns a subset of the master data as a JSON.
+  def _getMainData(self):
+    """Loads and returns a subset of the main data as a JSON.
 
     This includes:
     * builders: List of builders (builbot.status.builder.Builder).
-    * slaves: List of slaves (buildbot.status.slave).
+    * subordinates: List of subordinates (buildbot.status.subordinate).
     """
     # First do some bookkeeping.  If we queue any pending build requests
-    # to look into from restarting the master, process them now.
+    # to look into from restarting the main, process them now.
     # This should only happen once per restart.
     if self._pending_todos:
       todo_lists = yield defer.DeferredList(self._pending_todos)
@@ -526,10 +526,10 @@ class StatusPush(StatusReceiverMultiService):
     builder_infos = {
         data[0]: data[1] for success, data in builder_info_list if success}
 
-    slaves = {slave_name: self._status.getSlave(slave_name).asDict()
-              for slave_name in self._status.getSlaveNames()}
+    subordinates = {subordinate_name: self._status.getSubordinate(subordinate_name).asDict()
+              for subordinate_name in self._status.getSubordinateNames()}
     defer.returnValue({
-        'builders': builder_infos, 'slaves': slaves, 'name': self.name})
+        'builders': builder_infos, 'subordinates': subordinates, 'name': self.name})
 
 
   def _recordBuild(self, build):
@@ -574,11 +574,11 @@ class StatusPush(StatusReceiverMultiService):
 
   @event_handler
   def buildStarted(self, _builderName, build):
-    # This info is included in the master json.
+    # This info is included in the main json.
     return self
 
   def stepStarted(self, build, _step):
-    # This info is included in the master json.  No need to log this.
+    # This info is included in the main json.  No need to log this.
     return self
 
   @event_handler

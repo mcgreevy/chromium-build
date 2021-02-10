@@ -28,7 +28,7 @@ class DBThreadPool(threadpool.ThreadPool):
 
     # Some versions of SQLite incorrectly cache metadata about which tables are
     # and are not present on a per-connection basis.  This cache can be flushed
-    # by querying the sqlite_master table.  We currently assume all versions of
+    # by querying the sqlite_main table.  We currently assume all versions of
     # SQLite have this bug, although it has only been observed in 3.4.2.  A
     # dynamic check for this bug would be more appropriate.  This is documented
     # in bug #1810.
@@ -54,7 +54,7 @@ class DBThreadPool(threadpool.ThreadPool):
             log.msg("Using SQLite Version %s" % (vers,))
             if vers < (3,7):
                 log.msg("NOTE: this old version of SQLite does not support "
-                        "WAL journal mode; a busy master may encounter "
+                        "WAL journal mode; a busy main may encounter "
                         "'Database is locked' errors.  Consider upgrading.")
             if vers < (3,4):
                 log.msg("NOTE: this old version of SQLite is not supported. "
@@ -109,7 +109,7 @@ class DBThreadPool(threadpool.ThreadPool):
                 arg = self.engine.contextual_connect()
 
             if self.__broken_sqlite: # see bug #1810
-                arg.execute("select * from sqlite_master")
+                arg.execute("select * from sqlite_main")
             try:
                 rv = callable(arg, *args, **kwargs)
                 assert not isinstance(rv, sa.engine.ResultProxy), \
@@ -188,7 +188,7 @@ class DBThreadPool(threadpool.ThreadPool):
             import sqlite3 as sqlite
 
         dbfile = "detect_bug1810.db"
-        def test(select_from_sqlite_master=False):
+        def test(select_from_sqlite_main=False):
             try:
                 conn1 = sqlite.connect(dbfile)
                 curs1 = conn1.cursor()
@@ -198,8 +198,8 @@ class DBThreadPool(threadpool.ThreadPool):
                 curs2 = conn2.cursor()
                 curs2.execute("CREATE TABLE foo ( a integer )")
 
-                if select_from_sqlite_master:
-                    curs1.execute("SELECT * from sqlite_master")
+                if select_from_sqlite_main:
+                    curs1.execute("SELECT * from sqlite_main")
                 curs1.execute("SELECT * from foo")
             finally:
                 conn1.close()
@@ -213,7 +213,7 @@ class DBThreadPool(threadpool.ThreadPool):
             return True
 
         # but this version should not fail..
-        test(select_from_sqlite_master=True)
+        test(select_from_sqlite_main=True)
         return False # not broken - no workaround required
 
     def get_sqlite_version(self):

@@ -19,12 +19,12 @@ def RunSteps(api):
 
   if api.tryserver.is_tryserver:
     bot_config = api.chromium_tests.trybots[
-        api.properties['mastername']]['builders'][api.properties['buildername']]
+        api.properties['mainname']]['builders'][api.properties['buildername']]
     bot_config_object = api.chromium_tests.create_generalized_bot_config_object(
         bot_config['bot_ids'])
   else:
     bot_config_object = api.chromium_tests.create_bot_config_object(
-        api.properties['mastername'], api.properties['buildername'])
+        api.properties['mainname'], api.properties['buildername'])
   api.chromium_tests.configure_build(bot_config_object)
   update_step, bot_db = api.chromium_tests.prepare_checkout(bot_config_object)
   api.chromium_tests.compile_specific_targets(
@@ -38,7 +38,7 @@ def GenTests(api):
   yield (
       api.test('linux_tests') +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Tests',
           swarming_gtest=True)
   )
@@ -46,7 +46,7 @@ def GenTests(api):
   yield (
       api.test('failure') +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Tests',
           swarming_gtest=True) +
       api.override_step_data('compile', retcode=1)
@@ -55,7 +55,7 @@ def GenTests(api):
   yield (
       api.test('failure_tryserver') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng') +
       api.override_step_data('compile (with patch)', retcode=1)
   )
@@ -63,7 +63,7 @@ def GenTests(api):
   yield (
       api.test('perf_isolate_lookup') +
       api.properties.generic(
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Linux Builder',
           swarming_gtest=True)
   )
@@ -72,13 +72,13 @@ def GenTests(api):
       api.test('update_clang') +
       api.platform.name('win') +
       api.properties.generic(
-          mastername='chromium.win',
+          mainname='chromium.win',
           buildername='WinClang64 (dbg)')
   )
 
   yield (
       api.test('android') +
       api.properties.generic(
-          mastername='chromium.android',
+          mainname='chromium.android',
           buildername='Android Cronet Builder')
   )

@@ -48,7 +48,7 @@ class GomaApi(recipe_api.RecipeApi):
     return self._jsonstatus
 
   @property
-  def default_cache_path_per_slave(self):
+  def default_cache_path_per_subordinate(self):
     try:
       # Legacy Buildbot cache path:
       return self.m.path['goma_cache']
@@ -60,7 +60,7 @@ class GomaApi(recipe_api.RecipeApi):
   def default_cache_path(self):
     safe_buildername = re.sub(r'[^a-zA-Z0-9]', '_',
                               self.m.properties['buildername'])
-    return self.default_cache_path_per_slave.join(safe_buildername)
+    return self.default_cache_path_per_subordinate.join(safe_buildername)
 
   @property
   def recommended_goma_jobs(self):
@@ -344,8 +344,8 @@ class GomaApi(recipe_api.RecipeApi):
     # Set buildbot info used in goma_utils.MakeGomaStatusCounter etc.
     keys = [
       ('buildername', 'buildername'),
-      ('mastername', 'mastername'),
-      ('bot_id', 'slavename'),
+      ('mainname', 'mainname'),
+      ('bot_id', 'subordinatename'),
       ('clobber', 'clobber'),
     ]
     for prop_name, flag_suffix in keys:
@@ -356,7 +356,7 @@ class GomaApi(recipe_api.RecipeApi):
 
     result = self.m.build.python(
       name=name or 'upload_log',
-      script=self.package_repo_resource('scripts', 'slave',
+      script=self.package_repo_resource('scripts', 'subordinate',
                                         'upload_goma_logs.py'),
       args=args,
       step_test_data=(lambda: self.m.json.test_api.output(json_test_data)))

@@ -2,20 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Utility class to build the chromium master BuildFactory's.
+"""Utility class to build the chromium main BuildFactory's.
 
 Based on gclient_factory.py and adds chromium-specific steps."""
 
 import re
 
-from master.factory import chromium_commands
-from master.factory import gclient_factory
+from main.factory import chromium_commands
+from main.factory import gclient_factory
 
 import config
 
 
 # This is kind of the wrong place for this, but it is the only place apart
-# from master_config imported by all the configs that need this list.
+# from main_config imported by all the configs that need this list.
 blink_tests = [
   'blink_heap_unittests',
   'blink_platform_unittests',
@@ -42,45 +42,45 @@ def ForceComponent(target, project, gclient_env):
 
 
 class ChromiumFactory(gclient_factory.GClientFactory):
-  """Encapsulates data and methods common to the chromium master.cfg files."""
+  """Encapsulates data and methods common to the chromium main.cfg files."""
 
-  DEFAULT_TARGET_PLATFORM = config.Master.default_platform
+  DEFAULT_TARGET_PLATFORM = config.Main.default_platform
 
   MEMORY_TOOLS_GYP_DEFINES = 'build_for_tool=memcheck'
 
   # gclient custom vars
-  CUSTOM_VARS_GOOGLECODE_URL = ('googlecode_url', config.Master.googlecode_url)
+  CUSTOM_VARS_GOOGLECODE_URL = ('googlecode_url', config.Main.googlecode_url)
   CUSTOM_VARS_SOURCEFORGE_URL = ('sourceforge_url',
-                                 config.Master.sourceforge_url)
-  CUSTOM_VARS_LLVM_URL = ('llvm_url', config.Master.llvm_url)
-  CUSTOM_VARS_WEBKIT_MIRROR = ('webkit_trunk', config.Master.webkit_trunk_url)
-  CUSTOM_VARS_NACL_TRUNK_URL = ('nacl_trunk', config.Master.nacl_trunk_url)
+                                 config.Main.sourceforge_url)
+  CUSTOM_VARS_LLVM_URL = ('llvm_url', config.Main.llvm_url)
+  CUSTOM_VARS_WEBKIT_MIRROR = ('webkit_trunk', config.Main.webkit_trunk_url)
+  CUSTOM_VARS_NACL_TRUNK_URL = ('nacl_trunk', config.Main.nacl_trunk_url)
   # safe sync urls
   SAFESYNC_URL_CHROMIUM = 'http://chromium-status.appspot.com/lkgr'
 
   # gclient additional custom deps
   CUSTOM_DEPS_AVPERF = ('src/chrome/test/data/media/avperf',
-    config.Master.trunk_url + '/deps/avperf')
+    config.Main.trunk_url + '/deps/avperf')
   CUSTOM_VARS_NACL_LATEST = [
     ('nacl_revision', '$$NACL_REV$$'),
   ]
   CUSTOM_DEPS_VALGRIND = ('src/third_party/valgrind',
-     config.Master.trunk_url + '/deps/third_party/valgrind/binaries')
+     config.Main.trunk_url + '/deps/third_party/valgrind/binaries')
   CUSTOM_DEPS_DEVTOOLS_PERF = [
     ('src/third_party/WebKit/PerformanceTests',
-     config.Master.webkit_trunk_url + '/PerformanceTests'),
+     config.Main.webkit_trunk_url + '/PerformanceTests'),
     ('src/third_party/WebKit/LayoutTests/http/tests/inspector',
-     config.Master.webkit_trunk_url + '/LayoutTests/http/tests/inspector'),
+     config.Main.webkit_trunk_url + '/LayoutTests/http/tests/inspector'),
     ('src/third_party/WebKit/LayoutTests/inspector',
-     config.Master.webkit_trunk_url + '/LayoutTests/inspector'),
+     config.Main.webkit_trunk_url + '/LayoutTests/inspector'),
   ]
   CUSTOM_DEPS_TSAN_WIN = ('src/third_party/tsan',
-     config.Master.trunk_url + '/deps/third_party/tsan')
+     config.Main.trunk_url + '/deps/third_party/tsan')
   CUSTOM_DEPS_NACL_VALGRIND = ('src/third_party/valgrind/bin',
-     config.Master.nacl_trunk_url + '/src/third_party/valgrind/bin')
+     config.Main.nacl_trunk_url + '/src/third_party/valgrind/bin')
   CUSTOM_DEPS_WEBDRIVER_JAVA_TESTS = (
      'src/chrome/test/chromedriver/third_party/java_tests',
-     config.Master.trunk_url + '/deps/third_party/webdriver')
+     config.Main.trunk_url + '/deps/third_party/webdriver')
 
   CUSTOM_DEPS_GYP = [
     ('src/tools/gyp', 'http://gyp.googlecode.com/svn/trunk')]
@@ -144,9 +144,9 @@ class ChromiumFactory(gclient_factory.GClientFactory):
   }
 
   # pylint: disable=E1101
-  if config.Master.trunk_internal_url:
+  if config.Main.trunk_internal_url:
     CUSTOM_DEPS_DEVTOOLS_PERF.append(('src/data/devtools_test_pages',
-                                      config.Master.trunk_internal_url +
+                                      config.Main.trunk_internal_url +
                                       '/data/devtools_test_pages'))
 
   def __init__(self, build_dir, target_platform=None, pull_internal=True,
@@ -158,7 +158,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
       needed_components = None
     else:
       needed_components = self.NEEDED_COMPONENTS
-    main = gclient_factory.GClientSolution(config.Master.trunk_url_src,
+    main = gclient_factory.GClientSolution(config.Main.trunk_url_src,
                needed_components=needed_components,
                name=name,
                custom_deps_list=custom_deps_list,
@@ -168,13 +168,13 @@ class ChromiumFactory(gclient_factory.GClientFactory):
                                  self.CUSTOM_VARS_LLVM_URL,
                                  self.CUSTOM_VARS_NACL_TRUNK_URL])
     solutions = [main]
-    if config.Master.trunk_internal_url_src and pull_internal:
+    if config.Main.trunk_internal_url_src and pull_internal:
       if full_checkout:
         needed_components = None
       else:
         needed_components = self.NEEDED_COMPONENTS_INTERNAL
       internal = gclient_factory.GClientSolution(
-                     config.Master.trunk_internal_url_src,
+                     config.Main.trunk_internal_url_src,
                      needed_components=needed_components,
                      custom_deps_list=internal_custom_deps_list)
       solutions.append(internal)
@@ -222,7 +222,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
     f = factory_cmd_obj
     fp = factory_properties
 
-    # Copy perf expectations from slave to master for use later.
+    # Copy perf expectations from subordinate to main for use later.
     if factory_properties.get('expectations'):
       f.AddUploadPerfExpectations(factory_properties)
 
@@ -612,7 +612,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
     # Valgrind tests:
     for test in tests[:]:
       # TODO(timurrrr): replace 'valgrind' with 'memcheck'
-      #                 below and in master.chromium/master.cfg
+      #                 below and in main.chromium/main.cfg
       if M(test, 'valgrind_', 'memcheck', fp):
         continue
       # Run TSan in two-stage RaceVerifier mode.
@@ -678,7 +678,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
     assert not tests, 'Did you make a typo? %s wasn\'t processed' % tests
 
   def ChromiumFactory(self, target='Release', clobber=False, tests=None,
-                      mode=None, slave_type='BuilderTester',
+                      mode=None, subordinate_type='BuilderTester',
                       options=None, compile_timeout=1200, build_url=None,
                       project=None, factory_properties=None, gclient_deps=None,
                       run_default_swarm_tests=None):
@@ -722,7 +722,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
     ForceComponent(target, project, factory_properties['gclient_env'])
 
     factory = self.BuildFactory(target, clobber, tests_for_build, mode,
-                                slave_type, options, compile_timeout, build_url,
+                                subordinate_type, options, compile_timeout, build_url,
                                 project, factory_properties,
                                 gclient_deps=gclient_deps,
                                 skip_archive_steps=False)
@@ -741,7 +741,7 @@ class ChromiumFactory(gclient_factory.GClientFactory):
     assert not factory_properties.get('cf_archive_build')
 
     # Add a trigger step if needed.
-    self.TriggerFactory(factory, slave_type=slave_type,
+    self.TriggerFactory(factory, subordinate_type=subordinate_type,
                         factory_properties=factory_properties)
 
     # Add all the tests.

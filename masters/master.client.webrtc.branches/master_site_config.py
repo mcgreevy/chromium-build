@@ -2,20 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class WebRTCBranches(Master.Master3a):
+class WebRTCBranches(Main.Main3a):
   project_name = 'WebRTC Branches'
-  master_port = 21301
-  slave_port = 31301
-  master_port_alt = 26301
+  main_port = 21301
+  subordinate_port = 31301
+  main_port_alt = 26301
   server_url = 'http://webrtc.googlecode.com'
   project_url = 'http://webrtc.googlecode.com'
   from_address = 'webrtc-cb-watchlist@google.com'
   tree_closing_notification_recipients = ['webrtc-cb-watchlist@google.com']
-  master_domain = 'webrtc.org'
+  main_domain = 'webrtc.org'
   permitted_domains = ('google.com', 'chromium.org', 'webrtc.org')
   buildbot_url = 'http://build.chromium.org/p/client.webrtc.branches/'
   service_account_file = 'service-account-webrtc.json'

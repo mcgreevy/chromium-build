@@ -99,16 +99,16 @@ def RunSteps(api):
 def GenTests(api):
   yield (
     api.test('dart-sdk-linux-be') +
-    api.properties.generic(mastername='client.dart',
+    api.properties.generic(mainname='client.dart',
                            buildername='dart-sdk-linux-be',
                            revision='abcd1234efef5656'))
   yield (
     api.test('dart-sdk-windows-dev') +
-    api.properties.generic(mastername='client.dart',
+    api.properties.generic(mainname='client.dart',
                            buildername='dart-sdk-windows-dev',
                            revision='abcd1234efef5656'))
   yield (
     api.test('dart-sdk-mac-stable') +
-    api.properties.generic(mastername='client.dart',
+    api.properties.generic(mainname='client.dart',
                            buildername='dart-sdk-mac-stable',
                            revision='abcd1234efef5656'))

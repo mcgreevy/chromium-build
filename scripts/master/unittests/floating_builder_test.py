@@ -16,7 +16,7 @@ import test_env  # pylint: disable=W0611,W0403
 
 import mock
 
-from master import floating_builder as fb
+from main import floating_builder as fb
 
 
 def _to_timestamp(dt):
@@ -28,7 +28,7 @@ def _to_timestamp(dt):
   return calendar.timegm((dt - offset).timetuple())
 
 
-class _FakeSlaveStatus(object):
+class _FakeSubordinateStatus(object):
   def __init__(self, name):
     self.name = name
     self.connect_times = []
@@ -38,85 +38,85 @@ class _FakeSlaveStatus(object):
     return self.last_message_received
 
 
-class _FakeSlave(object):
-  def __init__(self, slavename):
-    self.slavename = slavename
-    self.slave_status = None
+class _FakeSubordinate(object):
+  def __init__(self, subordinatename):
+    self.subordinatename = subordinatename
+    self.subordinate_status = None
     self.offline = False
 
   def _set_last_seen(self, now, **kwargs):
     td = datetime.timedelta(**kwargs)
-    self.slave_status = _FakeSlaveStatus(self.slavename)
-    self.slave_status.last_message_received = _to_timestamp(now + td)
+    self.subordinate_status = _FakeSubordinateStatus(self.subordinatename)
+    self.subordinate_status.last_message_received = _to_timestamp(now + td)
 
   def __str__(self):
-    return self.slavename
+    return self.subordinatename
 
 
 class _FakeBuilder(object):
 
-  def __init__(self, name, slaves):
+  def __init__(self, name, subordinates):
     self.name = name
-    self._all_slaves = slaves
+    self._all_subordinates = subordinates
 
-    self.botmaster = mock.MagicMock()
+    self.botmain = mock.MagicMock()
     self.builder_status = mock.MagicMock()
-    self.builder_status.getSlaves.side_effect = lambda: [
-        s.slave_status for s in self._all_slaves
-        if s.slave_status]
+    self.builder_status.getSubordinates.side_effect = lambda: [
+        s.subordinate_status for s in self._all_subordinates
+        if s.subordinate_status]
 
-    self._online_slaves = ()
-    self._busy_slaves = ()
+    self._online_subordinates = ()
+    self._busy_subordinates = ()
 
   def __repr__(self):
     return self.name
 
   @property
-  def slaves(self):
-    return [_FakeSlaveBuilder(s, self)
-            for s in self._all_slaves
-            if s.slavename in self._online_slaves]
+  def subordinates(self):
+    return [_FakeSubordinateBuilder(s, self)
+            for s in self._all_subordinates
+            if s.subordinatename in self._online_subordinates]
 
   @property
-  def slavebuilders(self):
-    """Returns the list of slavebuilders that would be handed to
-    NextSlaveFunc.
+  def subordinatebuilders(self):
+    """Returns the list of subordinatebuilders that would be handed to
+    NextSubordinateFunc.
 
-    This is the set of slaves that are available for scheduling. We derive
-    this by returning all slaves that are both online and not busy.
+    This is the set of subordinates that are available for scheduling. We derive
+    this by returning all subordinates that are both online and not busy.
     """
-    return self._get_slave_builders(lambda s:
-      s.slavename in self._online_slaves and
-      s.slavename not in self._busy_slaves)
+    return self._get_subordinate_builders(lambda s:
+      s.subordinatename in self._online_subordinates and
+      s.subordinatename not in self._busy_subordinates)
 
-  def _get_slave_builders(self, fn):
-    return [_FakeSlaveBuilder(slave, self)
-            for slave in self._all_slaves
-            if fn(slave)]
+  def _get_subordinate_builders(self, fn):
+    return [_FakeSubordinateBuilder(subordinate, self)
+            for subordinate in self._all_subordinates
+            if fn(subordinate)]
 
-  def set_online_slaves(self, *slavenames):
-    self._online_slaves = set(slavenames)
+  def set_online_subordinates(self, *subordinatenames):
+    self._online_subordinates = set(subordinatenames)
 
-  def set_busy_slaves(self, *slavenames):
-    self._busy_slaves = set(slavenames)
+  def set_busy_subordinates(self, *subordinatenames):
+    self._busy_subordinates = set(subordinatenames)
 
 
-class _FakeSlaveBuilder(object):
+class _FakeSubordinateBuilder(object):
 
-  def __init__(self, slave, builder):
-    self.slave = slave
+  def __init__(self, subordinate, builder):
+    self.subordinate = subordinate
     self.builder = builder
 
   def __repr__(self):
-    return '{%s/%s}' % (self.builder.name, self.slave.slavename)
+    return '{%s/%s}' % (self.builder.name, self.subordinate.subordinatename)
 
 
 class FloatingBuilderTest(unittest.TestCase):
 
   def setUp(self):
     self._mocks = (
-      mock.patch('master.floating_builder._get_now'),
-      mock.patch('master.floating_builder.PokeBuilderTimer.reset'),
+      mock.patch('main.floating_builder._get_now'),
+      mock.patch('main.floating_builder.PokeBuilderTimer.reset'),
     )
     for patcher in self._mocks:
       patcher.start()
@@ -132,13 +132,13 @@ class FloatingBuilderTest(unittest.TestCase):
       self.poke_delta = delta
     fb.PokeBuilderTimer.reset.side_effect = record_poke_delta
 
-    self._slaves = dict((s, _FakeSlave(s)) for s in (
+    self._subordinates = dict((s, _FakeSubordinate(s)) for s in (
         'primary-a', 'primary-b', 'floating-a', 'floating-b',
     ))
 
     self.builder = _FakeBuilder(
         'Test Builder',
-        [s[1] for s in sorted(self._slaves.iteritems())],
+        [s[1] for s in sorted(self._subordinates.iteritems())],
     )
 
   def tearDown(self):
@@ -149,56 +149,56 @@ class FloatingBuilderTest(unittest.TestCase):
     fs = fb.FloatingSet()
     fs.AddPrimary('primary-a')
     fs.AddFloating('floating-a', 'floating-b')
-    fnsf = fs.NextSlaveFunc(datetime.timedelta(seconds=10))
+    fnsf = fs.NextSubordinateFunc(datetime.timedelta(seconds=10))
 
-    self.builder.set_online_slaves('floating-a', 'floating-b')
+    self.builder.set_online_subordinates('floating-a', 'floating-b')
 
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNone(nsb)
     self.assertEqual(self.poke_delta, datetime.timedelta(seconds=10))
 
     self.now += datetime.timedelta(seconds=11)
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNotNone(nsb)
-    self.assertEqual(nsb.slave.slavename, 'floating-a')
+    self.assertEqual(nsb.subordinate.subordinatename, 'floating-a')
 
   def testPrimaryBuilderIsSelectedWhenAvailable(self):
     fs = fb.FloatingSet()
     fs.AddPrimary('primary-a')
     fs.AddFloating('floating-a', 'floating-b')
-    fnsf = fs.NextSlaveFunc(datetime.timedelta(seconds=10))
+    fnsf = fs.NextSubordinateFunc(datetime.timedelta(seconds=10))
 
-    self.builder.set_online_slaves('primary-a', 'floating-a', 'floating-b')
+    self.builder.set_online_subordinates('primary-a', 'floating-a', 'floating-b')
 
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNotNone(nsb)
-    self.assertEqual(nsb.slave.slavename, 'primary-a')
+    self.assertEqual(nsb.subordinate.subordinatename, 'primary-a')
 
   def testPrimaryBuilderIsSelectedWhenOneIsAvailableAndOneIsBusy(self):
     fs = fb.FloatingSet()
     fs.AddPrimary('primary-a', 'primary-b')
     fs.AddFloating('floating-a', 'floating-b')
-    fnsf = fs.NextSlaveFunc(datetime.timedelta(seconds=10))
+    fnsf = fs.NextSubordinateFunc(datetime.timedelta(seconds=10))
 
-    self.builder.set_online_slaves('primary-a', 'primary-b', 'floating-a',
+    self.builder.set_online_subordinates('primary-a', 'primary-b', 'floating-a',
                                    'floating-b')
-    self.builder.set_busy_slaves('primary-a')
+    self.builder.set_busy_subordinates('primary-a')
 
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNotNone(nsb)
-    self.assertEqual(nsb.slave.slavename, 'primary-b')
+    self.assertEqual(nsb.subordinate.subordinatename, 'primary-b')
 
   def testNoBuilderIsSelectedWhenPrimariesAreOfflineWithinGrace(self):
     fs = fb.FloatingSet()
     fs.AddPrimary('primary-a', 'primary-b')
     fs.AddFloating('floating-a', 'floating-b')
-    fnsf = fs.NextSlaveFunc(datetime.timedelta(seconds=10))
+    fnsf = fs.NextSubordinateFunc(datetime.timedelta(seconds=10))
 
     self.now += datetime.timedelta(seconds=30)
-    self.builder.set_online_slaves('floating-a')
-    self._slaves['primary-b']._set_last_seen(self.now, seconds=-1)
+    self.builder.set_online_subordinates('floating-a')
+    self._subordinates['primary-b']._set_last_seen(self.now, seconds=-1)
 
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNone(nsb)
     self.assertEqual(self.poke_delta, datetime.timedelta(seconds=9))
 
@@ -206,14 +206,14 @@ class FloatingBuilderTest(unittest.TestCase):
     fs = fb.FloatingSet()
     fs.AddPrimary('primary-a', 'primary-b')
     fs.AddFloating('floating-a', 'floating-b')
-    fnsf = fs.NextSlaveFunc(datetime.timedelta(seconds=10))
+    fnsf = fs.NextSubordinateFunc(datetime.timedelta(seconds=10))
 
     self.now += datetime.timedelta(seconds=30)
-    self.builder.set_online_slaves('floating-a')
+    self.builder.set_online_subordinates('floating-a')
 
-    nsb = fnsf(self.builder, self.builder.slavebuilders)
+    nsb = fnsf(self.builder, self.builder.subordinatebuilders)
     self.assertIsNotNone(nsb)
-    self.assertEqual(nsb.slave.slavename, 'floating-a')
+    self.assertEqual(nsb.subordinate.subordinatename, 'floating-a')
 
 
 if __name__ == '__main__':

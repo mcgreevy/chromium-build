@@ -100,7 +100,7 @@ SPEC = {
         'os': 'Ubuntu-14.04',
       },
     },
-    # There are no slaves for the following two "Dummy Builders" and they
+    # There are no subordinates for the following two "Dummy Builders" and they
     # do not appear on the actual continuous waterfall; this configuration
     # is here so that a try bot can be added.
     'WebKit Linux slimming_paint_v2 Dummy Builder': {

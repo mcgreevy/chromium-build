@@ -27,8 +27,8 @@ import sys
 
 from common import archive_utils
 from common import chromium_utils
-from slave import build_directory
-from slave import slave_utils
+from subordinate import build_directory
+from subordinate import subordinate_utils
 
 
 def _CollectZipArchiveFiles(output_dir):
@@ -76,7 +76,7 @@ def archive_layout(args):
   results_dir_basename = os.path.basename(args.results_dir)
   args.results_dir = os.path.abspath(args.results_dir)
   print 'Archiving results from %s' % args.results_dir
-  staging_dir = args.staging_dir or slave_utils.GetStagingDir(chrome_dir)
+  staging_dir = args.staging_dir or subordinate_utils.GetStagingDir(chrome_dir)
   print 'Staging in %s' % staging_dir
   if not os.path.exists(staging_dir):
     os.makedirs(staging_dir)
@@ -88,7 +88,7 @@ def archive_layout(args):
                                     args.results_dir)[1]
 
   wc_dir = os.path.dirname(chrome_dir)
-  last_change = slave_utils.GetHashOrRevision(wc_dir)
+  last_change = subordinate_utils.GetHashOrRevision(wc_dir)
 
   builder_name = re.sub('[ .()]', '_', args.builder_name)
   build_number = str(args.build_number)
@@ -111,13 +111,13 @@ def archive_layout(args):
   gs_acl = args.gs_acl
   # These files never change, cache for a year.
   cache_control = "public, max-age=31556926"
-  slave_utils.GSUtilCopyFile(zip_file, gs_base, gs_acl=gs_acl,
+  subordinate_utils.GSUtilCopyFile(zip_file, gs_base, gs_acl=gs_acl,
                              cache_control=cache_control,
                              add_quiet_flag=True)
-  slave_utils.GSUtilCopyDir(args.results_dir, gs_base, gs_acl=gs_acl,
+  subordinate_utils.GSUtilCopyDir(args.results_dir, gs_base, gs_acl=gs_acl,
                             cache_control=cache_control,
                             add_quiet_flag=True)
-  slave_utils.GSUtilCopyFile(last_change_file,
+  subordinate_utils.GSUtilCopyFile(last_change_file,
                              gs_base + '/' + results_dir_basename,
                              gs_acl=gs_acl,
                              cache_control=cache_control,
@@ -128,13 +128,13 @@ def archive_layout(args):
   # caching w/ a max-age=3600).
   gs_base = '/'.join([args.gs_bucket, builder_name, 'results'])
   cache_control = 'no-cache'
-  slave_utils.GSUtilCopyFile(zip_file, gs_base, gs_acl=gs_acl,
+  subordinate_utils.GSUtilCopyFile(zip_file, gs_base, gs_acl=gs_acl,
                              cache_control=cache_control,
                              add_quiet_flag=True)
-  slave_utils.GSUtilCopyDir(args.results_dir, gs_base, gs_acl=gs_acl,
+  subordinate_utils.GSUtilCopyDir(args.results_dir, gs_base, gs_acl=gs_acl,
                             cache_control=cache_control,
                             add_quiet_flag=True)
-  slave_utils.GSUtilCopyFile(last_change_file,
+  subordinate_utils.GSUtilCopyFile(last_change_file,
                              gs_base + '/' + results_dir_basename,
                              gs_acl=gs_acl,
                              cache_control=cache_control,
@@ -159,12 +159,12 @@ def _ParseArgs():
   parser.add_argument('--staging-dir',
                       help='Directory to use for staging the archives. '
                            'Default behavior is to automatically detect '
-                           'slave\'s build directory.')
-  slave_utils_callback = slave_utils.AddArgs(parser)
+                           'subordinate\'s build directory.')
+  subordinate_utils_callback = subordinate_utils.AddArgs(parser)
 
   args = parser.parse_args()
   args.build_dir = build_directory.GetBuildOutputDirectory()
-  slave_utils_callback(args)
+  subordinate_utils_callback(args)
   return args
 
 

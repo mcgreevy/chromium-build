@@ -4,8 +4,8 @@
 
 """API for interacting with the buildbucket service directly.
 
-Instead of triggering jobs by emitting annotations then handled by the master,
-this module allows slaves to directly post requests to buildbucket.
+Instead of triggering jobs by emitting annotations then handled by the main,
+this module allows subordinates to directly post requests to buildbucket.
 """
 
 import json
@@ -54,8 +54,8 @@ class BuildbucketApi(recipe_api.RecipeApi):
     builder_name = parameters.get('builder_name')
     if builder_name:
       new_tags['builder'] = builder_name
-    if bucket.startswith('master.'):
-      new_tags['master'] = bucket[7:]
+    if bucket.startswith('main.'):
+      new_tags['main'] = bucket[7:]
     if self._buildnumber is not None:
       new_tags['parent_buildnumber'] = str(self._buildnumber)
     if self._buildername is not None:

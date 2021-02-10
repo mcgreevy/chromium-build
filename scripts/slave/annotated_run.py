@@ -19,26 +19,26 @@ sys.path.insert(0, os.path.join(BUILD_ROOT, 'scripts'))
 from common import annotator
 from common import chromium_utils
 from common import env
-from common import master_cfg_utils
-from slave import logdog_bootstrap
-from slave import monitoring_utils
-from slave import remote_run
-from slave import robust_tempdir
-from slave import update_scripts
+from common import main_cfg_utils
+from subordinate import logdog_bootstrap
+from subordinate import monitoring_utils
+from subordinate import remote_run
+from subordinate import robust_tempdir
+from subordinate import update_scripts
 
 # Logging instance.
 LOGGER = logging.getLogger('annotated_run')
 
-# /b/build/slave/<slavename>/build/
+# /b/build/subordinate/<subordinatename>/build/
 BUILD_DIR = os.getcwd()
-# /b/build/slave/<slavename>/
+# /b/build/subordinate/<subordinatename>/
 BUILDER_DIR = os.path.dirname(BUILD_DIR)
 # /b
 B_DIR = os.path.dirname(os.path.dirname(os.path.dirname(BUILDER_DIR)))
 
 
-# ENGINE_FLAGS is a mapping of master name to a engine flags. This can be used
-# to test new recipe engine flags on a select few masters.
+# ENGINE_FLAGS is a mapping of main name to a engine flags. This can be used
+# to test new recipe engine flags on a select few mains.
 _ENGINE_FLAGS = {
   # None is the default set of engine flags, and is used if nothing else
   # matches. It MUST be defined.
@@ -49,8 +49,8 @@ _ENGINE_FLAGS = {
   },
 }
 
-def _get_engine_flags(mastername):
-  return  _ENGINE_FLAGS.get(mastername, _ENGINE_FLAGS[None])
+def _get_engine_flags(mainname):
+  return  _ENGINE_FLAGS.get(mainname, _ENGINE_FLAGS[None])
 
 # List of bots that automatically get run through "remote_run".
 _REMOTE_RUN_PASSTHROUGH = {
@@ -60,7 +60,7 @@ _REMOTE_RUN_PASSTHROUGH = {
 }
 
 def _is_remote_run_passthrough(properties):
-  builders = _REMOTE_RUN_PASSTHROUGH.get(properties.get('mastername'), [])
+  builders = _REMOTE_RUN_PASSTHROUGH.get(properties.get('mainname'), [])
   return properties.get('buildername') in builders
 
 def _build_dir():
@@ -102,16 +102,16 @@ def get_recipe_properties(stream, workdir, build_properties,
                           use_factory_properties_from_disk):
   """Constructs the recipe's properties from buildbot's properties.
 
-  This retrieves the current factory properties from the master_config
-  in the slave's checkout (no factory properties are handed to us from the
-  master), and merges in the build properties.
+  This retrieves the current factory properties from the main_config
+  in the subordinate's checkout (no factory properties are handed to us from the
+  main), and merges in the build properties.
 
   Using the values from the checkout allows us to do things like change
   the recipe and other factory properties for a builder without needing
-  a master restart.
+  a main restart.
 
   As the build properties doesn't include the factory properties, we would:
-  1. Load factory properties from checkout on the slave.
+  1. Load factory properties from checkout on the subordinate.
   2. Override the factory properties with the build properties.
   3. Set the factory-only properties as build properties using annotation so
      that they will show up on the build page.
@@ -122,12 +122,12 @@ def get_recipe_properties(stream, workdir, build_properties,
   with stream.step('setup_properties') as s:
     factory_properties = {}
 
-    mastername = build_properties.get('mastername')
+    mainname = build_properties.get('mainname')
     buildername = build_properties.get('buildername')
-    if mastername and buildername:
-      # Load factory properties from tip-of-tree checkout on the slave builder.
+    if mainname and buildername:
+      # Load factory properties from tip-of-tree checkout on the subordinate builder.
       factory_properties = get_factory_properties_from_disk(
-          workdir, mastername, buildername)
+          workdir, mainname, buildername)
 
     # Check conflicts between factory properties and build properties.
     conflicting_properties = {}
@@ -168,36 +168,36 @@ def get_recipe_properties(stream, workdir, build_properties,
     return properties
 
 
-def get_factory_properties_from_disk(workdir, mastername, buildername):
-  master_list = master_cfg_utils.GetMasters()
-  master_path = None
-  for name, path in master_list:
-    if name == mastername:
-      master_path = path
+def get_factory_properties_from_disk(workdir, mainname, buildername):
+  main_list = main_cfg_utils.GetMains()
+  main_path = None
+  for name, path in main_list:
+    if name == mainname:
+      main_path = path
 
-  if not master_path:
-    raise LookupError('master "%s" not found.' % mastername)
+  if not main_path:
+    raise LookupError('main "%s" not found.' % mainname)
 
   script_path = os.path.join(env.Build, 'scripts', 'tools',
-                             'dump_master_cfg.py')
+                             'dump_main_cfg.py')
 
-  master_json = os.path.join(workdir, 'dump_master_cfg.json')
+  main_json = os.path.join(workdir, 'dump_main_cfg.json')
   dump_cmd = [sys.executable,
               script_path,
-              master_path, master_json]
+              main_path, main_json]
   proc = subprocess.Popen(dump_cmd, cwd=env.Build,
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   out, err = proc.communicate()
   if proc.returncode:
-    raise LookupError('Failed to get the master config; running %r in %r '
+    raise LookupError('Failed to get the main config; running %r in %r '
                       'returned exit code %d\nstdout: %s\nstderr: %s'% (
                       dump_cmd, env.Build, proc.returncode, out, err))
 
-  with open(master_json, 'rU') as f:
+  with open(main_json, 'rU') as f:
     config = json.load(f)
 
   # Now extract just the factory properties for the requested builder
-  # from the master config.
+  # from the main config.
   props = {}
   found = False
   for builder_dict in config['builders']:
@@ -208,12 +208,12 @@ def get_factory_properties_from_disk(workdir, mastername, buildername):
         props[name] = value
 
   if not found:
-    raise LookupError('builder "%s" not found on in master "%s"' %
-                      (buildername, mastername))
+    raise LookupError('builder "%s" not found on in main "%s"' %
+                      (buildername, mainname))
 
   if 'recipe' not in props:
     raise LookupError('Cannot find recipe for %s on %s' %
-                      (buildername, mastername))
+                      (buildername, mainname))
 
   return props
 
@@ -243,12 +243,12 @@ def get_args(argv):
       help='factory properties in b64 gz JSON format')
   parser.add_argument('--keep-stdin', action='store_true', default=False,
       help='don\'t close stdin when running recipe steps')
-  parser.add_argument('--master-overrides-slave', action='store_true',
-      help='use the property values given on the command line from the master, '
-           'not the ones looked up on the slave')
+  parser.add_argument('--main-overrides-subordinate', action='store_true',
+      help='use the property values given on the command line from the main, '
+           'not the ones looked up on the subordinate')
   parser.add_argument('--use-factory-properties-from-disk',
       action='store_true', default=False,
-      help='use factory properties loaded from disk on the slave')
+      help='use factory properties loaded from disk on the subordinate')
   parser.add_argument('--remote-run-passthrough', action='store_true',
       help='pass through and use remote_run')
 
@@ -266,16 +266,16 @@ def _locate_recipe(recipe):
   # Use the standard recipe runner unless the recipes are explicitly in the
   # "build_limited" repository.
   if env.BuildInternal:
-    build_limited = os.path.join(env.BuildInternal, 'scripts', 'slave')
+    build_limited = os.path.join(env.BuildInternal, 'scripts', 'subordinate')
     if os.path.exists(os.path.join(build_limited, 'recipes', recipe_file)):
       return (
           os.path.join(build_limited, 'recipes.py'),
           ('https://chrome-internal.googlesource.com/chrome/tools/'
-           'build_limited/scripts/slave.git'))
+           'build_limited/scripts/subordinate.git'))
 
   # Public recipe (this repository).
   return (
-      os.path.join(env.Build, 'scripts', 'slave', 'recipes.py'),
+      os.path.join(env.Build, 'scripts', 'subordinate', 'recipes.py'),
       'https://chromium.googlesource.com/chromium/tools/build.git')
 
 
@@ -306,7 +306,7 @@ def _exec_recipe(rt, opts, stream, basedir, tdir, properties):
   with open(props_file, 'w') as fh:
     json.dump(properties, fh)
 
-  engine_flags = _get_engine_flags(properties.get('mastername'))
+  engine_flags = _get_engine_flags(properties.get('mainname'))
   recipe_result_path = os.path.join(tdir, 'recipe_result.json')
 
   engine_args = []
@@ -395,9 +395,9 @@ def main(argv):
 
     # put client in /b/cipd_client. Do import here to avoid ImportErrors
     # tanking the update_scripts mechanism.
-    from slave import cipd_bootstrap_v2
+    from subordinate import cipd_bootstrap_v2
     cipd_bootstrap_v2.high_level_ensure_cipd_client(
-      B_DIR, properties.get('mastername'))
+      B_DIR, properties.get('mainname'))
 
     # Setup monitoring directory and send a monitoring event.
     build_data_dir = _ensure_directory(tdir, 'build_data')
@@ -409,15 +409,15 @@ def main(argv):
     # environment.
     properties['path_config'] = properties.get('path_config', 'buildbot')
 
-    properties['bot_id'] = properties['slavename']
-    properties['builder_id'] = 'master.%s:%s' % (
-      properties['mastername'], properties['buildername'])
+    properties['bot_id'] = properties['subordinatename']
+    properties['builder_id'] = 'main.%s:%s' % (
+      properties['mainname'], properties['buildername'])
 
     # Write our annotated_run.py monitoring event.
     monitoring_utils.write_build_monitoring_event(build_data_dir, properties)
 
     # Cleanup system and temporary directories.
-    from slave import cleanup_temp
+    from subordinate import cleanup_temp
     cleanup_temp.Cleanup(B_DIR)
 
     # Execute our recipe.

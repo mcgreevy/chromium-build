@@ -23,7 +23,7 @@ def RunSteps(api):
   api.chromium.ensure_goma()
   api.chromium.runhooks()
   api.chromium.run_mb(
-      api.properties.get('mastername'), api.properties.get('buildername'))
+      api.properties.get('mainname'), api.properties.get('buildername'))
 
   api.python(
       'annotated_steps',

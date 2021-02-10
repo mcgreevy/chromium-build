@@ -74,10 +74,10 @@ def _ChromiumPerfTesters():
         num_device_shards=6, num_host_shards=3, target_bits=32,
         browser_name='android-webview', uses_webview=True),
   ]
-  master_spec = {}
+  main_spec = {}
   for spec in testers:
-    master_spec.update(spec)
-  return master_spec
+    main_spec.update(spec)
+  return main_spec
 
 BUILDERS = freeze({
   'chromium.perf': _ChromiumPerfTesters(),
@@ -85,11 +85,11 @@ BUILDERS = freeze({
 
 
 def RunSteps(api):
-  mastername = api.properties['mastername']
+  mainname = api.properties['mainname']
   buildername = api.properties['buildername']
   # TODO(akuegel): Move the configs in builders.py in chromium_tests to this
   # recipe, and get rid of duplications.
-  builder = dict(BUILDERS[mastername][buildername])
+  builder = dict(BUILDERS[mainname][buildername])
   builder_config = builder.get('recipe_config', 'base_config')
   kwargs = {
     'REPO_NAME':'src',
@@ -118,7 +118,7 @@ def RunSteps(api):
         api.chromium_tests.get_compile_targets_for_scripts()
 
     builder['tests'] = api.chromium_tests.generate_tests_from_test_spec(
-        test_spec, builder, buildername, mastername, False, None,
+        test_spec, builder, buildername, mainname, False, None,
         scripts_compile_targets, [api.chromium_tests.steps.generate_script],
         bot_update_step)
 
@@ -195,16 +195,16 @@ def _sanitize_nonalpha(text):
 
 
 def GenTests(api):
-  for mastername, builders in BUILDERS.iteritems():
+  for mainname, builders in BUILDERS.iteritems():
     for buildername in builders:
       yield (
-          api.test('full_%s_%s' % (_sanitize_nonalpha(mastername),
+          api.test('full_%s_%s' % (_sanitize_nonalpha(mainname),
                                    _sanitize_nonalpha(buildername))) +
           api.properties.generic(
               path_config='kitchen',
               repo_name='src',
               repo_url=REPO_URL,
-              mastername=mastername,
+              mainname=mainname,
               buildername=buildername,
               parent_buildername='parent_buildername',
               parent_buildnumber='1729',
@@ -220,7 +220,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
               repo_url=REPO_URL,
-              mastername='chromium.perf',
+              mainname='chromium.perf',
               buildername='Android Nexus6 WebView Perf (1)',
               parent_buildername='parent_buildername',
               parent_buildnumber='1729',
@@ -236,7 +236,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
           repo_url=REPO_URL,
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Android Nexus6 WebView Perf (1)',
           parent_buildername='parent_buildername',
           parent_buildnumber='1729',
@@ -254,7 +254,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
           repo_url=REPO_URL,
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Android Nexus6 WebView Perf (1)',
           parent_buildername='parent_buildername',
           parent_buildnumber='1729',
@@ -279,7 +279,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
           repo_url=REPO_URL,
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Android Nexus6 WebView Perf (1)',
           parent_buildername='parent_buildername',
           parent_buildnumber='1729',
@@ -296,7 +296,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
           repo_url=REPO_URL,
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Android Nexus6 WebView Perf (1)',
           parent_buildername='parent_buildername',
           parent_buildnumber='1729',
@@ -313,7 +313,7 @@ def GenTests(api):
           path_config='kitchen',
           repo_name='src',
               repo_url=REPO_URL,
-              mastername='chromium.perf',
+              mainname='chromium.perf',
               buildername='Android Nexus6 WebView Perf (1)',
               parent_buildername='parent_buildername',
               parent_buildnumber='1729',

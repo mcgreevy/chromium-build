@@ -17,7 +17,7 @@ class ChromiumGSUtilApi(recipe_api.RecipeApi):
       name: The name of the step.
     """
     gsutil_download_path = self.package_repo_resource(
-        'scripts', 'slave', 'gsutil_download.py')
+        'scripts', 'subordinate', 'gsutil_download.py')
     args = ['--url', base_url,
             '--dst', destination,
             '--partial-name', partial_name]

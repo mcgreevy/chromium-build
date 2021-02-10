@@ -115,7 +115,7 @@ def win_8_x64_drm_steps(api):
                  'unpack.bat')])
     # windows Dr. Memory ctest step
     api.step("Dr. Memory ctest",
-             [api.package_repo_resource("scripts", "slave", "drmemory",
+             [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                      "build_env.bat"), 'ctest', '--timeout',
               '60', '-VV', '-S',
               str(api.path["checkout"].join("tests", "runsuite.cmake")) +
@@ -132,7 +132,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools"),
         "CYGWIN": "nodosfilewarning"}):
       api.step("Build TSan Tests",
-               ['E:\\b\\build\\scripts\\slave\\drmemory\\build_env.bat', 'make',
+               ['E:\\b\\build\\scripts\\subordinate\\drmemory\\build_env.bat', 'make',
                 '-C', api.path["start_dir"].join("tsan", "unittest")])
     # Dr. Memory TSan test step
     with api.context(env={
@@ -140,7 +140,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg full TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -157,7 +157,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg light TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -174,7 +174,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "rel full TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-rel-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -191,7 +191,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "rel light TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-rel-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -208,7 +208,7 @@ def win_8_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg full nosyms TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -225,7 +225,7 @@ def win_8_x64_drm_steps(api):
         "BOTTOOLS": api.path["start_dir"].join(
           "tools", "buildbot", "bot_tools")}):
       api.step("Pack test results",
-               [api.package_repo_resource("scripts", "slave", "drmemory",
+               [api.package_repo_resource("scripts", "subordinate", "drmemory",
                  "build_env.bat"), '7z', 'a', '-xr!*.pdb',
                 "testlogs_r" + build_properties["got_revision"] + "_b" +
                 str(build_properties["buildnumber"]) + ".7z",
@@ -269,7 +269,7 @@ def win_7_x64_drm_steps(api):
                  'unpack.bat')])
     # windows Dr. Memory ctest step
     api.step("Dr. Memory ctest",
-             [api.package_repo_resource("scripts", "slave", "drmemory",
+             [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                      "build_env.bat"), 'ctest', '--timeout',
               '60', '-VV', '-S',
               str(api.path["checkout"].join("tests", "runsuite.cmake")) +
@@ -286,7 +286,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools"),
         "CYGWIN": "nodosfilewarning"}):
       api.step("Build TSan Tests",
-               ['E:\\b\\build\\scripts\\slave\\drmemory\\build_env.bat', 'make',
+               ['E:\\b\\build\\scripts\\subordinate\\drmemory\\build_env.bat', 'make',
                 '-C', api.path["start_dir"].join("tsan", "unittest")])
     # Dr. Memory TSan test step
     with api.context(env={
@@ -294,7 +294,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg full TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -311,7 +311,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg light TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -328,7 +328,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "rel full TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-rel-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -345,7 +345,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "rel light TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-rel-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -362,7 +362,7 @@ def win_7_x64_drm_steps(api):
           "tools", "buildbot", "bot_tools")}):
       api.step(
           "dbg full nosyms TSan tests",
-          [api.package_repo_resource("scripts", "slave", "drmemory",
+          [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                   "build_env.bat"),
            'build_drmemory-dbg-32\\bin\\drmemory', '-dr_ops',
            '-msgbox_mask 0 -stderr_mask 15', '-results_to_stderr', '-batch',
@@ -379,7 +379,7 @@ def win_7_x64_drm_steps(api):
         "BOTTOOLS": api.path["start_dir"].join(
           "tools", "buildbot", "bot_tools")}):
       api.step("Pack test results",
-               [api.package_repo_resource("scripts", "slave", "drmemory",
+               [api.package_repo_resource("scripts", "subordinate", "drmemory",
                  "build_env.bat"), '7z', 'a', '-xr!*.pdb',
                 "testlogs_r" + build_properties["got_revision"] + "_b" +
                 str(build_properties["buildnumber"]) + ".7z",
@@ -428,7 +428,7 @@ def win_builder_steps(api):
             "tools", "buildbot", "bot_tools")}):
         # Package dynamorio step
         api.step("Package Dr. Memory",
-                 [api.package_repo_resource("scripts", "slave", "drmemory",
+                 [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                          "build_env.bat"), 'ctest', '-VV', '-S',
                   str(api.path["checkout"].join("package.cmake")) + ",build=0x" +
                   build_properties["got_revision"][:7] + ";drmem_only"])
@@ -454,7 +454,7 @@ def win_builder_steps(api):
             "tools", "buildbot", "bot_tools")
         }):
       api.step("create sfx archive",
-               [api.package_repo_resource("scripts", "slave", "drmemory",
+               [api.package_repo_resource("scripts", "subordinate", "drmemory",
                                        "build_env.bat"), "7z", "a", "-sfx",
                 basename + "-sfx.exe",
                 # To get the archive to contain paths relative to the
@@ -494,59 +494,59 @@ def RunSteps(api):
 def GenTests(api):
   yield (api.test('linux_builder')
      + api.properties(
-       mastername='client.drmemory',
+       mainname='client.drmemory',
        buildername='linux-builder',
        revision='123456789abcdef',
        got_revision='123456789abcdef',
        buildnumber=42,
-       bot_id='TestSlave',
+       bot_id='TestSubordinate',
      )
   )
 
   yield (api.test('linux_lucid_x64_drm')
     + api.properties(
-      mastername='client.drmemory',
+      mainname='client.drmemory',
       buildername='linux-lucid_x64-drm',
       revision='123456789abcdef',
       got_revision='123456789abcdef',
       buildnumber=42,
-      bot_id='TestSlave',
+      bot_id='TestSubordinate',
     )
     + api.platform('linux', 64)
   )
 
   yield (api.test('win_8_x64_drm')
     + api.properties(
-      mastername='client.drmemory',
+      mainname='client.drmemory',
       buildername='win-8_x64-drm',
       revision='123456789abcdef',
       got_revision='123456789abcdef',
       buildnumber=42,
-      bot_id='TestSlave',
+      bot_id='TestSubordinate',
     )
     + api.platform('win', 64)
   )
 
   yield (api.test('win_7_x64_drm')
     + api.properties(
-      mastername='client.drmemory',
+      mainname='client.drmemory',
       buildername='win-7_x64-drm',
       revision='123456789abcdef',
       got_revision='123456789abcdef',
       buildnumber=42,
-      bot_id='TestSlave',
+      bot_id='TestSubordinate',
     )
     + api.platform('win', 64)
   )
 
   yield (api.test('win_builder')
     + api.properties(
-      mastername='client.drmemory',
+      mainname='client.drmemory',
       buildername='win-builder',
       revision='123456789abcdef',
       got_revision='123456789abcdef',
       buildnumber=42,
-      bot_id='TestSlave',
+      bot_id='TestSubordinate',
     )
     + api.platform('win', 32)
     + api.step_data("Find package basename",
@@ -555,8 +555,8 @@ def GenTests(api):
 
   yield (api.test('builder_not_in_dispatch_directory')
     + api.properties(
-      mastername='client.drmemory',
+      mainname='client.drmemory',
       buildername='nonexistent_builder',
-      bot_id='TestSlave',
+      bot_id='TestSubordinate',
     )
   )

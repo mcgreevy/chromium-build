@@ -24,12 +24,12 @@ sys.path.insert(0, os.path.join(BUILD_ROOT, 'scripts'))
 from common import annotator
 from common import chromium_utils
 from common import env
-from slave import cipd
-from slave import infra_platform
-from slave import logdog_bootstrap
-from slave import monitoring_utils
-from slave import robust_tempdir
-from slave import update_scripts
+from subordinate import cipd
+from subordinate import infra_platform
+from subordinate import logdog_bootstrap
+from subordinate import monitoring_utils
+from subordinate import robust_tempdir
+from subordinate import update_scripts
 
 
 # BuildBot root directory: /b
@@ -38,10 +38,10 @@ BUILDBOT_ROOT = os.path.abspath(os.path.dirname(BUILD_ROOT))
 
 LOGGER = logging.getLogger('remote_run')
 
-# KitchenConfig is a set of per-master Kitchen configuration properties.
+# KitchenConfig is a set of per-main Kitchen configuration properties.
 KitchenConfig = collections.namedtuple('KitchenConfig', (
     # List of builders that are explicitly configured for Kitchen. If None,
-    # all builders on the master are configured for Kitchen.
+    # all builders on the main are configured for Kitchen.
     'builders',
     # If True, "builders" is interpreted as a blacklist instead of a whitelist,
     # meaing that all builders *except* those explicitly named should use
@@ -50,8 +50,8 @@ KitchenConfig = collections.namedtuple('KitchenConfig', (
 
 _ALL_BUILDERS = KitchenConfig(builders=None, is_blacklist=False)
 
-# This is a map of KitchenConfig to apply to master. Keys are master names,
-# values are KitchenConfig instances to apply to that master.
+# This is a map of KitchenConfig to apply to main. Keys are main names,
+# values are KitchenConfig instances to apply to that main.
 _KITCHEN_CONFIG = {
   'chromium.infra': _ALL_BUILDERS,
   'chromium.infra.cron': _ALL_BUILDERS,
@@ -83,7 +83,7 @@ _KITCHEN_CONFIG = {
   'chromium.swarm': _ALL_BUILDERS,
 }
 
-# Masters that are running "canary" run.
+# Mains that are running "canary" run.
 _CANARY_MASTERS = set((
   'chromium.infra',
   'chromium.infra.cron',
@@ -109,8 +109,8 @@ _RECIPES_PY_CIPD_PACKAGE = 'infra/recipes-py'
 # The name of the Kitchen CIPD package.
 _KITCHEN_CIPD_PACKAGE = 'infra/tools/luci/kitchen/${platform}'
 
-# _CIPD_PINS is a mapping of master name to pinned CIPD package version to use
-# for that master.
+# _CIPD_PINS is a mapping of main name to pinned CIPD package version to use
+# for that main.
 #
 # If "kitchen" pin is empty, use the traditional "recipes.py" invocation path.
 # Otherwise, use Kitchen.
@@ -128,12 +128,12 @@ _CANARY_CIPD_PINS = CipdPins(
       kitchen='git_revision:626f893e5822aa2fbea113c0c2e023f2a601c463')
 
 
-def _get_is_canary(mastername):
-  return mastername in _CANARY_MASTERS
+def _get_is_canary(mainname):
+  return mainname in _CANARY_MASTERS
 
 
-def _get_is_kitchen(mastername, buildername):
-  kc = _KITCHEN_CONFIG.get(mastername)
+def _get_is_kitchen(mainname, buildername):
+  kc = _KITCHEN_CONFIG.get(mainname)
   if not kc:
     return False
   if kc.builders is None:
@@ -152,7 +152,7 @@ def get_is_opt_in(properties):
   The BuildBucket property looks like:
   "buildbucket": "{
     \"build\": {
-      \"bucket\": \"master.tryserver.chromium.linux\",
+      \"bucket\": \"main.tryserver.chromium.linux\",
       \"created_by\": \"user:iannucci@chromium.org\",
       \"created_ts\": \"1494616236661800\",
       \"id\": \"8979775000984247248\",
@@ -160,7 +160,7 @@ def get_is_opt_in(properties):
       \"tags\": [
         \"builder:linux_chromium_rel_ng\",
         \"buildset:patch/rietveld/codereview.chromium.org/2852733003/1\",
-        \"master:tryserver.chromium.linux\",
+        \"main:tryserver.chromium.linux\",
         \"user_agent:rietveld\"
       ]
     }
@@ -263,7 +263,7 @@ def _remote_run_with_kitchen(args, stream, _is_canary, kitchen_version,
       name=_KITCHEN_CIPD_PACKAGE,
       version=kitchen_version)
 
-  from slave import cipd_bootstrap_v2
+  from subordinate import cipd_bootstrap_v2
   cipd_bootstrap_v2.install_cipd_packages(cipd_root, kitchen_pkg)
 
   kitchen_bin = os.path.join(cipd_root, 'kitchen' + infra_platform.exe_suffix())
@@ -296,20 +296,20 @@ def _remote_run_with_kitchen(args, stream, _is_canary, kitchen_version,
       ]:
     kitchen_cmd += ['-python-path', python_path]
 
-  # Master "remote_run" factory has been changed to pass "refs/heads/master" as
-  # a default instead of "origin/master". However, this is a master-side change,
-  # and requires a master restart. Rather than restarting all masters, we will
+  # Main "remote_run" factory has been changed to pass "refs/heads/main" as
+  # a default instead of "origin/main". However, this is a main-side change,
+  # and requires a main restart. Rather than restarting all mains, we will
   # just pretend the change took effect here.
   #
-  # No "-revision" means "latest", which is the same as "origin/master"'s
+  # No "-revision" means "latest", which is the same as "origin/main"'s
   # meaning.
   #
   # See: https://chromium-review.googlesource.com/c/446895/
   # See: crbug.com/696704
   #
-  # TODO(dnj,nodir): Delete this once we're confident that all masters have been
+  # TODO(dnj,nodir): Delete this once we're confident that all mains have been
   # restarted to take effect.
-  if args.revision and (args.revision != 'origin/master'):
+  if args.revision and (args.revision != 'origin/main'):
     kitchen_cmd += ['-revision', args.revision]
 
   # Using LogDog?
@@ -386,7 +386,7 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
   properties.update(args.build_properties)
 
   # Determine our pins.
-  mastername = properties.get('mastername')
+  mainname = properties.get('mainname')
   buildername = properties.get('buildername')
 
   # Determine if this build is an opt-in build.
@@ -396,7 +396,7 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
   #
   # If a property includes "remote_run_canary", we will explicitly use canary
   # pins. This can be done by manually submitting a build to the waterfall.
-  is_canary = (_get_is_canary(mastername) or is_opt_in or
+  is_canary = (_get_is_canary(mainname) or is_opt_in or
                'remote_run_canary' in properties or args.canary)
   pins = _STABLE_CIPD_PINS if not is_canary else _CANARY_CIPD_PINS
 
@@ -404,7 +404,7 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
   #
   # If a property includes "remote_run_kitchen", we will explicitly use canary
   # pins. This can be done by manually submitting a build to the waterfall.
-  is_kitchen = (_get_is_kitchen(mastername, buildername) or is_opt_in or
+  is_kitchen = (_get_is_kitchen(mainname, buildername) or is_opt_in or
                 'remote_run_kitchen' in properties)
 
   # Allow command-line "--kitchen" to override.
@@ -414,7 +414,7 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
 
   # Augment our input properties...
   properties['build_data_dir'] = build_data_dir
-  properties['builder_id'] = 'master.%s:%s' % (mastername, buildername)
+  properties['builder_id'] = 'main.%s:%s' % (mainname, buildername)
 
   if not is_kitchen:
     # path_config property defines what paths a build uses for checkout, git
@@ -424,7 +424,7 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
     # "kitchen" was never correct, and incorrectly implies that Kitchen is
     # somehow involved int his path config.
     properties['path_config'] = 'kitchen'
-    properties['bot_id'] = properties['slavename']
+    properties['bot_id'] = properties['subordinatename']
   else:
     # If we're using Kitchen, our "path_config" must be empty or "kitchen".
     path_config = properties.pop('path_config', None)
@@ -437,8 +437,8 @@ def _exec_recipe(args, rt, stream, basedir, buildbot_build_dir):
   monitoring_utils.write_build_monitoring_event(build_data_dir, properties)
 
   # Ensure that the CIPD client is installed and available on PATH.
-  from slave import cipd_bootstrap_v2
-  cipd_bootstrap_v2.high_level_ensure_cipd_client(basedir, mastername)
+  from subordinate import cipd_bootstrap_v2
+  cipd_bootstrap_v2.high_level_ensure_cipd_client(basedir, mainname)
 
   # "/b/c" as a cache directory.
   cache_dir = os.path.join(BUILDBOT_ROOT, 'c')
@@ -575,13 +575,13 @@ def main(argv, stream):
     basedir = chromium_utils.FindUpward(buildbot_build_dir, 'b')
   except chromium_utils.PathNotFound as e:
     LOGGER.warn(e)
-    # Use base directory inside system temporary directory - if we use slave
+    # Use base directory inside system temporary directory - if we use subordinate
     # one (cwd), the paths get too long. Recipes which need different paths
     # or persistent directories should do so explicitly.
     basedir = tempfile.gettempdir()
 
   # Cleanup system and temporary directories.
-  from slave import cleanup_temp
+  from subordinate import cleanup_temp
   cleanup_temp.Cleanup(b_dir=basedir)
 
   # Choose a tempdir prefix. If we have no active subdir, we will use a prefix

@@ -9,8 +9,8 @@ import sys
 MODULES_WHITELIST = [
   # TODO(martiniss): Move skia modules into recipe resources
   r'common\.skia\..*',
-  r'slave\.skia\..*',
-  r'slave\.recipe_modules\.swarming\.resources\..*'
+  r'subordinate\.skia\..*',
+  r'subordinate\.recipe_modules\.swarming\.resources\..*'
 ]
 
 RECIPES_PY = os.path.join(

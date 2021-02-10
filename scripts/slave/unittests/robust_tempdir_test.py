@@ -8,7 +8,7 @@ import unittest
 
 import test_env  # pylint: disable=W0403,W0611
 
-from slave import robust_tempdir
+from subordinate import robust_tempdir
 
 
 class RobustTempdirTest(unittest.TestCase):

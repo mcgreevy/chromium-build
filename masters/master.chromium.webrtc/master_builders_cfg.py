@@ -6,16 +6,16 @@ from buildbot.changes.filter import ChangeFilter
 from buildbot.process.properties import WithProperties
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master import master_utils
-from master.factory import remote_run_factory
+from main import main_utils
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.ChromiumWebRTC
+import main_site_config
+ActiveMain = main_site_config.ChromiumWebRTC
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -26,7 +26,7 @@ def Update(c):
   c['schedulers'].append(
       SingleBranchScheduler(name='chromium_scheduler',
                             change_filter=ChangeFilter(project='chromium',
-                                                       branch='master'),
+                                                       branch='main'),
                             treeStableTimer=60,
                             builderNames=[
                               'Win Builder',

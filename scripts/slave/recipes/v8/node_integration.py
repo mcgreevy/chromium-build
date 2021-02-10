@@ -165,18 +165,18 @@ def _sanitize_nonalpha(*chunks):
 
 
 def GenTests(api):
-  for mastername, masterconf in BUILDERS.iteritems():
-    for buildername, _ in masterconf['builders'].iteritems():
-      if mastername.startswith('tryserver'):
+  for mainname, mainconf in BUILDERS.iteritems():
+    for buildername, _ in mainconf['builders'].iteritems():
+      if mainname.startswith('tryserver'):
         properties_fn = api.properties.tryserver
       else:
         properties_fn = api.properties.generic
       yield (
-          api.test(_sanitize_nonalpha('full', mastername, buildername)) +
+          api.test(_sanitize_nonalpha('full', mainname, buildername)) +
           properties_fn(
-              mastername=mastername,
+              mainname=mainname,
               buildername=buildername,
-              branch='refs/heads/master',
+              branch='refs/heads/main',
               revision='deadbeef',
           )
       )

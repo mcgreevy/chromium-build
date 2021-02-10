@@ -4,14 +4,14 @@
 
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import annotator_factory
+from main.factory import annotator_factory
 
 m_annotator = annotator_factory.AnnotatorFactory()
 
 def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='libyuv_windows_scheduler',
-                            branch='master',
+                            branch='main',
                             treeStableTimer=0,
                             builderNames=[
           'Win32 Debug',
@@ -26,14 +26,14 @@ def Update(c):
   ])
 
   specs = [
-    {'name': 'Win32 Debug', 'slavebuilddir': 'win'},
-    {'name': 'Win32 Release', 'slavebuilddir': 'win'},
-    {'name': 'Win64 Debug', 'slavebuilddir': 'win'},
-    {'name': 'Win64 Release', 'slavebuilddir': 'win'},
-    {'name': 'Win32 Debug (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win32 Release (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win64 Debug (Clang)', 'slavebuilddir': 'win_clang'},
-    {'name': 'Win64 Release (Clang)', 'slavebuilddir': 'win_clang'},
+    {'name': 'Win32 Debug', 'subordinatebuilddir': 'win'},
+    {'name': 'Win32 Release', 'subordinatebuilddir': 'win'},
+    {'name': 'Win64 Debug', 'subordinatebuilddir': 'win'},
+    {'name': 'Win64 Release', 'subordinatebuilddir': 'win'},
+    {'name': 'Win32 Debug (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win32 Release (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win64 Debug (Clang)', 'subordinatebuilddir': 'win_clang'},
+    {'name': 'Win64 Release (Clang)', 'subordinatebuilddir': 'win_clang'},
   ]
 
   c['builders'].extend([
@@ -42,6 +42,6 @@ def Update(c):
         'factory': m_annotator.BaseFactory('libyuv/libyuv'),
         'notify_on_missing': True,
         'category': 'win',
-        'slavebuilddir': spec['slavebuilddir'],
+        'subordinatebuilddir': spec['subordinatebuilddir'],
       } for spec in specs
   ])

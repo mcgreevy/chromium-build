@@ -14,14 +14,14 @@ class LibyuvApi(recipe_api.RecipeApi):
     super(LibyuvApi, self).__init__(**kwargs)
 
   def apply_bot_config(self, builders, recipe_configs, perf_config=None):
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
-    master_dict = builders.get(mastername, {})
-    self.master_config = master_dict.get('settings', {})
+    main_dict = builders.get(mainname, {})
+    self.main_config = main_dict.get('settings', {})
 
-    self.bot_config = master_dict.get('builders', {}).get(buildername)
-    assert self.bot_config, ('Unrecognized builder name "%r" for master "%r".' %
-                             (buildername, mastername))
+    self.bot_config = main_dict.get('builders', {}).get(buildername)
+    assert self.bot_config, ('Unrecognized builder name "%r" for main "%r".' %
+                             (buildername, mainname))
 
     self.bot_type = self.bot_config['bot_type']
     recipe_config_name = self.bot_config['recipe_config']
@@ -92,8 +92,8 @@ class LibyuvApi(recipe_api.RecipeApi):
 
   def package_build(self):
     upload_url = self.m.archive.legacy_upload_url(
-        self.master_config.get('build_gs_bucket'),
-        extra_url_components=self.m.properties['mastername'])
+        self.main_config.get('build_gs_bucket'),
+        extra_url_components=self.m.properties['mainname'])
     self.m.archive.zip_and_upload_build(
         'package build',
         self.m.chromium.c.build_config_fs,
@@ -113,8 +113,8 @@ class LibyuvApi(recipe_api.RecipeApi):
         self.m.chromium.c.build_dir.join(self.m.chromium.c.build_config_fs))
 
     download_url = self.m.archive.legacy_download_url(
-       self.master_config.get('build_gs_bucket'),
-       extra_url_components=self.m.properties['mastername'])
+       self.main_config.get('build_gs_bucket'),
+       extra_url_components=self.m.properties['mainname'])
     self.m.archive.download_and_unzip_build(
         'extract build',
         self.m.chromium.c.build_config_fs,
@@ -129,7 +129,7 @@ class LibyuvApi(recipe_api.RecipeApi):
         self.m.chromium_android.run_test_suite('libyuv_unittest')
         self.m.chromium_android.shutdown_device_monitor()
         self.m.chromium_android.logcat_dump(
-            gs_bucket=self.master_config.get('build_gs_bucket'))
+            gs_bucket=self.main_config.get('build_gs_bucket'))
         self.m.chromium_android.stack_tool_steps(force_latest_version=True)
         self.m.chromium_android.test_report()
       else:

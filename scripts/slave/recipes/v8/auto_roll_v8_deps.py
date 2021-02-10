@@ -107,7 +107,7 @@ def RunSteps(api):
 
   # Enforce a clean state.
   with api.context(cwd=api.path['checkout']):
-    api.git('checkout', '-f', 'origin/master')
+    api.git('checkout', '-f', 'origin/main')
     api.git('branch', '-D', 'roll', ok_ret='any')
     api.git('clean', '-ffd')
     api.git('new-branch', 'roll')
@@ -197,7 +197,7 @@ v8/tools/swarming_client: https://chromium.googlesource.com/external/swarming.cl
 
   yield (
       api.test('roll') +
-      api.properties.generic(mastername='client.v8.fyi',
+      api.properties.generic(mainname='client.v8.fyi',
                              buildername='Auto-roll - v8 deps') +
       api.override_step_data(
           'gclient get v8 deps',

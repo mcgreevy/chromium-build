@@ -291,7 +291,7 @@ def GenTests(api):
     yield (
       api.test(buildername) +
       host_platform +
-      api.properties.generic(mastername='client.boringssl',
+      api.properties.generic(mainname='client.boringssl',
                              buildername=buildername, bot_id='bot_id') +
       api.override_step_data('unit tests',
                              api.test_utils.canned_test_output(True)) +
@@ -307,7 +307,7 @@ def GenTests(api):
     yield (
       api.test(buildername) +
       host_platform +
-      api.properties.generic(mastername='client.boringssl',
+      api.properties.generic(mainname='client.boringssl',
                              buildername=buildername, bot_id='bot_id')
     )
 
@@ -319,7 +319,7 @@ def GenTests(api):
     yield (
       api.test(buildername) +
       host_platform +
-      api.properties.generic(mastername='client.boringssl',
+      api.properties.generic(mainname='client.boringssl',
                              buildername=buildername, bot_id='bot_id') +
       api.override_step_data('unit tests',
                              api.test_utils.canned_test_output(True))
@@ -328,7 +328,7 @@ def GenTests(api):
   yield (
     api.test('failed_unit_tests') +
     api.platform('linux', 64) +
-    api.properties.generic(mastername='client.boringssl', buildername='linux',
+    api.properties.generic(mainname='client.boringssl', buildername='linux',
                            bot_id='bot_id') +
     api.override_step_data('unit tests',
                            api.test_utils.canned_test_output(False)) +
@@ -339,7 +339,7 @@ def GenTests(api):
   yield (
     api.test('failed_ssl_tests') +
     api.platform('linux', 64) +
-    api.properties.generic(mastername='client.boringssl', buildername='linux',
+    api.properties.generic(mainname='client.boringssl', buildername='linux',
                            bot_id='bot_id') +
     api.override_step_data('unit tests',
                            api.test_utils.canned_test_output(True)) +
@@ -353,6 +353,6 @@ def GenTests(api):
     api.properties.tryserver(
         gerrit_project='boringssl',
         gerrit_url='https://boringssl-review.googlesource.com',
-        mastername='actually-no-master', buildername='linux',
-        bot_id='swarming-slave')
+        mainname='actually-no-main', buildername='linux',
+        bot_id='swarming-subordinate')
   )

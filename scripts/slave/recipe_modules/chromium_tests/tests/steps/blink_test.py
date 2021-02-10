@@ -45,7 +45,7 @@ def GenTests(api):
   yield (
       api.test('android') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           bot_id='test_bot_id',
@@ -56,7 +56,7 @@ def GenTests(api):
       api.test('win') +
       api.platform.name('win') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           bot_id='test_bot_id',
@@ -67,7 +67,7 @@ def GenTests(api):
   yield (
       api.test('unexpected_flakes') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           bot_id='test_bot_id') +
@@ -81,7 +81,7 @@ def GenTests(api):
   yield (
       api.test('big') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           bot_id='test_bot_id') +

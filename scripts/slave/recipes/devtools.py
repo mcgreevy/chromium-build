@@ -63,20 +63,20 @@ def RunSteps(api):
   # See crbug.com/655848
 
 def GenTests(api):
-  for mastername, config in MASTERS.iteritems():
-    if mastername.startswith('tryserver'):
+  for mainname, config in MASTERS.iteritems():
+    if mainname.startswith('tryserver'):
       yield (
         api.test(config['testname'] + '_no_devtools') +
         api.properties.tryserver(
             buildername=config['buildername'],
-            mastername=mastername,
+            mainname=mainname,
         )
       )
       yield (
         api.test(config['testname']  + '_with_devtools') +
         api.properties.tryserver(
             buildername=config['buildername'],
-            mastername=mastername,
+            mainname=mainname,
         ) +
         api.override_step_data(
             'git diff to analyze patch',
@@ -89,6 +89,6 @@ def GenTests(api):
         api.test(config['testname']) +
         api.properties.generic(
             buildername=config['buildername'],
-            mastername=mastername,
+            mainname=mainname,
         )
       )

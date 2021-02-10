@@ -229,9 +229,9 @@ class AutoBisectStagingApi(recipe_api.RecipeApi):
 
   def start_test_run_for_bisect(self, update_step, bot_db, test_config_params,
                                 skip_download=False, **kwargs):
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
-    bot_config = bot_db.get_bot_config(mastername, buildername)
+    bot_config = bot_db.get_bot_config(mainname, buildername)
     build_archive_url = test_config_params['parent_build_archive_url']
     if not skip_download:
       if self.m.chromium.c.TARGET_PLATFORM == 'android':
@@ -270,7 +270,7 @@ class AutoBisectStagingApi(recipe_api.RecipeApi):
               args=[zip_dir, build_dir])
       else:
         self.m.chromium_tests.download_and_unzip_build(
-            mastername, buildername, update_step, bot_db,
+            mainname, buildername, update_step, bot_db,
             build_archive_url=build_archive_url,
             build_revision=test_config_params['parent_got_revision'],
             override_bot_type='tester')
@@ -282,11 +282,11 @@ class AutoBisectStagingApi(recipe_api.RecipeApi):
     if not tests:  # pragma: no cover
       return
     self.m.chromium_swarming.configure_swarming(
-        'chromium', precommit=False, mastername=mastername)
+        'chromium', precommit=False, mainname=mainname)
     test_runner = self.m.chromium_tests.create_test_runner(tests)
 
     bot_config_object = self.m.chromium_tests.create_bot_config_object(
-        mastername, buildername)
+        mainname, buildername)
     with self.m.chromium_tests.wrap_chromium_tests(bot_config_object, tests):
       with self.test_context_mgr(self.m):
         if self.m.chromium.c.TARGET_PLATFORM == 'android' and not skip_download:
@@ -359,7 +359,7 @@ class AutoBisectStagingApi(recipe_api.RecipeApi):
       flags['do_not_nest_wait_for_revision'] = kwargs.pop(
           'do_not_nest_wait_for_revision')
     if bot_db is None:  # pragma: no cover
-      self.bot_db = api.chromium_tests.create_bot_db_from_master_dict('', None)
+      self.bot_db = api.chromium_tests.create_bot_db_from_main_dict('', None)
     else:
       self.bot_db = bot_db
 

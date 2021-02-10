@@ -74,7 +74,7 @@ def GenTests(api):
           bot_id='bot_id') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
-          got_revision_cp='refs/heads/master@{#3333333333}'))
+          got_revision_cp='refs/heads/main@{#3333333333}'))
 
   yield (
       api.test('%s_test_failure' % sanitize('Android ChromeDriver')) +
@@ -83,7 +83,7 @@ def GenTests(api):
           bot_id='bot_id') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
-          got_revision_cp='refs/heads/master@{#3333333333}') +
+          got_revision_cp='refs/heads/main@{#3333333333}') +
       api.step_data('java_tests chrome_stable.Run Tests', retcode=1))
 
   yield (
@@ -93,7 +93,7 @@ def GenTests(api):
           bot_id='bot_id') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
-          got_revision_cp='refs/heads/master@{#3333333333}') +
+          got_revision_cp='refs/heads/main@{#3333333333}') +
       api.step_data('Download Test Results Log.read results log file',
                     api.raw_io.output_text('{"3333333333": true}')))
 
@@ -104,7 +104,7 @@ def GenTests(api):
           bot_id='bot_id') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
-          got_revision_cp='refs/heads/master@{#3333333333}') +
+          got_revision_cp='refs/heads/main@{#3333333333}') +
       api.step_data(
           'Download Test Results Log.gsutil download results log', retcode=1))
 
@@ -115,7 +115,7 @@ def GenTests(api):
           bot_id='bot_id') +
       api.properties(
           parent_build_archive_url='gs://test-domain/test-archive.zip',
-          got_revision_cp='refs/heads/master@{#3333333333}') +
+          got_revision_cp='refs/heads/main@{#3333333333}') +
       api.step_data(
           'Download Prebuilts.listdir get prebuilt filename',
           api.json.output(['rNone.zip'])))

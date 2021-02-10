@@ -13,11 +13,11 @@ DEPS = [
 
 def RunSteps(api):
   bot_config = api.chromium_tests.create_bot_config_object(
-      api.properties['mastername'], api.properties['buildername'])
+      api.properties['mainname'], api.properties['buildername'])
   api.chromium_tests.configure_build(bot_config)
   update_step, bot_db = api.chromium_tests.prepare_checkout(bot_config)
   api.chromium_tests.archive_build(
-      api.properties['mastername'], api.properties['buildername'],
+      api.properties['mainname'], api.properties['buildername'],
       update_step, bot_db)
 
 
@@ -25,35 +25,35 @@ def GenTests(api):
   yield (
       api.test('linux_builder') +
       api.properties.generic(
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Linux Builder')
   )
 
   yield (
       api.test('linux_perf_bisect_builder') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect_builder')
   )
 
   yield (
       api.test('cf_archive_build') +
       api.properties.generic(
-          mastername='chromium.lkgr',
+          mainname='chromium.lkgr',
           buildername='ASAN Release')
   )
 
   yield (
       api.test('archive_build') +
       api.properties.generic(
-          mastername='chromium',
+          mainname='chromium',
           buildername='Linux x64')
   )
 
   yield (
-      api.test('cross_master_trigger') +
+      api.test('cross_main_trigger') +
       api.platform.name('win') +
       api.properties.generic(
-          mastername='chromium.perf',
+          mainname='chromium.perf',
           buildername='Win x64 Builder')
   )

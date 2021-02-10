@@ -38,7 +38,7 @@ def RunSteps(api):
   for test in api.chromium_tests.steps.generate_instrumentation_test(
       api,
       api.chromium_tests,
-      'test_mastername',
+      'test_mainname',
       'test_buildername',
       test_spec,
       update_step,
@@ -60,7 +60,7 @@ def GenTests(api):
           single_spec={
               'test': 'example_instrumentation_test',
           },
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
       )
@@ -80,7 +80,7 @@ def GenTests(api):
                   ],
               },
           },
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
       )

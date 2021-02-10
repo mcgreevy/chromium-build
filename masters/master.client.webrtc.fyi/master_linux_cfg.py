@@ -5,16 +5,16 @@
 from buildbot.scheduler import Periodic
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import annotator_factory
-from master.factory import remote_run_factory
+from main.factory import annotator_factory
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.WebRTCFYI
+import main_site_config
+ActiveMain = main_site_config.WebRTCFYI
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -27,7 +27,7 @@ m_annotator = annotator_factory.AnnotatorFactory()
 def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='webrtc_linux_scheduler',
-                            branch='master',
+                            branch='main',
                             treeStableTimer=0,
                             builderNames=[
                                 'Linux (swarming)',
@@ -44,13 +44,13 @@ def Update(c):
   ])
 
   specs = [
-    {'name': 'Linux (swarming)', 'slavebuilddir': 'linux_swarming'},
-    {'name': 'Linux32 Debug (ARM)', 'slavebuilddir': 'linux_arm'},
-    {'name': 'Linux64 GCC', 'slavebuilddir': 'linux_gcc'},
+    {'name': 'Linux (swarming)', 'subordinatebuilddir': 'linux_swarming'},
+    {'name': 'Linux32 Debug (ARM)', 'subordinatebuilddir': 'linux_arm'},
+    {'name': 'Linux64 GCC', 'subordinatebuilddir': 'linux_gcc'},
     {
       'name': 'Auto-roll - WebRTC DEPS',
       'recipe': 'webrtc/auto_roll_webrtc_deps',
-      'slavebuilddir': 'linux_autoroll',
+      'subordinatebuilddir': 'linux_autoroll',
     },
   ]
 
@@ -62,7 +62,7 @@ def Update(c):
                    else m_remote_run('webrtc/standalone'),
         'notify_on_missing': True,
         'category': 'linux',
-        'slavebuilddir': spec['slavebuilddir'],
+        'subordinatebuilddir': spec['subordinatebuilddir'],
         'auto_reboot': False,
       } for spec in specs
   ])

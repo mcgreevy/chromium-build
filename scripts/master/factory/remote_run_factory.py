@@ -4,21 +4,21 @@
 
 import re
 
-from master.factory import annotator_commands
-from master.factory import commands
-from master.factory.build_factory import BuildFactory
+from main.factory import annotator_commands
+from main.factory import commands
+from main.factory.build_factory import BuildFactory
 
 
 # TODO(nodir): restore timeout=1200, https://crbug.com/593891
-def RemoteRunFactory(active_master, repository, recipe,
+def RemoteRunFactory(active_main, repository, recipe,
                      revision=None, factory_properties=None,
                      timeout=2400, max_time=None, triggers=None,
                      use_gitiles=False):
   """Returns buildbot build factory which runs recipes using recipe engine's
   remote_run command.
 
-  |active_master| is config_bootstrap.Master's subclass from master's
-  master_site_config.py .
+  |active_main| is config_bootstrap.Main's subclass from main's
+  main_site_config.py .
 
   |repository| is the URL of repository containing recipe to run.
 
@@ -37,13 +37,13 @@ def RemoteRunFactory(active_master, repository, recipe,
   to run, regardless of output. After |max_time| seconds, the build is
   forcibly killed.
 
-  |triggers| is a list of builders on the same master to trigger
+  |triggers| is a list of builders on the same main to trigger
   after the build.
 
   |use_gitiles| enables a Gitiles-specific way to fetch the repo; it's more
   efficient for large repos.
   """
-  revision = revision or 'refs/heads/master'
+  revision = revision or 'refs/heads/main'
   if isinstance(revision, basestring):
     assert re.match('^([a-z0-9]{40}|refs/.+)$', revision)
 
@@ -59,7 +59,7 @@ def RemoteRunFactory(active_master, repository, recipe,
   factory = BuildFactory(build_inherit_factory_properties=False)
   factory.properties.update(factory_properties, 'RemoteRunFactory')
   cmd_obj = annotator_commands.AnnotatorCommands(
-      factory, active_master=active_master)
+      factory, active_main=active_main)
 
   runner = cmd_obj.PathJoin(cmd_obj.script_dir, 'remote_run.py')
   cmd = [

@@ -2,31 +2,31 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class ChromiumPerfFyi(Master.Master1):
+class ChromiumPerfFyi(Main.Main1):
   project_name = 'Chromium Perf Fyi'
-  master_port = 8061
-  slave_port = 8161
-  master_port_alt = 8261
+  main_port = 8061
+  subordinate_port = 8161
+  main_port_alt = 8261
   buildbot_url = 'http://build.chromium.org/p/chromium.perf.fyi/'
   service_account_file = 'service-account-chromium.json'
 
-  # master.chromium.perf.fyi uses bulidbucket in an interesting way:
+  # main.chromium.perf.fyi uses bulidbucket in an interesting way:
   #
-  # master.chromium.perf has builders and testers, but master.chromium.perf.fyi
+  # main.chromium.perf has builders and testers, but main.chromium.perf.fyi
   # has only testers. The former builds chromium and triggers testers on the FYI
   #
-  # Some builders on master.chromium.perf run for each commit, and thus trigger
+  # Some builders on main.chromium.perf run for each commit, and thus trigger
   # builds on FYI for each commit. FYI does not have capacity to run a build
   # for each commit, so it uses buildbot "merge requests" feature that collapses
   # multiple build requests into a single build.
   #
   # The chromium.perf -> chromium.perf.fyi build triggering is implemented
   # using buildbucket. Each buildbucket build is converted to one buildbot
-  # build request. When a slave becomes available, all build requests are
+  # build request. When a subordinate becomes available, all build requests are
   # merged into one build which is associated with combined changes of all
   # build requests, aka blamelist. However buildbucket-buildbot integration
   # does not support build request merging (crbug.com/451259), thus when the
@@ -42,7 +42,7 @@ class ChromiumPerfFyi(Master.Master1):
   # consume them by looking at the buildbot pages which don't have the issue,
   # because the build requests are correctly scheduled, and the build with a
   # correct blamelist is run. So, this is fine.
-  buildbucket_bucket = 'master.chromium.perf.fyi'
+  buildbucket_bucket = 'main.chromium.perf.fyi'
   # Buildbucket creates a "changes" table row for each change in each
   # buildbucket build (unless global change id is specified; it is not), and
   # buildbot console view does not like it. We can it avoid by telling

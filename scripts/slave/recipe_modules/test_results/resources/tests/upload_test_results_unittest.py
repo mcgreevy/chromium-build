@@ -99,7 +99,7 @@ class UploadTestResultsTest(unittest.TestCase):
         '--input-json=%s' % input_json_file_path,
         '--results-directory=%s' % result_directory,
         '--test-results-server=foo',
-        '--master-name=sauron',
+        '--main-name=sauron',
       ])
       files = [
         ('full_results.json',
@@ -112,7 +112,7 @@ class UploadTestResultsTest(unittest.TestCase):
           'foo',
           [('builder', 'DUMMY_BUILDER_NAME'),
            ('testtype', 'foo'),
-           ('master', 'sauron')], files, 120)
+           ('main', 'sauron')], files, 120)
     finally:
       shutil.rmtree(result_directory)
 
@@ -155,7 +155,7 @@ class UploadTestResultsTest(unittest.TestCase):
         '--builder-name=hobbit',
         '--build-number=1234',
         '--chrome-revision=99999',
-        '--master-name=sauron',
+        '--main-name=sauron',
       ])
       uploaded_json_result_path = os.path.join(
           result_directory, upload_test_results.FULL_RESULTS_FILENAME)
@@ -163,7 +163,7 @@ class UploadTestResultsTest(unittest.TestCase):
       # Assert that metadata are added to the json results before uploading.
       with open(uploaded_json_result_path) as f:
         augmented_json = json.load(f)
-      self.assertEquals(augmented_json.get('master_name'), 'sauron')
+      self.assertEquals(augmented_json.get('main_name'), 'sauron')
       self.assertEquals(augmented_json.get('builder_name'), 'hobbit')
       self.assertEquals(augmented_json.get('build_number'), '1234')
       self.assertEquals(augmented_json.get('chromium_revision'), '99999')
@@ -173,7 +173,7 @@ class UploadTestResultsTest(unittest.TestCase):
           'foo',
           [('builder', 'hobbit'),
            ('testtype', 'foo'),
-           ('master', 'sauron')], files, 120)
+           ('main', 'sauron')], files, 120)
     finally:
       shutil.rmtree(result_directory)
 

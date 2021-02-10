@@ -49,7 +49,7 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -64,7 +64,7 @@ def GenTests(api):
   yield (
       api.test('android') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           target_platform='android',
@@ -78,7 +78,7 @@ def GenTests(api):
       api.properties(
           override_isolate_target='base_unittests_run',
           override_compile_targets=['base_unittests_run'],
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -89,7 +89,7 @@ def GenTests(api):
   yield (
       api.test('no_result_json') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={

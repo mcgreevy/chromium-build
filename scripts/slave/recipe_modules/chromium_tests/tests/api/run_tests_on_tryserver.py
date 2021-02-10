@@ -12,7 +12,7 @@ DEPS = [
 
 def RunSteps(api):
   bot_config = api.chromium_tests.trybots[
-      api.properties['mastername']]['builders'][api.properties['buildername']]
+      api.properties['mainname']]['builders'][api.properties['buildername']]
   bot_config_object = api.chromium_tests.create_generalized_bot_config_object(
       bot_config['bot_ids'])
   api.chromium_tests.configure_build(bot_config_object)
@@ -30,7 +30,7 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng',
           swarm_hashes={
             'base_unittests': 'ffffffffffffffffffffffffffffffffffffffff',
@@ -44,7 +44,7 @@ def GenTests(api):
   yield (
       api.test('disable_deapply_patch_recipes') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng',
           disable_deapply_patch=True,
           swarm_hashes={
@@ -59,7 +59,7 @@ def GenTests(api):
   yield (
       api.test('disable_deapply_patch_affected_files') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.linux',
+          mainname='tryserver.chromium.linux',
           buildername='linux_chromium_rel_ng',
           affected_files=['testing/buildbot/chromium.linux.json'],
           swarm_hashes={

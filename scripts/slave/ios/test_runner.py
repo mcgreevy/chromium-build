@@ -23,9 +23,9 @@ import time
 import xctest_utils
 
 from common import gtest_utils
-from slave import slave_utils
-from slave.ios import find_xcode
-from slave.ios import utils
+from subordinate import subordinate_utils
+from subordinate.ios import find_xcode
+from subordinate.ios import utils
 
 
 class Error(Exception):
@@ -106,7 +106,7 @@ class TestRunner(object):
     perf_bot_name=None,
     perf_build_number=None,
     perf_builder_name=None,
-    perf_master_name=None,
+    perf_main_name=None,
     perf_revision=None,
     perf_x_value=None,
     test_args=None,
@@ -123,7 +123,7 @@ class TestRunner(object):
       perf_build_number: Build number to indicate to the perf dashboard.
       perf_builder_name: Name of this builder as indicated to the perf
         dashboard.
-      perf_master_name: Name of the master as indicated to the perf dashboard.
+      perf_main_name: Name of the main as indicated to the perf dashboard.
       perf_revision: Revision to indicate to the perf dashboard.
       perf_x_value: Value to use on the x axis for all data uploaded to the
       perf dashboard.
@@ -152,7 +152,7 @@ class TestRunner(object):
     self.env_vars = env_vars or []
     self.gs_bucket = gs_bucket
     self.perf_bot_name = perf_bot_name
-    self.perf_master_name = perf_master_name
+    self.perf_main_name = perf_main_name
     self.perf_revision = perf_revision
     self.perf_build_number = perf_build_number
     self.perf_builder_name = perf_builder_name
@@ -433,7 +433,7 @@ class SimulatorTestRunner(TestRunner):
     perf_bot_name=None,
     perf_build_number=None,
     perf_builder_name=None,
-    perf_master_name=None,
+    perf_main_name=None,
     perf_revision=None,
     perf_x_value=None,
     test_args=None,
@@ -455,7 +455,7 @@ class SimulatorTestRunner(TestRunner):
       perf_build_number: Build number to indicate to the perf dashboard.
       perf_builder_name: Name of this builder as indicated to the perf
         dashboard.
-      perf_master_name: Name of the master as indicated to the perf dashboard.
+      perf_main_name: Name of the main as indicated to the perf dashboard.
       perf_revision: Revision to indicate to the perf dashboard.
       perf_x_value: Value to use on the x axis for all data uploaded to the
       perf dashboard.
@@ -472,7 +472,7 @@ class SimulatorTestRunner(TestRunner):
       perf_bot_name=perf_bot_name,
       perf_build_number=perf_build_number,
       perf_builder_name=perf_builder_name,
-      perf_master_name=perf_master_name,
+      perf_main_name=perf_main_name,
       perf_revision=perf_revision,
       perf_x_value=perf_x_value,
       test_args=test_args,
@@ -668,7 +668,7 @@ class SimulatorTestRunner(TestRunner):
         os.path.join(docs_dir, 'desktop.png'),
       ])
 
-      self.summary['links']['test data'] = slave_utils.ZipAndUpload(
+      self.summary['links']['test data'] = subordinate_utils.ZipAndUpload(
         self.gs_bucket,
         '%s.zip' % self.app_name,
         docs_dir,
@@ -795,7 +795,7 @@ class XCTestRunner(TestRunner):
     perf_bot_name=None,
     perf_build_number=None,
     perf_builder_name=None,
-    perf_master_name=None,
+    perf_main_name=None,
     perf_revision=None,
     perf_x_value=None,
     test_args=None,
@@ -814,7 +814,7 @@ class XCTestRunner(TestRunner):
       perf_build_number: Build number to indicate to the perf dashboard.
       perf_builder_name: Name of this builder as indicated to the perf
       dashboard.
-      perf_master_name: Name of the master as indicated to the perf dashboard.
+      perf_main_name: Name of the main as indicated to the perf dashboard.
       perf_revision: Revision to indicate to the perf dashboard.
       perf_x_value: Value to use on the x axis for all data uploaded to the
       perf dashboard.
@@ -832,7 +832,7 @@ class XCTestRunner(TestRunner):
       perf_bot_name=perf_bot_name,
       perf_build_number=perf_build_number,
       perf_builder_name=perf_builder_name,
-      perf_master_name=perf_master_name,
+      perf_main_name=perf_main_name,
       perf_revision=perf_revision,
       perf_x_value=perf_x_value,
       test_args=test_args,
@@ -1031,7 +1031,7 @@ class SimulatorXCTestRunner(XCTestRunner):
     perf_bot_name=None,
     perf_build_number=None,
     perf_builder_name=None,
-    perf_master_name=None,
+    perf_main_name=None,
     perf_revision=None,
     perf_x_value=None,
     test_args=None,
@@ -1054,7 +1054,7 @@ class SimulatorXCTestRunner(XCTestRunner):
       perf_build_number: Build number to indicate to the perf dashboard.
       perf_builder_name: Name of this builder as indicated to the perf
       dashboard.
-      perf_master_name: Name of the master as indicated to the perf dashboard.
+      perf_main_name: Name of the main as indicated to the perf dashboard.
       perf_revision: Revision to indicate to the perf dashboard.
       perf_x_value: Value to use on the x axis for all data uploaded to the
       perf dashboard.
@@ -1073,7 +1073,7 @@ class SimulatorXCTestRunner(XCTestRunner):
       perf_bot_name=perf_bot_name,
       perf_build_number=perf_build_number,
       perf_builder_name=perf_builder_name,
-      perf_master_name=perf_master_name,
+      perf_main_name=perf_main_name,
       perf_revision=perf_revision,
       perf_x_value=perf_x_value,
       test_args=test_args,
@@ -1119,7 +1119,7 @@ class SimulatorXCTestRunner(XCTestRunner):
         os.path.join(docs_dir, 'desktop.png'),
       ])
 
-      self.summary['links']['test data'] = slave_utils.ZipAndUpload(
+      self.summary['links']['test data'] = subordinate_utils.ZipAndUpload(
         self.gs_bucket,
         '%s.zip' % self.app_name,
         docs_dir,
@@ -1318,7 +1318,7 @@ class DeviceXCTestRunner(XCTestRunner):
     perf_bot_name=None,
     perf_build_number=None,
     perf_builder_name=None,
-    perf_master_name=None,
+    perf_main_name=None,
     perf_revision=None,
     perf_x_value=None,
     test_args=None,
@@ -1337,7 +1337,7 @@ class DeviceXCTestRunner(XCTestRunner):
       perf_build_number: Build number to indicate to the perf dashboard.
       perf_builder_name: Name of this builder as indicated to the perf
       dashboard.
-      perf_master_name: Name of the master as indicated to the perf dashboard.
+      perf_main_name: Name of the main as indicated to the perf dashboard.
       perf_revision: Revision to indicate to the perf dashboard.
       perf_x_value: Value to use on the x axis for all data uploaded to the
       perf dashboard.
@@ -1359,7 +1359,7 @@ class DeviceXCTestRunner(XCTestRunner):
       perf_bot_name=perf_bot_name,
       perf_build_number=perf_build_number,
       perf_builder_name=perf_builder_name,
-      perf_master_name=perf_master_name,
+      perf_main_name=perf_main_name,
       perf_revision=perf_revision,
       perf_x_value=perf_x_value,
       test_args=test_args,

@@ -2,13 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class ChromiumOSChromium(Master.Master2a):
+class ChromiumOSChromium(Main.Main2a):
   project_name = 'ChromiumOS Chromium'
-  master_port_id = 3
+  main_port_id = 3
   buildbot_url = 'http://build.chromium.org/p/chromiumos.chromium/'
   pubsub_service_account_file = 'service-account-luci-milo.json'
   pubsub_topic = 'projects/luci-milo/topics/public-buildbot'

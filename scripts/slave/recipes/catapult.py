@@ -69,9 +69,9 @@ def RunSteps(api, platform):
 def GenTests(api):
   yield (
     api.test('basic') +
-    api.properties(mastername='master.client.catapult',
+    api.properties(mainname='main.client.catapult',
                    buildername='windows',
-                   bot_id='windows_slave') +
+                   bot_id='windows_subordinate') +
     api.generator_script(
       'build_steps.py',
       {'name': 'Dashboard Tests', 'cmd': ['run_py_tests', '--no-hooks']},
@@ -80,9 +80,9 @@ def GenTests(api):
 
   yield (
     api.test('android') +
-    api.properties(mastername='master.client.catapult',
+    api.properties(mainname='main.client.catapult',
                    buildername='android',
-                   bot_id='android_slave',
+                   bot_id='android_subordinate',
                    platform='android') +
     api.generator_script(
         'build_steps.py',

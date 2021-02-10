@@ -13,7 +13,7 @@ def main():
   parser.add_argument('--message', help='commit message', required=True)
   parser.add_argument('--dest-branch',
                       help='git branch in the destination repo to sync to',
-                      default='master')
+                      default='main')
   parser.add_argument('source', help='directory to copy files from')
   parser.add_argument('dest', help='git checkout to copy files to')
   opts = parser.parse_args()

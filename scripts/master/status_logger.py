@@ -25,16 +25,16 @@ from infra_libs import ts_mon
 
 step_field_spec = [
     ts_mon.StringField('builder'),
-    ts_mon.StringField('master'),
+    ts_mon.StringField('main'),
     ts_mon.StringField('project_id'),
     ts_mon.StringField('result'),
-    ts_mon.StringField('slave'),
+    ts_mon.StringField('subordinate'),
     ts_mon.StringField('step_name'),
     ts_mon.StringField('subproject_tag'),
 ]
 
 step_durations = ts_mon.CumulativeDistributionMetric(
-    'buildbot/master/builders/steps/durations',
+    'buildbot/main/builders/steps/durations',
     'Time (in seconds) from step start to step end',
     step_field_spec,
     units=ts_mon.MetricsDataUnits.SECONDS,
@@ -42,46 +42,46 @@ step_durations = ts_mon.CumulativeDistributionMetric(
     bucketer=ts_mon.FixedWidthBucketer(10, 1000))
 
 step_counts = ts_mon.CounterMetric(
-    'buildbot/master/builders/steps/count',
+    'buildbot/main/builders/steps/count',
     'Count of step results, per builder and step',
     step_field_spec)
 
 field_spec = [
     ts_mon.StringField('builder'),
-    ts_mon.StringField('master'),
+    ts_mon.StringField('main'),
     ts_mon.StringField('project_id'),
     ts_mon.StringField('result'),
-    ts_mon.StringField('slave'),
+    ts_mon.StringField('subordinate'),
     ts_mon.StringField('subproject_id'),
 ]
 
-result_count = ts_mon.CounterMetric('buildbot/master/builders/results/count',
-    'Number of items consumed from ts_mon.log by mastermon',
+result_count = ts_mon.CounterMetric('buildbot/main/builders/results/count',
+    'Number of items consumed from ts_mon.log by mainmon',
     field_spec)
 # A custom bucketer with 12% resolution in the range of 1..10**5,
 # better suited for build cycle times.
 bucketer = ts_mon.GeometricBucketer(
     growth_factor=10**0.05, num_finite_buckets=100)
 cycle_times = ts_mon.CumulativeDistributionMetric(
-    'buildbot/master/builders/builds/durations',
-    'Durations (in seconds) that slaves spent actively doing work towards '
+    'buildbot/main/builders/builds/durations',
+    'Durations (in seconds) that subordinates spent actively doing work towards '
     'builds for each builder',
     field_spec,
     bucketer=bucketer)
 pending_times = ts_mon.CumulativeDistributionMetric(
-    'buildbot/master/builders/builds/pending_durations',
-    'Durations (in seconds) that the master spent waiting for slaves to become '
+    'buildbot/main/builders/builds/pending_durations',
+    'Durations (in seconds) that the main spent waiting for subordinates to become '
     'available for each builder',
     field_spec,
     bucketer=bucketer)
 total_times = ts_mon.CumulativeDistributionMetric(
-    'buildbot/master/builders/builds/total_durations',
+    'buildbot/main/builders/builds/total_durations',
     'Total duration (in seconds) that builds took to complete for each builder',
     field_spec,
     bucketer=bucketer)
 
 pre_test_times = ts_mon.CumulativeDistributionMetric(
-    'buildbot/master/builders/builds/pre_test_durations',
+    'buildbot/main/builders/builds/pre_test_durations',
     'Durations (in seconds) that builds spent before their "before_tests" step',
     field_spec,
     bucketer=bucketer)
@@ -111,7 +111,7 @@ class StatusEventLogger(StatusReceiverMultiService):
                service's parent directory by default, mainly overridden for
                testing.
       event_logging_dir: directory where to write events. This object adds the
-               master name to the path. Mainly overridden for testing.
+               main name to the path. Mainly overridden for testing.
       event_logfile: file name for writing events.
       ts_mon_logfile: file name for writing ts_mon metrics.
       logging_ignore_basedir (bool): when True, do not prepend
@@ -120,14 +120,14 @@ class StatusEventLogger(StatusReceiverMultiService):
                Default: enabled.
     """
     self._basedir = basedir
-    self.master_dir = os.path.basename(os.path.abspath(os.curdir))
+    self.main_dir = os.path.basename(os.path.abspath(os.curdir))
 
     self.logging_ignore_basedir = (
         logging_ignore_basedir or self.DEFAULT_LOGGING_IGNORE_BASEDIR)
 
     self._event_logging_dir = os.path.join(
       event_logging_dir or '/var/log/chrome-infra',
-      'status_logger-' + self.master_dir)
+      'status_logger-' + self.main_dir)
 
     event_logfile = event_logfile or 'events.log'
     ts_mon_logfile = ts_mon_logfile or 'ts_mon.log'
@@ -181,12 +181,12 @@ class StatusEventLogger(StatusReceiverMultiService):
       project_id=None, subproject_tag=None, steps=None, pre_test_time_s=None):
     """Log a build result for ts_mon.
 
-    This allows computing metrics for builds in mastermon.
+    This allows computing metrics for builds in mainmon.
     """
     d = {
         'timestamp_ms': finished * 1000,
         'builder': builder_name,
-        'slave': bot_name,
+        'subordinate': bot_name,
         'result': result.lower(),
         'duration_s': finished - started,
         'pending_s': started - scheduled,
@@ -223,7 +223,7 @@ class StatusEventLogger(StatusReceiverMultiService):
       'timestamp': timestamp,
       'builder': builder_name,
       'step_result': step_result,
-      'slave': bot_name,
+      'subordinate': bot_name,
     }
 
     if project_id:
@@ -247,7 +247,7 @@ class StatusEventLogger(StatusReceiverMultiService):
       # a bit of space.
       d = {'event-mon-timestamp-kind': timestamp_kind,
            'event-mon-event-timestamp': timestamp,
-           'event-mon-service-name': 'buildbot/master/%s' % self.master_dir,
+           'event-mon-service-name': 'buildbot/main/%s' % self.main_dir,
            'build-event-type': build_event_type,
            'build-event-hostname': bot_name,
            'build-event-build-name': builder_name,
@@ -415,7 +415,7 @@ class StatusEventLogger(StatusReceiverMultiService):
 
   def buildStarted(self, builderName, build):
     build_number = build.getNumber()
-    bot = build.getSlavename()
+    bot = build.getSubordinatename()
     started, _ = build.getTimes()
     properties = build.getProperties()
     self.send_build_event(
@@ -428,7 +428,7 @@ class StatusEventLogger(StatusReceiverMultiService):
     return self
 
   def stepStarted(self, build, step):
-    bot = build.getSlavename()
+    bot = build.getSubordinatename()
     builder_name = build.getBuilder().name
     build_number = build.getNumber()
     step_name = step.getName()
@@ -448,7 +448,7 @@ class StatusEventLogger(StatusReceiverMultiService):
   def stepFinished(self, build, step, results):
     builder_name = build.getBuilder().name
     build_number = build.getNumber()
-    bot = build.getSlavename()
+    bot = build.getSubordinatename()
     step_name = step.getName()
     step_text = ' '.join(step.getText())
     started, finished = step.getTimes()
@@ -478,13 +478,13 @@ class StatusEventLogger(StatusReceiverMultiService):
 
     if re.match('bot_update|update_scripts', step_name):
       values = {
-          'slave': bot,
+          'subordinate': bot,
           'project_id': project_id,
           'builder': builder_name,
           'result': step_result,
           'subproject_tag': subproject_tag,
           'step_name': step_name.split()[0],
-          'master': self.master_dir
+          'main': self.main_dir
       }
       fields = { key: value if value is not None else ''
                 for key, value in values.iteritems() }
@@ -493,7 +493,7 @@ class StatusEventLogger(StatusReceiverMultiService):
 
   def buildFinished(self, builderName, build, results):
     build_number = build.getNumber()
-    bot = build.getSlavename()
+    bot = build.getSubordinatename()
     started, finished = build.getTimes()
 
     # Calculate when build was scheduled if possible. Use build started
@@ -546,9 +546,9 @@ class StatusEventLogger(StatusReceiverMultiService):
     subproject_tag = properties.getProperty('subproject_tag')
 
     fields = {
-        'master': 'deprecated',
+        'main': 'deprecated',
         'builder': builderName,
-        'slave': bot,
+        'subordinate': bot,
         'result': buildbot.status.results.Results[results].lower(),
         'project_id': project_id if project_id else 'unknown',
         'subproject_id': subproject_tag if subproject_tag else 'unknown',
@@ -560,9 +560,9 @@ class StatusEventLogger(StatusReceiverMultiService):
     if pre_test_time_s:
       pre_test_times.add(pre_test_time_s, fields=fields)
 
-    # TODO(sergeyberezin): remove this when all masters are restarted,
+    # TODO(sergeyberezin): remove this when all mains are restarted,
     # and all graphs and alerts are migrated to the new metrics. Do
-    # this before turning down mastermon - to avoid accumulating logs.
+    # this before turning down mainmon - to avoid accumulating logs.
     self.send_build_result(
         scheduled, started, finished, builderName, bot,
         buildbot.status.results.Results[results],

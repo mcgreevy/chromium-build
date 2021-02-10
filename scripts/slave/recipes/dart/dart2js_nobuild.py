@@ -216,30 +216,30 @@ def GenTests(api):
       api.test('dart2js-linux-jsshell-hostchecked-csp-3-5-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='dart2js-linux-jsshell-hostchecked-csp-3-5-be',
         revision='hash_of_revision'))
    yield (
       api.test('dart2js-win7-ie10-dev') + api.platform('win', 32) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='dart2js-win7-ie10-dev',
         revision='hash_of_revision'))
    yield (
       api.test('dart2js-linux-drt-be') + api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='dart2js-linux-drt-93-105-dev',
         revision='hash_of_revision'))
    yield (
       api.test('dart2js-linux-d8-be') + api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='dart2js-linux-d8-1-4-be',
         revision='hash_of_revision'))
    yield (
       api.test('dart2js-mac10.11-safari-1-3-be') + api.platform('mac', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='dart2js-mac10.11-safari-1-3-be',
         revision='hash_of_revision'))

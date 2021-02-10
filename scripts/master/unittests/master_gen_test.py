@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Tests for scripts/master/master_gen.py."""
+"""Tests for scripts/main/main_gen.py."""
 
 import os
 import tempfile
@@ -13,14 +13,14 @@ import unittest
 # This adjusts sys.path, so it must be imported before the other modules.
 import test_env  # pylint: disable=W0403
 
-from master import master_gen
+from main import main_gen
 
 
 SAMPLE_WATERFALL_PYL = """\
 {
-  "master_base_class": "_FakeMasterBase",
-  "master_port": 20999,
-  "master_port_alt": 40999,
+  "main_base_class": "_FakeMainBase",
+  "main_port": 20999,
+  "main_port_alt": 40999,
   "bot_port": 30999,
   "templates": ["templates"],
 
@@ -95,9 +95,9 @@ SAMPLE_WATERFALL_PYL = """\
 
 SAMPLE_TRYSERVER_PYL = """\
 {
-  "master_base_class": "_FakeMasterBase",
-  "master_port": 20999,
-  "master_port_alt": 40999,
+  "main_base_class": "_FakeMainBase",
+  "main_port": 20999,
+  "main_port_alt": 40999,
   "bot_port": 30999,
   "buildbucket_bucket": "fake_bucket",
   "service_account_file": "fake_service_account",
@@ -130,24 +130,24 @@ SAMPLE_TRYSERVER_PYL = """\
 }
 """
 
-# This class fakes the base class from master_site_config.py.
-class _FakeMasterBase(object):
+# This class fakes the base class from main_site_config.py.
+class _FakeMainBase(object):
   in_production = False
   is_production_host = False
 
 
-# This class fakes the actual master class in master_site_config.py.
-class _FakeMaster(_FakeMasterBase):
+# This class fakes the actual main class in main_site_config.py.
+class _FakeMain(_FakeMainBase):
   project_name = 'test'
-  master_port = '20999'
-  slave_port = '30999'
-  master_port_alt = '40999'
+  main_port = '20999'
+  subordinate_port = '30999'
+  main_port_alt = '40999'
   buildbot_url = 'https://build.chromium.org/p/test'
   buildbucket_bucket = None
   service_account_file = None
 
 
-class PopulateBuildmasterConfigTest(unittest.TestCase):
+class PopulateBuildmainConfigTest(unittest.TestCase):
   def verify_timeouts(self, builder, expected_builder_timeout=None,
                       expected_no_output_timeout=2400):
     steps = builder['factory'].steps
@@ -163,7 +163,7 @@ class PopulateBuildmasterConfigTest(unittest.TestCase):
       fp.close()
 
       c = {}
-      master_gen.PopulateBuildmasterConfig(c, fp.name, _FakeMaster)
+      main_gen.PopulateBuildmainConfig(c, fp.name, _FakeMain)
       c['builders'] = sorted(c['builders'])
 
       self.assertEqual(len(c['builders']), 4)
@@ -188,11 +188,11 @@ class PopulateBuildmasterConfigTest(unittest.TestCase):
       fp.close()
 
       c = {}
-      master_gen.PopulateBuildmasterConfig(c, fp.name, _FakeMaster)
+      main_gen.PopulateBuildmainConfig(c, fp.name, _FakeMain)
 
       self.assertEqual(len(c['builders']), 1)
       self.assertEqual(c['builders'][0]['name'], 'Test Linux')
-      self.assertEqual(set(s.slavename for s in c['slaves']),
+      self.assertEqual(set(s.subordinatename for s in c['subordinates']),
                        set(['vm9998-m1', 'vm9999-m1']))
 
       self.assertEqual(len(c['change_source']), 0)
@@ -206,10 +206,10 @@ class PopulateBuildmasterConfigTest(unittest.TestCase):
 
 OLD_TRYSERVER_PYL = """\
 {
-  "master_base_class": "_FakeMasterBase",
-  "master_port": 20999,
-  "master_port_alt": 40999,
-  "slave_port": 30999,
+  "main_base_class": "_FakeMainBase",
+  "main_port": 20999,
+  "main_port_alt": 40999,
+  "subordinate_port": 30999,
   "buildbucket_bucket": "fake_bucket",
   "service_account_file": "fake_service_account",
   "templates": ["templates"],
@@ -221,21 +221,21 @@ OLD_TRYSERVER_PYL = """\
       },
       "recipe": "test_recipe",
       "scheduler": None,
-      "slave_pools": ["main"],
-      "slavebuilddir": "test"
+      "subordinate_pools": ["main"],
+      "subordinatebuilddir": "test"
     }
   },
 
   "schedulers": {},
 
-  "slave_pools": {
+  "subordinate_pools": {
     "main": {
-      "slave_data": {
+      "subordinate_data": {
         "bits": 64,
         "os":  "linux",
         "version": "precise"
       },
-      "slaves": ["vm9999-m1"],
+      "subordinates": ["vm9999-m1"],
     },
   },
 }
@@ -249,7 +249,7 @@ class OldNomenclature(unittest.TestCase):
       fp.close()
 
       c = {}
-      master_gen.PopulateBuildmasterConfig(c, fp.name, _FakeMaster)
+      main_gen.PopulateBuildmainConfig(c, fp.name, _FakeMain)
 
       self.assertEqual(len(c['builders']), 1)
       self.assertEqual(c['builders'][0]['name'], 'Test Linux')

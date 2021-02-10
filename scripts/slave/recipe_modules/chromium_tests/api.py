@@ -88,8 +88,8 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     """Adds builders to our builder map"""
     self._builders.update(builders)
 
-  def create_bot_config_object(self, mastername, buildername):
-    bot_id = {'mastername': mastername, 'buildername': buildername}
+  def create_bot_config_object(self, mainname, buildername):
+    bot_id = {'mainname': mainname, 'buildername': buildername}
     return bdb_module.BotConfig(self.builders, [bot_id])
 
   def create_generalized_bot_config_object(self, bot_ids):
@@ -154,7 +154,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     # WARNING: src-side runtest.py is only tested with chromium CQ builders.
     # Usage not covered by chromium CQ is not supported and can break
     # without notice.
-    if bot_config.get_master_setting('src_side_runtest_py'):
+    if bot_config.get_main_setting('src_side_runtest_py'):
       self.m.chromium.c.runtest_py.src_side = True
 
     bot_type = override_bot_type or bot_config.get('bot_type', 'builder_tester')
@@ -198,12 +198,12 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     else:
       self.m.chromium.runhooks()
 
-  # TODO(phajdan.jr): remove create_bot_db_from_master_dict. It adds another
-  # entry point to _add_master_dict_and_test_spec which can really complicate
+  # TODO(phajdan.jr): remove create_bot_db_from_main_dict. It adds another
+  # entry point to _add_main_dict_and_test_spec which can really complicate
   # things.
-  def create_bot_db_from_master_dict(self, mastername, master_dict):
+  def create_bot_db_from_main_dict(self, mainname, main_dict):
     bot_db = self.create_bot_db_object()
-    bot_db._add_master_dict_and_test_spec(mastername, master_dict, {})
+    bot_db._add_main_dict_and_test_spec(mainname, main_dict, {})
     return bot_db
 
   def prepare_checkout(self, bot_config, root_solution_revision=None):
@@ -237,14 +237,14 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
 
   # TODO(phajdan.jr): remove enable_swarming (http://crbug.com/684067).
   def generate_tests_from_test_spec(self, test_spec, builder_dict,
-      buildername, mastername, enable_swarming, swarming_dimensions,
+      buildername, mainname, enable_swarming, swarming_dimensions,
       scripts_compile_targets, generators, bot_update_step):
     tests = builder_dict.get('tests', ())
     # TODO(phajdan.jr): Switch everything to scripts generators and simplify.
     for generator in generators:
       tests = (
           tuple(generator(
-              self._api_for_tests, self, mastername, buildername, test_spec,
+              self._api_for_tests, self, mainname, buildername, test_spec,
               bot_update_step, enable_swarming=enable_swarming,
               swarming_dimensions=swarming_dimensions,
               scripts_compile_targets=scripts_compile_targets)) +
@@ -389,22 +389,22 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
   def compile_specific_targets(
       self, bot_config, update_step, bot_db,
       compile_targets, tests_including_triggered,
-      mb_mastername=None, mb_buildername=None, mb_config_path=None,
+      mb_mainname=None, mb_buildername=None, mb_config_path=None,
       override_bot_type=None):
     """Runs compile and related steps for given builder.
 
     Allows finer-grained control about exact compile targets used.
 
-    We don't use the given `mastername` and `buildername` to run MB, because
+    We don't use the given `mainname` and `buildername` to run MB, because
     they may be the values of the continuous builder the trybot may be
-    configured to match; instead we need to use the actual mastername and
-    buildername we're running on (Default to the "mastername" and
+    configured to match; instead we need to use the actual mainname and
+    buildername we're running on (Default to the "mainname" and
     "buildername" in the build properties -- self.m.properties, but could be
-    overridden by `mb_mastername` and `mb_buildername`), because it may be
+    overridden by `mb_mainname` and `mb_buildername`), because it may be
     configured with different MB settings.
 
     However, recipes used by Findit for culprit finding may still set
-    (mb_mastername, mb_buildername) = (mastername, buildername) to exactly match
+    (mb_mainname, mb_buildername) = (mainname, buildername) to exactly match
     a given continuous builder."""
 
     assert isinstance(bot_db, bdb_module.BotConfigAndTestDB), \
@@ -432,7 +432,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
         self.transient_check(update_step, lambda transform_name:
             self.run_mb_and_compile(compile_targets, isolated_targets,
                                     name_suffix=transform_name(''),
-                                    mb_mastername=mb_mastername,
+                                    mb_mainname=mb_mainname,
                                     mb_buildername=mb_buildername,
                                     mb_config_path=mb_config_path))
       except self.m.step.StepFailure:
@@ -456,23 +456,23 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
               update_step.presentation.properties['got_revision'],
               self.m.isolate.isolated_tests)
 
-  def archive_build(self, mastername, buildername, update_step, bot_db):
-    bot_config = bot_db.get_bot_config(mastername, buildername)
+  def archive_build(self, mainname, buildername, update_step, bot_db):
+    bot_config = bot_db.get_bot_config(mainname, buildername)
 
     if bot_config.get('bot_type') == 'builder':
       if not bot_config.get('cf_archive_build'):
-        master_config = bot_db.get_master_settings(mastername)
+        main_config = bot_db.get_main_settings(mainname)
         build_revision = update_step.presentation.properties['got_revision']
 
         # For archiving 'chromium.perf', the builder also archives a version
         # without perf test files for manual bisect.
         # (https://bugs.chromium.org/p/chromium/issues/detail?id=604452)
-        if (master_config.get('bisect_builders') and
-            buildername in master_config.get('bisect_builders')):
+        if (main_config.get('bisect_builders') and
+            buildername in main_config.get('bisect_builders')):
           self.m.archive.zip_and_upload_build(
               'package build for bisect',
               self.m.chromium.c.build_config_fs,
-              build_url=self._build_bisect_gs_archive_url(master_config),
+              build_url=self._build_bisect_gs_archive_url(main_config),
               build_revision=build_revision,
               cros_board=self.m.chromium.c.TARGET_CROS_BOARD,
               update_properties=update_step.presentation.properties,
@@ -485,7 +485,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
             'package build',
             self.m.chromium.c.build_config_fs,
             build_url=self._build_gs_archive_url(
-                mastername, master_config, buildername),
+                mainname, main_config, buildername),
             build_revision=build_revision,
             cros_board=self.m.chromium.c.TARGET_CROS_BOARD,
             # TODO(machenbach): Make asan a configuration switch.
@@ -496,17 +496,17 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
 
       # TODO(phajdan.jr): Triggering should be separate from archiving.
       trigger_specs = []
-      for loop_mastername, loop_buildername, builder_dict in sorted(
+      for loop_mainname, loop_buildername, builder_dict in sorted(
           bot_db.bot_configs_matching_parent_buildername(
-              mastername, buildername)):
+              mainname, buildername)):
         trigger_spec = {
             'builder_name': loop_buildername,
             'properties': {
-                'parent_mastername': mastername,
+                'parent_mainname': mainname,
             },
         }
-        if mastername != loop_mastername:
-          trigger_spec['bucket'] = 'master.' + loop_mastername
+        if mainname != loop_mainname:
+          trigger_spec['bucket'] = 'main.' + loop_mainname
         for name, value in update_step.presentation.properties.iteritems():
           if name.startswith('got_'):
             trigger_spec['properties']['parent_' + name] = value
@@ -534,15 +534,15 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
        )
 
   def run_mb_and_compile(self, compile_targets, isolated_targets, name_suffix,
-                         mb_mastername=None, mb_buildername=None,
+                         mb_mainname=None, mb_buildername=None,
                          mb_config_path=None):
     use_goma_module=False
     if self.m.chromium.c.project_generator.tool == 'mb':
-      mb_mastername = mb_mastername or self.m.properties['mastername']
+      mb_mainname = mb_mainname or self.m.properties['mainname']
       mb_buildername = mb_buildername or self.m.properties['buildername']
       use_goma = (self.m.chromium.c.compile_py.compiler and
                   'goma' in self.m.chromium.c.compile_py.compiler)
-      self.m.chromium.run_mb(mb_mastername, mb_buildername,
+      self.m.chromium.run_mb(mb_mainname, mb_buildername,
                              mb_config_path=mb_config_path,
                              use_goma=use_goma,
                              isolated_targets=isolated_targets,
@@ -553,7 +553,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     self.m.chromium.compile(compile_targets, name='compile%s' % name_suffix,
                             use_goma_module=use_goma_module)
 
-  def download_and_unzip_build(self, mastername, buildername, update_step,
+  def download_and_unzip_build(self, mainname, buildername, update_step,
                                bot_db, build_archive_url=None,
                                build_revision=None, override_bot_type=None):
     assert isinstance(bot_db, bdb_module.BotConfigAndTestDB), \
@@ -561,7 +561,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     # We only want to do this for tester bots (i.e. those which do not compile
     # locally).
     bot_type = override_bot_type or bot_db.get_bot_config(
-        mastername, buildername).get('bot_type')
+        mainname, buildername).get('bot_type')
     if bot_type != 'tester':
       return
 
@@ -584,8 +584,8 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     build_archive_url = build_archive_url or self.m.properties.get(
         'parent_build_archive_url')
     if build_archive_url is None:
-      master_config = bot_db.get_master_settings(mastername)
-      legacy_build_url = self._make_legacy_build_url(master_config, mastername)
+      main_config = bot_db.get_main_settings(mainname)
+      legacy_build_url = self._make_legacy_build_url(main_config, mainname)
 
     self.m.archive.download_and_unzip_build(
       step_name='extract build',
@@ -594,16 +594,16 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
       build_revision=build_revision,
       build_archive_url=build_archive_url)
 
-  def _make_legacy_build_url(self, master_config, mastername):
-    # The master where the build was zipped and uploaded from.
-    source_master = self.m.properties.get('parent_mastername')
-    if not source_master:
-      source_master = self.m.properties['mastername']
+  def _make_legacy_build_url(self, main_config, mainname):
+    # The main where the build was zipped and uploaded from.
+    source_main = self.m.properties.get('parent_mainname')
+    if not source_main:
+      source_main = self.m.properties['mainname']
     return self.m.archive.legacy_download_url(
-               master_config.get('build_gs_bucket'),
+               main_config.get('build_gs_bucket'),
                extra_url_components=(
-                   None if mastername.startswith('chromium.perf')
-                   else source_master))
+                   None if mainname.startswith('chromium.perf')
+                   else source_main))
 
   @contextlib.contextmanager
   def wrap_chromium_tests(self, bot_config, tests=None):
@@ -635,8 +635,8 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
         #TODO(prasadv): Remove this hack and implement specific functions
         # at the point of call.
         perf_setup = bot_config.matches_any_bot_id(lambda bot_id:
-            bot_id['mastername'].startswith('chromium.perf') or
-            bot_id['mastername'].startswith('tryserver.chromium.perf'))
+            bot_id['mainname'].startswith('chromium.perf') or
+            bot_id['mainname'].startswith('tryserver.chromium.perf'))
         self.m.chromium_android.common_tests_setup_steps(perf_setup=perf_setup)
 
       try:
@@ -669,7 +669,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
       self.m.chromium.runhooks(name='runhooks (without patch)')
 
   def run_tests_on_tryserver(self, bot_config, tests, bot_update_step,
-                             affected_files, mb_mastername=None,
+                             affected_files, mb_mainname=None,
                              mb_buildername=None, disable_deapply_patch=False):
     def deapply_patch_fn(failing_tests):
       self.deapply_patch(bot_update_step)
@@ -685,7 +685,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
           self.m.isolate.clean_isolated_files(self.m.chromium.output_dir)
         self.run_mb_and_compile(compile_targets, failing_swarming_tests,
                                 ' (without patch)',
-                                mb_mastername=mb_mastername,
+                                mb_mainname=mb_mainname,
                                 mb_buildername=mb_buildername)
         if failing_swarming_tests:
           self.m.isolate.isolate_tests(self.m.chromium.output_dir,
@@ -715,36 +715,36 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
               'TESTS FAILED; retries without patch disabled (%s)'
                   % deapply_patch_reason)
 
-  def _build_bisect_gs_archive_url(self, master_config):
+  def _build_bisect_gs_archive_url(self, main_config):
     return self.m.archive.legacy_upload_url(
-        master_config.get('bisect_build_gs_bucket'),
-        extra_url_components=master_config.get('bisect_build_gs_extra'))
+        main_config.get('bisect_build_gs_bucket'),
+        extra_url_components=main_config.get('bisect_build_gs_extra'))
 
-  def _build_gs_archive_url(self, mastername, master_config, buildername):
+  def _build_gs_archive_url(self, mainname, main_config, buildername):
     """Returns the archive URL to pass to self.m.archive.zip_and_upload_build.
 
-    Most builders on most masters use a standard format for the build archive
-    URL, but some builders on some masters may specify custom places to upload
+    Most builders on most mains use a standard format for the build archive
+    URL, but some builders on some mains may specify custom places to upload
     builds to. These special cases include:
       'chromium.perf' or 'chromium.perf.fyi':
-        Exclude the name of the master from the url.
+        Exclude the name of the main from the url.
       'tryserver.chromium.perf', or
           linux_full_bisect_builder on 'tryserver.chromium.linux':
         Return None so that the archive url specified in factory_properties
-        (as set on the master's configuration) is used instead.
+        (as set on the main's configuration) is used instead.
     """
-    if mastername.startswith('chromium.perf'):
+    if mainname.startswith('chromium.perf'):
       return self.m.archive.legacy_upload_url(
-          master_config.get('build_gs_bucket'),
+          main_config.get('build_gs_bucket'),
           extra_url_components=None)
-    elif (mastername == 'tryserver.chromium.perf' or
-          (mastername == 'tryserver.chromium.linux' and
+    elif (mainname == 'tryserver.chromium.perf' or
+          (mainname == 'tryserver.chromium.linux' and
            buildername == 'linux_full_bisect_builder')):
       return None
     else:
       return self.m.archive.legacy_upload_url(
-          master_config.get('build_gs_bucket'),
-          extra_url_components=self.m.properties['mastername'])
+          main_config.get('build_gs_bucket'),
+          extra_url_components=self.m.properties['mainname'])
 
   def get_common_args_for_scripts(self):
     args = []
@@ -758,21 +758,21 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
       'checkout': self.m.path['checkout'],
       'runit.py': self.package_repo_resource('scripts', 'tools', 'runit.py'),
       'runtest.py': self.package_repo_resource(
-          'scripts', 'slave', 'runtest.py'),
+          'scripts', 'subordinate', 'runtest.py'),
     }
     args.extend(['--paths', self.m.json.input(paths)])
 
     properties = {}
     # TODO(phajdan.jr): Remove buildnumber when no longer used.
 
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
-    master_dict = self.builders.get(mastername, {})
-    bot_config = master_dict.get('builders', {}).get(buildername, {})
+    main_dict = self.builders.get(mainname, {})
+    bot_config = main_dict.get('builders', {}).get(buildername, {})
 
-    for name in ('buildername', 'bot_id', 'buildnumber', 'mastername'):
+    for name in ('buildername', 'bot_id', 'buildnumber', 'mainname'):
       properties[name] = self.m.properties[name]
-    properties['slavename'] = properties['bot_id']
+    properties['subordinatename'] = properties['bot_id']
 
     # Optional properties
     for name in ('perf-id', 'results-url'):
@@ -818,10 +818,10 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
     return result.json.output
 
   def main_waterfall_steps(self):
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
 
-    bot_config = self.create_bot_config_object(mastername, buildername)
+    bot_config = self.create_bot_config_object(mainname, buildername)
     self.configure_build(bot_config)
     update_step, bot_db = self.prepare_checkout(bot_config)
     tests, tests_including_triggered = self.get_tests(bot_config, bot_db)
@@ -831,14 +831,14 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
         bot_config, update_step, bot_db,
         compile_targets, tests_including_triggered)
     self.archive_build(
-        mastername, buildername, update_step, bot_db)
-    self.download_and_unzip_build(mastername, buildername, update_step, bot_db)
+        mainname, buildername, update_step, bot_db)
+    self.download_and_unzip_build(mainname, buildername, update_step, bot_db)
 
     if not tests:
       return
 
     self.m.chromium_swarming.configure_swarming(
-        'chromium', precommit=False, mastername=mastername)
+        'chromium', precommit=False, mainname=mainname)
     test_runner = self.create_test_runner(
         tests, serialize_tests=bot_config.get('serialize_tests'))
     with self.wrap_chromium_tests(bot_config, tests):
@@ -858,12 +858,12 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
             affected_files, disable_deapply_patch=disable_deapply_patch)
 
   def _trybot_steps_internal(self):
-    mastername = self.m.properties.get('mastername')
+    mainname = self.m.properties.get('mainname')
     buildername = self.m.properties.get('buildername')
-    bot_config = self.trybots.get(mastername, {}).get(
+    bot_config = self.trybots.get(mainname, {}).get(
         'builders', {}).get(buildername)
-    assert bot_config, 'No bot config for master/builder [%s / %s]' % (
-        mastername, buildername)
+    assert bot_config, 'No bot config for main/builder [%s / %s]' % (
+        mainname, buildername)
 
     bot_config_object = self.create_generalized_bot_config_object(
         bot_config['bot_ids'])
@@ -941,7 +941,7 @@ class ChromiumTestsApi(recipe_api.RecipeApi):
               results_url=bot_config.get('results-url'),
               perf_dashboard_id='webkt_layout_tests_exparchive',
               io_timeout=None,
-              waterfall_mastername=mastername,
+              waterfall_mainname=mainname,
               waterfall_buildername=buildername,
               merge=merge,
               results_handler=self.steps.LayoutTestResultsHandler(),

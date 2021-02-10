@@ -26,7 +26,7 @@ def GenTests(api):
   yield (
       api.test('failure') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           bot_id='test_bot_id',
           buildnumber=123) +
@@ -36,7 +36,7 @@ def GenTests(api):
   yield (
       api.test('serialize_tests') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           bot_id='test_bot_id',
           buildnumber=123,

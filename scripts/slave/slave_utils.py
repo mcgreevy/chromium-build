@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Functions specific to build slaves, shared by several buildbot scripts.
+"""Functions specific to build subordinates, shared by several buildbot scripts.
 """
 
 import datetime
@@ -17,8 +17,8 @@ import tempfile
 import time
 
 from common import chromium_utils
-from slave.bootstrap import ImportMasterConfigs # pylint: disable=W0611
-from common.chromium_utils import GetActiveMaster # pylint: disable=W0611
+from subordinate.bootstrap import ImportMainConfigs # pylint: disable=W0611
+from common.chromium_utils import GetActiveMain # pylint: disable=W0611
 
 # These codes used to distinguish true errors from script warnings.
 ERROR_EXIT_CODE = 1
@@ -27,8 +27,8 @@ WARNING_EXIT_CODE = 88
 
 # Regex matching git comment lines containing svn revision info.
 GIT_SVN_ID_RE = re.compile(r'^git-svn-id: .*@([0-9]+) .*$')
-# Regex for the master branch commit position.
-GIT_CR_POS_RE = re.compile(r'^Cr-Commit-Position: refs/heads/master@{#(\d+)}$')
+# Regex for the main branch commit position.
+GIT_CR_POS_RE = re.compile(r'^Cr-Commit-Position: refs/heads/main@{#(\d+)}$')
 
 # Global variables set by command-line arguments (AddArgs, AddOpts).
 _ARGS_GSUTIL_PY_PATH = os.environ.get('BUILD_SLAVE_UTILS_GSUTIL_PY_PATH')
@@ -98,11 +98,11 @@ def GetBuildRevisions(src_dir, webkit_dir=None, revision_dir=None):
 
 
 def GetZipFileNames(
-    mastername, buildnumber, parent_buildnumber, build_revision,
+    mainname, buildnumber, parent_buildnumber, build_revision,
     webkit_revision=None, extract=False, use_try_buildnumber=True):
   base_name = 'full-build-%s' % chromium_utils.PlatformName()
 
-  if 'try' in mastername and use_try_buildnumber:
+  if 'try' in mainname and use_try_buildnumber:
     if extract:
       if not parent_buildnumber:
         raise Exception('missing parent_buildnumber')
@@ -117,15 +117,15 @@ def GetZipFileNames(
   return base_name, version_suffix
 
 
-def SlaveBuildName(chrome_dir):
-  """Extracts the build name of this slave (e.g., 'chrome-release') from the
+def SubordinateBuildName(chrome_dir):
+  """Extracts the build name of this subordinate (e.g., 'chrome-release') from the
   leaf subdir of its build directory.
   """
-  return os.path.basename(SlaveBaseDir(chrome_dir))
+  return os.path.basename(SubordinateBaseDir(chrome_dir))
 
 
-def SlaveBaseDir(chrome_dir):
-  """Finds the full path to the build slave's base directory (e.g.
+def SubordinateBaseDir(chrome_dir):
+  """Finds the full path to the build subordinate's base directory (e.g.
   'c:/b/chrome/chrome-release').  This is assumed to be the parent of the
   shallowest 'build' directory in the chrome_dir path.
 
@@ -139,13 +139,13 @@ def SlaveBaseDir(chrome_dir):
     if leaf == 'build':
       # Remember this one and keep looking for something shallower.
       result = parent
-    if leaf == 'slave':
+    if leaf == 'subordinate':
       # We are too deep, stop now.
       break
     prev_dir = curr_dir
     curr_dir = parent
   if not result:
-    raise chromium_utils.PathNotFound('Unable to find slave base dir above %s' %
+    raise chromium_utils.PathNotFound('Unable to find subordinate base dir above %s' %
                                       chrome_dir)
   return result
 
@@ -155,7 +155,7 @@ def GetStagingDir(start_dir):
   full path.
   """
   start_dir = os.path.abspath(start_dir)
-  staging_dir = os.path.join(SlaveBaseDir(start_dir), 'chrome_staging')
+  staging_dir = os.path.join(SubordinateBaseDir(start_dir), 'chrome_staging')
   chromium_utils.MaybeMakeDirectory(staging_dir)
   return staging_dir
 
@@ -836,7 +836,7 @@ def _IsGitDirectory(dir_path):
 
 
 def AddArgs(parser):
-  """Adds slave_utils common arguments to the supplied argparse parser.
+  """Adds subordinate_utils common arguments to the supplied argparse parser.
 
   Args:
       parser (argparse.ArgumentParser): The argument parser to augment.
@@ -844,10 +844,10 @@ def AddArgs(parser):
   Returns: callable(args)
       A callback function that should be invoked with the parsed args. This
       completes the processing and loads the result of the parsing into
-      slave_utils.
+      subordinate_utils.
   """
-  group = parser.add_argument_group(title='Common `slave_utils.py` Options')
-  group.add_argument('--slave-utils-gsutil-py-path', metavar='PATH',
+  group = parser.add_argument_group(title='Common `subordinate_utils.py` Options')
+  group.add_argument('--subordinate-utils-gsutil-py-path', metavar='PATH',
       help='The path to the `gsutil.py` command to use for Google Storage '
            'operations. This file lives in the <depot_tools> repository.')
 
@@ -855,7 +855,7 @@ def AddArgs(parser):
 
 
 def AddOpts(parser):
-  """Adds slave_utils common arguments to the supplied optparse parser.
+  """Adds subordinate_utils common arguments to the supplied optparse parser.
 
   Args:
       parser (optparse.OptionParser): The argument parser to augment.
@@ -863,10 +863,10 @@ def AddOpts(parser):
   Returns: callable(opts)
       A callback function that should be invoked with the parsed opts. This
       completes the processing and loads the result of the parsing into
-      slave_utils.
+      subordinate_utils.
   """
-  group = optparse.OptionGroup(parser, 'Common `slave_utils.py` Options')
-  group.add_option('--slave-utils-gsutil-py-path', metavar='PATH',
+  group = optparse.OptionGroup(parser, 'Common `subordinate_utils.py` Options')
+  group.add_option('--subordinate-utils-gsutil-py-path', metavar='PATH',
       help='The path to the `gsutil` command to use for Google Storage '
            'operations. This file lives in the <depot_tools> repository.')
   parser.add_option_group(group)
@@ -880,12 +880,12 @@ def _AddArgsCallback(opts):
   both argparse and optparse results.
   """
   global _ARGS_GSUTIL_PY_PATH
-  _ARGS_GSUTIL_PY_PATH = opts.slave_utils_gsutil_py_path
+  _ARGS_GSUTIL_PY_PATH = opts.subordinate_utils_gsutil_py_path
 
 
 def GetPassthroughArgs(opts):
-  """Returns (list): A list of slave_utils arguments that can be forwarded to
-      other slave_utils-args-aware scrpts.
+  """Returns (list): A list of subordinate_utils arguments that can be forwarded to
+      other subordinate_utils-args-aware scrpts.
 
   Args:
       opts: Either the parsed argparse results or the optparse options
@@ -893,6 +893,6 @@ def GetPassthroughArgs(opts):
           AddArgs/AddOpts.
   """
   args = []
-  if opts.slave_utils_gsutil_py_path:
-    args += ['--slave-utils-gsutil-py-path', opts.slave_utils_gsutil_py_path]
+  if opts.subordinate_utils_gsutil_py_path:
+    args += ['--subordinate-utils-gsutil-py-path', opts.subordinate_utils_gsutil_py_path]
   return args

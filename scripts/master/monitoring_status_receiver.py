@@ -15,48 +15,48 @@ from twisted.python import log, threadpool
 
 from infra_libs import ts_mon
 
-uptime = ts_mon.FloatMetric('buildbot/master/uptime',
-    'Time (in seconds) since the master was started',
-    [ts_mon.StringField('master')])
-accepting_builds = ts_mon.BooleanMetric('buildbot/master/accepting_builds',
-    'Whether the master\'s BuildRequestDistributor is running',
-    [ts_mon.StringField('master')])
+uptime = ts_mon.FloatMetric('buildbot/main/uptime',
+    'Time (in seconds) since the main was started',
+    [ts_mon.StringField('main')])
+accepting_builds = ts_mon.BooleanMetric('buildbot/main/accepting_builds',
+    'Whether the main\'s BuildRequestDistributor is running',
+    [ts_mon.StringField('main')])
 
-connected = ts_mon.GaugeMetric('buildbot/master/builders/connected_slaves',
-    'Number of slaves currently connected, per builder',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
-current_builds = ts_mon.GaugeMetric('buildbot/master/builders/current_builds',
+connected = ts_mon.GaugeMetric('buildbot/main/builders/connected_subordinates',
+    'Number of subordinates currently connected, per builder',
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
+current_builds = ts_mon.GaugeMetric('buildbot/main/builders/current_builds',
     'Number of builds currently running, per builder',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
-pending_builds = ts_mon.GaugeMetric('buildbot/master/builders/pending_builds',
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
+pending_builds = ts_mon.GaugeMetric('buildbot/main/builders/pending_builds',
     'Number of builds pending, per builder',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
-last_build_status = ts_mon.StringMetric('buildbot/master/builders/last_result',
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
+last_build_status = ts_mon.StringMetric('buildbot/main/builders/last_result',
     'The build result of the last completed build.',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
 consecutive_failures = ts_mon.GaugeMetric(
-    'buildbot/master/builders/consecutive_failures',
+    'buildbot/main/builders/consecutive_failures',
     'The number of consecutive failures until now.', [
-        ts_mon.StringField('master'),
+        ts_mon.StringField('main'),
         ts_mon.StringField('builder'),
         ts_mon.StringField('failure_type')])
-state = ts_mon.StringMetric('buildbot/master/builders/state',
+state = ts_mon.StringMetric('buildbot/main/builders/state',
     'State of this builder - building, idle, or offline',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
-total = ts_mon.GaugeMetric('buildbot/master/builders/total_slaves',
-    'Number of slaves configured on this builder - connected or not',
-    [ts_mon.StringField('master'), ts_mon.StringField('builder')])
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
+total = ts_mon.GaugeMetric('buildbot/main/builders/total_subordinates',
+    'Number of subordinates configured on this builder - connected or not',
+    [ts_mon.StringField('main'), ts_mon.StringField('builder')])
 
-reactor_queue = ts_mon.GaugeMetric('buildbot/master/reactor/queue',
+reactor_queue = ts_mon.GaugeMetric('buildbot/main/reactor/queue',
     'Number of items in the reactor queue.',
     None)
 reactor_queue_created = ts_mon.FloatMetric(
-    'buildbot/master/reactor/queue_age_created',
+    'buildbot/main/reactor/queue_age_created',
     'Age of oldest item in the reactor queue by creation.',
     None,
     units=ts_mon.MetricsDataUnits.MILLISECONDS)
 reactor_queue_modified = ts_mon.FloatMetric(
-    'buildbot/master/reactor/queue_age_modified',
+    'buildbot/main/reactor/queue_age_modified',
     'Age of oldest item in the reactor queue by last modified.',
     None,
     units=ts_mon.MetricsDataUnits.MILLISECONDS)
@@ -160,7 +160,7 @@ class MonitoringStatusReceiver(StatusReceiverMultiService):
           # Only log things that led to this callchain from the buildbot
           # directory.
           if ('buildbot_8_4p1' in filename
-              or os.path.join('scripts', 'master') in filename):
+              or os.path.join('scripts', 'main') in filename):
             shortname = os.path.basename(filename)
             callchain.append('%s:%d:%s' % (shortname, line, func_name))
         return str(callchain)
@@ -176,9 +176,9 @@ class MonitoringStatusReceiver(StatusReceiverMultiService):
         '\n  '.join(self.callbackInfo(f, args, kwargs)
                   for f, args, kwargs in reactor.threadCallQueue[:20]),
     ))
-    uptime.set(time.time() - SERVER_STARTED, fields={'master': ''})
-    accepting_builds.set(bool(self.status.master.botmaster.brd.running),
-                         fields={'master': ''})
+    uptime.set(time.time() - SERVER_STARTED, fields={'main': ''})
+    accepting_builds.set(bool(self.status.main.botmain.brd.running),
+                         fields={'main': ''})
     reactor_queue.set(len(reactor.threadCallQueue))
 
     # Iterate through the reactor queue to figure out the oldest deferred.
@@ -196,14 +196,14 @@ class MonitoringStatusReceiver(StatusReceiverMultiService):
     builder_names = set()
     for builder_name in self.status.getBuilderNames():
       builder_names.add(builder_name)
-      fields = {'builder': builder_name, 'master': ''}
+      fields = {'builder': builder_name, 'main': ''}
       builder = self.status.getBuilder(builder_name)
-      slaves = builder.getSlaves()
+      subordinates = builder.getSubordinates()
 
-      connected.set(sum(1 for x in slaves if x.connected), fields=fields)
+      connected.set(sum(1 for x in subordinates if x.connected), fields=fields)
       current_builds.set(len(builder.getCurrentBuilds()), fields=fields)
       state.set(builder.currentBigState, fields=fields)
-      total.set(len(slaves), fields=fields)
+      total.set(len(subordinates), fields=fields)
 
       last_build = builder.getLastFinishedBuild()
       if last_build:
@@ -223,7 +223,7 @@ class MonitoringStatusReceiver(StatusReceiverMultiService):
 
     # Get pending build requests directly from the db for all builders at
     # once.
-    d = self.status.master.db.buildrequests.getBuildRequests(claimed=False)
+    d = self.status.main.db.buildrequests.getBuildRequests(claimed=False)
 
     # Timeout the database request after 5 seconds.
     def timeout():
@@ -244,7 +244,7 @@ class MonitoringStatusReceiver(StatusReceiverMultiService):
 
       for builder_name, count in pending_per_builder.iteritems():
         pending_builds.set(count,
-                           fields={'builder': builder_name, 'master': ''})
+                           fields={'builder': builder_name, 'main': ''})
 
   def _flush_and_log_exceptions(self):
     try:

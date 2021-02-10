@@ -14,7 +14,7 @@ DEPS = [
 
 
 def RunSteps(api):
-  mastername = api.properties.get('mastername')
+  mainname = api.properties.get('mainname')
   buildername = api.properties.get('buildername')
   use_goma_module = api.properties.get('use_goma_module', False)
   out_dir = api.properties.get('out_dir', None)
@@ -22,7 +22,7 @@ def RunSteps(api):
   ninja_confirm_noop = api.properties.get('ninja_confirm_noop', False)
 
   bot_config = api.chromium_tests.create_bot_config_object(
-      mastername, buildername)
+      mainname, buildername)
   api.chromium_tests.configure_build(bot_config)
 
   if failfast:
@@ -35,7 +35,7 @@ def RunSteps(api):
 
   mb_config_path = api.properties.get('mb_config_path')
 
-  api.chromium.run_mb(mastername, buildername, use_goma=True,
+  api.chromium.run_mb(mainname, buildername, use_goma=True,
                       mb_config_path=mb_config_path,
                       android_version_code=3,
                       android_version_name="example")
@@ -47,7 +47,7 @@ def RunSteps(api):
 
 def GenTests(api):
   yield api.test('basic_out_dir') + api.properties(
-      mastername='chromium.linux',
+      mainname='chromium.linux',
       buildername='Android Builder (dbg)',
       bot_id='build1-a1',
       buildnumber='77457',
@@ -55,7 +55,7 @@ def GenTests(api):
   )
 
   yield api.test('basic_out_dir_with_custom_mb_config') + api.properties(
-      mastername='chromium.linux',
+      mainname='chromium.linux',
       buildername='Android Builder (dbg)',
       bot_id='build1-a1',
       buildnumber='77457',
@@ -64,7 +64,7 @@ def GenTests(api):
   )
 
   yield api.test('basic_out_dir_without_compile_py') + api.properties(
-      mastername='chromium.linux',
+      mainname='chromium.linux',
       buildername='Android Builder (dbg)',
       bot_id='build1-a1',
       buildnumber='77457',
@@ -72,7 +72,7 @@ def GenTests(api):
   )
 
   yield api.test('basic_out_dir_with_goma_module') + api.properties(
-      mastername='chromium.linux',
+      mainname='chromium.linux',
       buildername='Android Builder (dbg)',
       bot_id='build1-a1',
       buildnumber='77457',
@@ -81,7 +81,7 @@ def GenTests(api):
   )
 
   yield api.test('basic_no_out_dir_with_goma_module') + api.properties(
-      mastername='chromium.linux',
+      mainname='chromium.linux',
       buildername='Android Builder (dbg)',
       bot_id='build1-a1',
       buildnumber='77457',
@@ -90,7 +90,7 @@ def GenTests(api):
 
   yield (api.test('basic_out_dir_goma_module_build_failure') +
          api.properties(
-             mastername='chromium.linux',
+             mainname='chromium.linux',
              buildername='Android Builder (dbg)',
              bot_id='build1-a1',
              buildnumber='77457',
@@ -114,7 +114,7 @@ def GenTests(api):
 
   yield (api.test('basic_out_dir_ninja_build_failure') +
          api.properties(
-             mastername='chromium.linux',
+             mainname='chromium.linux',
              buildername='Android Builder (dbg)',
              bot_id='build1-a1',
              buildnumber='77457',
@@ -124,7 +124,7 @@ def GenTests(api):
 
   yield (api.test('basic_out_dir_ninja_no_op_failure') +
          api.properties(
-             mastername='chromium.linux',
+             mainname='chromium.linux',
              buildername='Android Builder (dbg)',
              bot_id='build1-a1',
              buildnumber='77457',
@@ -138,7 +138,7 @@ def GenTests(api):
 
   yield (api.test('basic_out_dir_goma_module_start_failure') +
          api.properties(
-             mastername='chromium.linux',
+             mainname='chromium.linux',
              buildername='Android Builder (dbg)',
              bot_id='build1-a1',
              buildnumber='77457',
@@ -159,7 +159,7 @@ def GenTests(api):
 
   yield (api.test('basic_out_dir_goma_module_ping_failure') +
          api.properties(
-             mastername='chromium.linux',
+             mainname='chromium.linux',
              buildername='Android Builder (dbg)',
              bot_id='build1-a1',
              buildnumber='77457',

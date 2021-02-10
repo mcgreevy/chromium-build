@@ -19,12 +19,12 @@ def RunSteps(api):
 
   if api.tryserver.is_tryserver:
     bot_config = api.chromium_tests.trybots[
-        api.properties['mastername']]['builders'][api.properties['buildername']]
+        api.properties['mainname']]['builders'][api.properties['buildername']]
     bot_config_object = api.chromium_tests.create_generalized_bot_config_object(
         bot_config['bot_ids'])
   else:
     bot_config_object = api.chromium_tests.create_bot_config_object(
-        api.properties['mastername'], api.properties['buildername'])
+        api.properties['mainname'], api.properties['buildername'])
   api.chromium_tests.configure_build(bot_config_object)
   with api.chromium_tests.wrap_chromium_tests(bot_config_object, tests=tests):
     pass
@@ -34,7 +34,7 @@ def GenTests(api):
   yield (
       api.test('require_device_steps') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.android',
+          mainname='tryserver.chromium.android',
           buildername='android_blink_rel',
           local_gtest=True)
   )
@@ -42,7 +42,7 @@ def GenTests(api):
   yield (
       api.test('no_require_device_steps') +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Android Tests')
   )
 
@@ -50,14 +50,14 @@ def GenTests(api):
       api.test('win') +
       api.platform.name('win') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.win',
+          mainname='tryserver.chromium.win',
           buildername='win_chromium_rel_ng')
   )
 
   yield (
       api.test('isolated_targets') +
       api.properties.generic(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Tests',
           swarming_gtest=True)
   )

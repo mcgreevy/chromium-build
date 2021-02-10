@@ -73,7 +73,7 @@ def RunSteps(api):
     api.gsutil(['cp', '-a', 'public-read', tarball, uri],
                name='upoad tarball')
 
-  # Trigger slaves
+  # Trigger subordinates
   target_builder = buildername.replace('cross-', 'target-')
   trigger_spec = [{
     'builder_name': '%s-%s' % (target_builder, channel)
@@ -85,12 +85,12 @@ def GenTests(api):
   yield (
     api.test('cross-arm-vm-linux-release-recipe') +
     api.platform('linux', 64) +
-    api.properties.generic(mastername='client.dart',
+    api.properties.generic(mainname='client.dart',
                            buildername='cross-arm-vm-linux-release-recipe-be',
                            revision='abcd1234efef5656'))
   yield (
     api.test('clobber-coverage') +
     api.platform('linux', 64) +
-    api.properties.generic(mastername='client.dart',
+    api.properties.generic(mainname='client.dart',
                            buildername='test-coverage-stable',
                            revision='abcd1234efef5656'))

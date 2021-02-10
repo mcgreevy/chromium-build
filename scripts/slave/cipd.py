@@ -21,7 +21,7 @@ BUILD_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(
 sys.path.insert(0, os.path.join(BUILD_ROOT, 'scripts'))
 
 import common.env
-import slave.infra_platform
+import subordinate.infra_platform
 
 # Instance-wide logger.
 LOGGER = logging.getLogger('cipd')
@@ -40,7 +40,7 @@ def cipd_ensure(path, packages, service_account_json=None,
       fd.write('%s %s\n' % (pkg.name, pkg.version))
 
   cmd = [
-      'cipd'+slave.infra_platform.exe_suffix(),
+      'cipd'+subordinate.infra_platform.exe_suffix(),
       'ensure',
       '-ensure-file', manifest_path,
       '-root', path,

@@ -22,7 +22,7 @@ PROPERTIES = {
   # Non-patch jobs properties.
   'repository': Property(kind=str, help='Full url to a Git repository',
                          default=None, param_name='repo_url'),
-  'refspec': Property(kind=str, help='Refspec to checkout', default='master'),
+  'refspec': Property(kind=str, help='Refspec to checkout', default='main'),
 }
 
 

@@ -378,6 +378,6 @@ def GenTests(api):
   # A valid commit to flutter/engine, to make the gsutil urls look real.
   for platform in ('mac', 'linux', 'win'):
     yield (api.test(platform) + api.platform(platform, 64)
-        + api.properties(mastername='client.flutter',
+        + api.properties(mainname='client.flutter',
               buildername='%s Engine' % platform.capitalize(),
               bot_id='fake-m1', clobber=''))

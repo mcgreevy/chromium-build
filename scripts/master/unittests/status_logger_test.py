@@ -12,7 +12,7 @@ import unittest
 
 import test_env  # pylint: disable=W0611,W0403
 
-from master import status_logger
+from main import status_logger
 
 from infra_libs import ts_mon
 
@@ -50,7 +50,7 @@ class Build(object):
   def getBuilder(self):
     return Builder()
 
-  def getSlavename(self):
+  def getSubordinatename(self):
     return 'cool-m1'
 
   def getProperty(self, _name):
@@ -259,7 +259,7 @@ class StatusLoggerTest(unittest.TestCase):
 
       # Ensure we wrote the correct json line.
       expected = {
-          "slave": "cool-m1",
+          "subordinate": "cool-m1",
           "builder": "coconuts",
           "timestamp": 5500,
           "step_result": "success",
@@ -279,9 +279,9 @@ class StatusLoggerTest(unittest.TestCase):
     with _make_logger() as logger:
       logger.stepFinished(build, step, [0])
     expected_fields = {
-        'slave': build.getSlavename(),
+        'subordinate': build.getSubordinatename(),
         'builder': build.getBuilder().name,
-        'master': logger.master_dir,
+        'main': logger.main_dir,
         'result': 'success',
         'step_name': 'bot_update',
         'subproject_tag': '',
@@ -314,7 +314,7 @@ class StatusLoggerTest(unittest.TestCase):
 
       # Ensure we wrote the correct json line.
       expected = {
-          "slave": "cool-m1",
+          "subordinate": "cool-m1",
           "builder": "coconuts",
           "timestamp": 5500,
           "step_result": "success",

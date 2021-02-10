@@ -20,12 +20,12 @@ import test_env  # pylint: disable=W0403,W0611
 import mock
 from common import annotator
 from common import env
-from slave import logdog_bootstrap as ldbs
-from slave import cipd
-from slave import cipd_bootstrap_v2
-from slave import gce
-from slave import infra_platform
-from slave import robust_tempdir
+from subordinate import logdog_bootstrap as ldbs
+from subordinate import cipd
+from subordinate import cipd_bootstrap_v2
+from subordinate import gce
+from subordinate import infra_platform
+from subordinate import robust_tempdir
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -44,10 +44,10 @@ class LogDogBootstrapTest(unittest.TestCase):
 
     self._patchers = []
     map(self._patch, (
-        mock.patch('slave.infra_platform.get'),
-        mock.patch('slave.logdog_bootstrap._check_call'),
-        mock.patch('slave.gce.Authenticator.is_gce'),
-        mock.patch('slave.cipd_bootstrap_v2.install_cipd_packages'),
+        mock.patch('subordinate.infra_platform.get'),
+        mock.patch('subordinate.logdog_bootstrap._check_call'),
+        mock.patch('subordinate.gce.Authenticator.is_gce'),
+        mock.patch('subordinate.cipd_bootstrap_v2.install_cipd_packages'),
         mock.patch('os.environ', {}),
         ))
 
@@ -64,7 +64,7 @@ class LogDogBootstrapTest(unittest.TestCase):
         logdog_only=None,
         logdog_debug_out_file=None)
     self.properties = {
-      'mastername': 'default',
+      'mainname': 'default',
       'buildername': 'builder',
       'buildnumber': 24601,
     }
@@ -76,7 +76,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     # Set of default base params.
     self.base = ldbs.Params(
         project='alpha', cipd_tag=ldbs._STABLE_CIPD_TAG, api=self.stable_api,
-        mastername='default', buildername='builder', buildnumber=24601,
+        mainname='default', buildername='builder', buildnumber=24601,
         logdog_only=False, generation=None)
 
     # Control whether we think we're a GCE instnace.
@@ -107,7 +107,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     with open(self._tp('logdog_annotee_cmd.json')) as fd:
       self.assertEqual(json.load(fd), value)
 
-  @mock.patch('slave.logdog_bootstrap._load_params_dict')
+  @mock.patch('subordinate.logdog_bootstrap._load_params_dict')
   def test_get_params(self, load_params_dict):
     load_params_dict.return_value = {
       'alpha': {
@@ -129,16 +129,16 @@ class LogDogBootstrapTest(unittest.TestCase):
     def mp(params):
       props = self.properties.copy()
       props.update({
-          'mastername': params.mastername,
+          'mainname': params.mainname,
           'buildername': params.buildername,
           'buildnumber': params.buildnumber,
       })
       return props
 
 
-    # No mastername, buildername, and buildnumber returns None.
+    # No mainname, buildername, and buildnumber returns None.
     with self.assertRaises(ldbs.NotBootstrapped):
-        ldbs._get_params(mp(base._replace(mastername=None)))
+        ldbs._get_params(mp(base._replace(mainname=None)))
     with self.assertRaises(ldbs.NotBootstrapped):
         ldbs._get_params(mp(base._replace(buildername=None)))
     with self.assertRaises(ldbs.NotBootstrapped):
@@ -149,29 +149,29 @@ class LogDogBootstrapTest(unittest.TestCase):
     self.assertEqual(ldbs._get_params(mp(params)), params)
 
     # Blacklist.
-    params = base._replace(mastername='blacklist', buildername='blacklisted')
+    params = base._replace(mainname='blacklist', buildername='blacklisted')
     with self.assertRaises(ldbs.NotBootstrapped):
       ldbs._get_params(mp(params))
 
-    params = base._replace(mastername='blacklist', buildername='other')
+    params = base._replace(mainname='blacklist', buildername='other')
     self.assertEqual(ldbs._get_params(mp(params)), params)
 
     # Whitelist.
-    params = base._replace(mastername='whitelist', buildername='whitelisted')
+    params = base._replace(mainname='whitelist', buildername='whitelisted')
     self.assertEqual(ldbs._get_params(mp(params)), params)
 
-    params = base._replace(mastername='whitelist', buildername='other')
+    params = base._replace(mainname='whitelist', buildername='other')
     with self.assertRaises(ldbs.NotBootstrapped):
       ldbs._get_params(mp(params))
 
     # Canary.
-    params = base._replace(mastername='canary', cipd_tag='canary')
+    params = base._replace(mainname='canary', cipd_tag='canary')
     self.assertEqual(ldbs._get_params(mp(params)), params)
 
 
   @mock.patch('os.path.isfile')
-  @mock.patch('slave.logdog_bootstrap._get_params')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_bootstrap_command_linux_stable(self, tempdir, get_params, isfile):
     gce.Authenticator.is_gce.return_value = True
     recipe_cmd = ['run_recipe.py', 'recipe_params...']
@@ -179,7 +179,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     tempdir.return_value = 'foo'
     get_params.return_value = ldbs.Params(
         project='myproject', cipd_tag='stable', api=self.stable_api,
-        mastername='mastername', buildername='buildername', buildnumber=1337,
+        mainname='mainname', buildername='buildername', buildnumber=1337,
         logdog_only=False, generation=None)
     isfile.return_value = True
 
@@ -206,14 +206,14 @@ class LogDogBootstrapTest(unittest.TestCase):
         [os.path.join(cipd_dir, 'logdog_butler'),
             '-log-level', 'warning',
             '-project', 'myproject',
-            '-prefix', 'bb/mastername/buildername/1337',
+            '-prefix', 'bb/mainname/buildername/1337',
             '-coordinator-host', 'luci-logdog.appspot.com',
             '-output', 'logdog',
-            '-tag', 'buildbot.master=mastername',
+            '-tag', 'buildbot.main=mainname',
             '-tag', 'buildbot.builder=buildername',
             '-tag', 'buildbot.buildnumber=1337',
             '-tag', 'logdog.viewer_url=https://luci-milo.appspot.com/buildbot/'
-                    'mastername/buildername/1337',
+                    'mainname/buildername/1337',
             '-service-account-json', ':gce',
             '-output-max-buffer-age', '30s',
             'run',
@@ -233,9 +233,9 @@ class LogDogBootstrapTest(unittest.TestCase):
     self._assertAnnoteeCommand(recipe_cmd)
 
   @mock.patch('os.path.isfile')
-  @mock.patch('slave.logdog_bootstrap._get_service_account_json')
-  @mock.patch('slave.logdog_bootstrap._get_params')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap._get_service_account_json')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_bootstrap_command_win_stable(self, tempdir, get_params,
                                         service_account, isfile):
     infra_platform.get.return_value = ('win', 'x86_64', 64)
@@ -245,7 +245,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     tempdir.return_value = 'foo'
     get_params.return_value = ldbs.Params(
         project='myproject', cipd_tag='stable',
-        api=self.stable_api, mastername='mastername',
+        api=self.stable_api, mainname='mainname',
         buildername='buildername', buildnumber=1337, logdog_only=True,
         generation='1')
     service_account.return_value = 'creds.json'
@@ -274,14 +274,14 @@ class LogDogBootstrapTest(unittest.TestCase):
         [os.path.join(cipd_dir, 'logdog_butler.exe'),
             '-log-level', 'warning',
             '-project', 'myproject',
-            '-prefix', 'bb/mastername/buildername/1/1337',
+            '-prefix', 'bb/mainname/buildername/1/1337',
             '-coordinator-host', 'luci-logdog.appspot.com',
             '-output', 'logdog',
-            '-tag', 'buildbot.master=mastername',
+            '-tag', 'buildbot.main=mainname',
             '-tag', 'buildbot.builder=buildername',
             '-tag', 'buildbot.buildnumber=1337',
             '-tag', 'logdog.viewer_url=https://luci-milo.appspot.com/buildbot/'
-                    'mastername/buildername/1337',
+                    'mainname/buildername/1337',
             '-service-account-json', 'creds.json',
             '-output-max-buffer-age', '30s',
             '-io-keepalive-stderr', '5m',
@@ -304,9 +304,9 @@ class LogDogBootstrapTest(unittest.TestCase):
     self._assertAnnoteeCommand(recipe_cmd)
 
   @mock.patch('os.path.isfile')
-  @mock.patch('slave.logdog_bootstrap._get_service_account_json')
-  @mock.patch('slave.logdog_bootstrap._get_params')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap._get_service_account_json')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_bootstrap_command_mac_canary(self, tempdir, get_params,
                                         service_account, isfile):
     infra_platform.get.return_value = ('mac', 'x86_64', 64)
@@ -316,7 +316,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     tempdir.return_value = 'foo'
     get_params.return_value = ldbs.Params(
         project='myproject', cipd_tag='canary',
-        api=self.latest_api, mastername='mastername',
+        api=self.latest_api, mainname='mainname',
         buildername='buildername', buildnumber=1337, logdog_only=False,
         generation=None)
     service_account.return_value = 'creds.json'
@@ -343,14 +343,14 @@ class LogDogBootstrapTest(unittest.TestCase):
         [os.path.join(cipd_dir, 'logdog_butler'),
             '-log-level', 'warning',
             '-project', 'myproject',
-            '-prefix', 'bb/mastername/buildername/1337',
+            '-prefix', 'bb/mainname/buildername/1337',
             '-coordinator-host', 'luci-logdog.appspot.com',
             '-output', 'logdog',
-            '-tag', 'buildbot.master=mastername',
+            '-tag', 'buildbot.main=mainname',
             '-tag', 'buildbot.builder=buildername',
             '-tag', 'buildbot.buildnumber=1337',
             '-tag', 'logdog.viewer_url=https://luci-milo.appspot.com/buildbot/'
-                    'mastername/buildername/1337',
+                    'mainname/buildername/1337',
             '-service-account-json', 'creds.json',
             '-output-max-buffer-age', '30s',
             'run',
@@ -372,9 +372,9 @@ class LogDogBootstrapTest(unittest.TestCase):
     self._assertAnnoteeCommand(recipe_cmd)
 
   @mock.patch('os.path.isfile')
-  @mock.patch('slave.logdog_bootstrap._get_service_account_json')
-  @mock.patch('slave.logdog_bootstrap._get_params')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap._get_service_account_json')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_bootstrap_command_win_canary(self, tempdir, get_params,
                                         service_account, isfile):
     infra_platform.get.return_value = ('win', 'x86_64', 64)
@@ -384,7 +384,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     tempdir.return_value = 'foo'
     get_params.return_value = ldbs.Params(
         project='myproject', cipd_tag='canary',
-        api=self.latest_api, mastername='mastername',
+        api=self.latest_api, mainname='mainname',
         buildername='buildername', buildnumber=1337, logdog_only=True,
         generation=None)
     service_account.return_value = 'creds.json'
@@ -411,14 +411,14 @@ class LogDogBootstrapTest(unittest.TestCase):
         [os.path.join(cipd_dir, 'logdog_butler.exe'),
             '-log-level', 'warning',
             '-project', 'myproject',
-            '-prefix', 'bb/mastername/buildername/1337',
+            '-prefix', 'bb/mainname/buildername/1337',
             '-coordinator-host', 'luci-logdog.appspot.com',
             '-output', 'logdog',
-            '-tag', 'buildbot.master=mastername',
+            '-tag', 'buildbot.main=mainname',
             '-tag', 'buildbot.builder=buildername',
             '-tag', 'buildbot.buildnumber=1337',
             '-tag', 'logdog.viewer_url=https://luci-milo.appspot.com/buildbot/'
-                    'mastername/buildername/1337',
+                    'mainname/buildername/1337',
             '-service-account-json', 'creds.json',
             '-output-max-buffer-age', '30s',
             '-io-keepalive-stderr', '5m',
@@ -441,9 +441,9 @@ class LogDogBootstrapTest(unittest.TestCase):
     self._assertAnnoteeCommand(recipe_cmd)
 
   @mock.patch('os.path.isfile')
-  @mock.patch('slave.logdog_bootstrap._get_service_account_json')
-  @mock.patch('slave.logdog_bootstrap._get_params')
-  @mock.patch('slave.robust_tempdir.RobustTempdir.tempdir')
+  @mock.patch('subordinate.logdog_bootstrap._get_service_account_json')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.robust_tempdir.RobustTempdir.tempdir')
   def test_registered_apis_work(self, tempdir, get_params, service_account,
                                 isfile):
     tempdir.return_value = 'foo'
@@ -457,22 +457,22 @@ class LogDogBootstrapTest(unittest.TestCase):
 
   def test_get_bootstrap_result(self):
     mo = mock.mock_open(read_data='{"return_code": 1337}')
-    with mock.patch('slave.logdog_bootstrap.open', mo, create=True):
+    with mock.patch('subordinate.logdog_bootstrap.open', mo, create=True):
       bs = ldbs.BootstrapState(None, [], '/foo/bar')
       self.assertEqual(bs.get_result(), 1337)
 
     mo = mock.mock_open(read_data='!!! NOT JSON? !!!')
-    with mock.patch('slave.logdog_bootstrap.open', mo, create=True):
+    with mock.patch('subordinate.logdog_bootstrap.open', mo, create=True):
       bs = ldbs.BootstrapState(None, [], '/foo/bar')
       self.assertRaises(ldbs.BootstrapError, bs.get_result)
 
     mo = mock.mock_open(read_data='{"invalid": "json"}')
-    with mock.patch('slave.logdog_bootstrap.open', mo, create=True):
+    with mock.patch('subordinate.logdog_bootstrap.open', mo, create=True):
       bs = ldbs.BootstrapState(None, [], '/foo/bar')
       self.assertRaises(ldbs.BootstrapError, bs.get_result)
 
     mo = mock.mock_open()
-    with mock.patch('slave.logdog_bootstrap.open', mo, create=True):
+    with mock.patch('subordinate.logdog_bootstrap.open', mo, create=True):
       mo.side_effect = IOError('Test not found')
       self.assertRaises(ldbs.BootstrapError, bs.get_result)
 
@@ -519,7 +519,7 @@ class LogDogBootstrapTest(unittest.TestCase):
         self.opts, ('foo', 'bar'))
     self.assertEqual(service_account_json, ':gce')
 
-  @mock.patch('slave.logdog_bootstrap.get_config')
+  @mock.patch('subordinate.logdog_bootstrap.get_config')
   def test_cipd_install_failure_raises_bootstrap_error(self, get_config):
     cipd_bootstrap_v2.install_cipd_packages.side_effect = (
         subprocess.CalledProcessError(0, [], 'PROCESS ERROR'))
@@ -531,7 +531,7 @@ class LogDogBootstrapTest(unittest.TestCase):
     self.assertEqual(e.exception.message, 'Failed to install CIPD packages.')
     cipd_bootstrap_v2.install_cipd_packages.assert_called_once()
 
-  @mock.patch('slave.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
   def test_will_not_bootstrap_if_recursive(self, get_params):
     get_params.side_effect = Exception('Tried to bootstrap')
     os.environ['LOGDOG_STREAM_PREFIX'] = 'foo'
@@ -540,7 +540,7 @@ class LogDogBootstrapTest(unittest.TestCase):
       ldbs.bootstrap(self.rt, self.opts, self.basedir, self.tdir,
                     self.properties, [])
 
-  @mock.patch('slave.logdog_bootstrap._get_params')
+  @mock.patch('subordinate.logdog_bootstrap._get_params')
   def test_will_not_bootstrap_if_disabled(self, get_params):
     get_params.side_effect = Exception('Tried to bootstrap')
     opts = self.opts._replace(logdog_disable=True)
@@ -559,18 +559,18 @@ class TestPublicParams(unittest.TestCase):
     params = ldbs._load_params_dict('chromium')
     self.assertIsInstance(params, dict)
 
-    # Get a list of all defined master/builders, plus a "TESTING" builder to
+    # Get a list of all defined main/builders, plus a "TESTING" builder to
     # test '*' defaults.
     combos = set()
-    for _, masters in params.iteritems():
-      for master, builders in masters.iteritems():
+    for _, mains in params.iteritems():
+      for main, builders in mains.iteritems():
         for builder in builders.iterkeys():
-          combos.add((master, builder))
-        combos.add((master, 'TESTING'))
+          combos.add((main, builder))
+        combos.add((main, 'TESTING'))
 
-    for master, builder in sorted(combos):
+    for main, builder in sorted(combos):
       params = ldbs._get_params({
-          'mastername': master,
+          'mainname': main,
           'buildername': builder,
           'buildnumber': 24601,
       })

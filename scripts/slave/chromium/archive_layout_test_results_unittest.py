@@ -12,7 +12,7 @@ BASE_DIR = os.path.join(
 sys.path.append(os.path.join(BASE_DIR, 'scripts'))
 sys.path.append(os.path.join(BASE_DIR, 'site_config'))
 
-from slave.chromium import archive_layout_test_results as archive_module
+from subordinate.chromium import archive_layout_test_results as archive_module
 
 
 class ArchiveLayoutTestResultsTest(unittest.TestCase):

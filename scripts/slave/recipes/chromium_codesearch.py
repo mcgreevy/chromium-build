@@ -63,7 +63,7 @@ SPEC = freeze({
       'package_filename': 'chromium-src',
       'platform': 'linux',
       'sync_generated_files': True,
-      'gen_repo_branch': 'master',
+      'gen_repo_branch': 'main',
       'corpus': 'chromium-linux',
     },
     'codesearch-gen-chromium-chromiumos': {
@@ -124,9 +124,9 @@ SPEC = freeze({
 })
 
 def GenerateCompilationDatabase(api, debug_path, targets, platform):
-  mastername = api.properties.get('mastername')
+  mainname = api.properties.get('mainname')
   buildername = api.properties.get('buildername')
-  api.chromium.run_mb(mastername,
+  api.chromium.run_mb(mainname,
                       buildername,
                       build_dir=debug_path,
                       phase=platform,
@@ -210,7 +210,7 @@ def RunSteps(api):
   if platform == 'chromeos':
     result = GenerateCompilationDatabase(api, debug_path, targets, 'linux')
     api.python('Filter out duplicate compilation units',
-               api.package_repo_resource('scripts', 'slave', 'chromium',
+               api.package_repo_resource('scripts', 'subordinate', 'chromium',
                                          'filter_compilations.py'),
                ['--compdb-input', debug_path.join('compile_commands.json'),
                 '--compdb-filter', api.raw_io.input_text(data=result.stdout),
@@ -251,7 +251,7 @@ def RunSteps(api):
   index_pack_kythe_name_with_revision = 'index_pack_%s_kythe_%s.zip' % (
       platform, commit_position)
   api.python('create kythe index pack',
-             api.package_repo_resource('scripts', 'slave', 'chromium',
+             api.package_repo_resource('scripts', 'subordinate', 'chromium',
                                        'package_index.py'),
              ['--path-to-compdb', debug_path.join('compile_commands.json'),
               '--path-to-archive-output',
@@ -273,7 +273,7 @@ def RunSteps(api):
     generated_repo_dir = api.path['start_dir'].join('generated')
     api.git.checkout(
         GENERATED_REPO,
-        ref=bot_config.get('gen_repo_branch', 'master'),
+        ref=bot_config.get('gen_repo_branch', 'main'),
         dir_path=generated_repo_dir,
         submodules=False)
     with api.context(cwd=generated_repo_dir):
@@ -282,7 +282,7 @@ def RunSteps(api):
 
     # Sync the generated files into this checkout.
     api.python('sync generated files',
-               api.package_repo_resource('scripts','slave',
+               api.package_repo_resource('scripts','subordinate',
                                       'sync_generated_files_codesearch.py'),
                ['--message',
                 'Generated files from "%s" build %s, revision %s' % (
@@ -290,7 +290,7 @@ def RunSteps(api):
                     api.properties.get('buildnumber'),
                     api.chromium.build_properties.get('got_revision')),
                 '--dest-branch',
-                bot_config.get('gen_repo_branch', 'master'),
+                bot_config.get('gen_repo_branch', 'main'),
                 'src/out',
                 generated_repo_dir])
 
@@ -309,7 +309,7 @@ def GenTests(api):
       test += api.step_data('generate compilation database for linux',
                             stdout=api.raw_io.output_text('some compilation data'))
     test += api.properties.generic(buildername=buildername,
-                                   mastername='chromium.infra.codesearch')
+                                   mainname='chromium.infra.codesearch')
 
     yield test
 
@@ -322,7 +322,7 @@ def GenTests(api):
                   stdout=api.raw_io.output_text('some compilation data')) +
     api.step_data('run translation_unit clang tool', retcode=2) +
     api.properties.generic(buildername='codesearch-gen-chromium-chromiumos',
-                           mastername='chromium.infra.codesearch')
+                           mainname='chromium.infra.codesearch')
   )
 
   yield (
@@ -333,5 +333,5 @@ def GenTests(api):
                   stdout=api.raw_io.output_text('some compilation data'),
                   retcode=1) +
     api.properties.generic(buildername='codesearch-gen-chromium-chromiumos',
-                           mastername='chromium.infra.codesearch')
+                           mainname='chromium.infra.codesearch')
   )

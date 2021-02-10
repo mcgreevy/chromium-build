@@ -7,12 +7,12 @@ DEPS = [
 ]
 
 def RunSteps(api):
-  assert api.build.slave_utils_args
+  assert api.build.subordinate_utils_args
 
   with api.build.gsutil_py_env():
     api.build.python(
         'runtest',
-        api.build.package_repo_resource('scripts', 'slave', 'runtest.py'))
+        api.build.package_repo_resource('scripts', 'subordinate', 'runtest.py'))
 
 
 def GenTests(api):

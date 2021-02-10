@@ -182,18 +182,18 @@ def GenTests(api):
       api.test('analyzer-linux-release-strong-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='analyzer-linux-release-strong-be',
         revision='hash_of_revision'))
    yield (
       api.test('analyzer-win7-debug-dev') + api.platform('win', 32) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='analyzer-win7-debug-dev',
         revision='hash_of_revision'))
    yield (
       api.test('pkg-mac10.11-release-be') + api.platform('mac', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='pkg-mac10.11-release-be',
         revision='hash_of_revision'))

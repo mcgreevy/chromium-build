@@ -14,7 +14,7 @@ DEPS = [
 # To run, pass these options into properties:
 # bot_id="multivm-windows-release",
 # buildername="multivm-windows-perf-be",
-# mastername="client.dart.fyi", buildnumber=75
+# mainname="client.dart.fyi", buildnumber=75
 
 
 def RunSteps(api):
@@ -61,6 +61,6 @@ def GenTests(api):
            api.properties(bot_id='multivm-windows-release',
                           buildername='multivm-windows-perf-be',
                           buildnumber=75,
-                          mastername='client.dart.fyi') +
+                          mainname='client.dart.fyi') +
            api.step_data('Post bisect results',
                          api.json.output(bisect_response)))

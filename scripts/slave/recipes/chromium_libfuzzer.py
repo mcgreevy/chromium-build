@@ -101,7 +101,7 @@ def gn_refs(api, step_name, args):
 
 
 def RunSteps(api):
-  mastername = api.m.properties['mastername']
+  mainname = api.m.properties['mainname']
   buildername, bot_config = api.chromium.configure_bot(BUILDERS, ['mb'])
 
   checkout_results = api.bot_update.ensure_checkout(
@@ -109,7 +109,7 @@ def RunSteps(api):
 
   api.chromium.ensure_goma()
   api.chromium.runhooks()
-  api.chromium.run_mb(mastername, buildername, use_goma=True)
+  api.chromium.run_mb(mainname, buildername, use_goma=True)
 
   all_fuzzers = gn_refs(
           api,

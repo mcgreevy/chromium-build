@@ -52,16 +52,16 @@ def _sanitize_nonalpha(text):
 def GenTests(api):
   builders = api.libyuv.BUILDERS
 
-  def generate_builder(mastername, buildername, revision, suffix=None):
+  def generate_builder(mainname, buildername, revision, suffix=None):
     suffix = suffix or ''
-    bot_config = builders[mastername]['builders'][buildername]
+    bot_config = builders[mainname]['builders'][buildername]
     bot_type = bot_config.get('bot_type', 'builder_tester')
 
     chromium_kwargs = bot_config.get('chromium_config_kwargs', {})
     test = (
-      api.test('%s_%s%s' % (_sanitize_nonalpha(mastername),
+      api.test('%s_%s%s' % (_sanitize_nonalpha(mainname),
                             _sanitize_nonalpha(buildername), suffix)) +
-      api.properties(mastername=mastername,
+      api.properties(mainname=mainname,
                      buildername=buildername,
                      bot_id='bot_id',
                      BUILD_CONFIG=chromium_kwargs['BUILD_CONFIG']) +
@@ -78,23 +78,23 @@ def GenTests(api):
     if bot_type == 'tester':
       test += api.properties(parent_got_revision=revision)
 
-    if mastername.startswith('tryserver'):
+    if mainname.startswith('tryserver'):
       test += api.properties(issue='123456789', patchset='1',
                              rietveld='https://rietveld.example.com')
     test += api.properties(buildnumber=1337)
     return test
 
-  for mastername, master_config in builders.iteritems():
-    for buildername in master_config['builders'].keys():
-      yield generate_builder(mastername, buildername, revision='deadbeef')
+  for mainname, main_config in builders.iteritems():
+    for buildername in main_config['builders'].keys():
+      yield generate_builder(mainname, buildername, revision='deadbeef')
 
   # Forced builds (not specifying any revision) and test failures.
-  mastername = 'client.libyuv'
-  yield generate_builder(mastername, 'Linux64 Debug', revision=None,
+  mainname = 'client.libyuv'
+  yield generate_builder(mainname, 'Linux64 Debug', revision=None,
                          suffix='_forced')
-  yield generate_builder(mastername, 'Android Debug', revision=None,
+  yield generate_builder(mainname, 'Android Debug', revision=None,
                          suffix='_forced')
-  yield generate_builder(mastername, 'Android Tester ARM32 Debug (Nexus 5X)',
+  yield generate_builder(mainname, 'Android Tester ARM32 Debug (Nexus 5X)',
                          revision=None, suffix='_forced_invalid')
 
   yield generate_builder('tryserver.libyuv', 'linux', revision=None,

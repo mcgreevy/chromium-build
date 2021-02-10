@@ -3,8 +3,8 @@
 # found in the LICENSE file.
 
 from buildbot.status.builder import FAILURE
-from master import chromium_notifier
-from master import master_utils
+from main import chromium_notifier
+from main import main_utils
 
 
 forgiving_steps = ['update_scripts', 'update', 'svnkill', 'taskkill',
@@ -19,28 +19,28 @@ class V8Notifier(chromium_notifier.ChromiumNotifier):
     return results[0] == FAILURE
 
 
-def Update(config, active_master, c):
+def Update(config, active_main, c):
   c['status'].append(V8Notifier(
-      fromaddr=active_master.from_address,
+      fromaddr=active_main.from_address,
       categories_steps=vtunejit_categories_steps,
       exclusions={},
-      relayhost=config.Master.smtp,
+      relayhost=config.Main.smtp,
       sendToInterestedUsers=False,
       extraRecipients=['chunyang.dai@intel.com'],
       status_header='buildbot failure in %(project)s on %(builder)s, %(steps)s',
-      lookup=master_utils.FilterDomain(),
+      lookup=main_utils.FilterDomain(),
       forgiving_steps=forgiving_steps))
   c['status'].append(V8Notifier(
-      fromaddr=active_master.from_address,
+      fromaddr=active_main.from_address,
       categories_steps=clusterfuzz_categories_steps,
       exclusions={},
-      relayhost=config.Master.smtp,
+      relayhost=config.Main.smtp,
       sendToInterestedUsers=False,
       extraRecipients=[
         'v8-clusterfuzz-sheriff@chromium.org',
         'machenbach@chromium.org',
       ],
       status_header='buildbot failure in %(project)s on %(builder)s, %(steps)s',
-      lookup=master_utils.FilterDomain(),
+      lookup=main_utils.FilterDomain(),
       forgiving_steps=forgiving_steps))
 

@@ -6,25 +6,25 @@ from buildbot.process.properties import WithProperties
 from buildbot.scheduler import Scheduler
 from buildbot.scheduler import Triggerable
 
-from master import master_utils
-from master.factory import remote_run_factory
+from main import main_utils
+from main.factory import remote_run_factory
 
-import master_site_config
+import main_site_config
 
-ActiveMaster = master_site_config.ChromiumMemory
+ActiveMain = main_site_config.ChromiumMemory
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
       **kwargs)
 
-def Update(_config, active_master, c):
+def Update(_config, active_main, c):
   c['schedulers'].extend([
       Scheduler(name='linux_memory_rel',
-                branch='master',
+                branch='main',
                 treeStableTimer=60,
                 builderNames=[
           'Linux ASan LSan Builder',

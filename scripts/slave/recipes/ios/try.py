@@ -18,7 +18,7 @@ def RunSteps(api):
   with api.tryserver.set_failure_hash():
     bot_update_step = api.ios.checkout()
     # Ensure try bots mirror configs from chromium.mac.
-    api.ios.read_build_config(master_name='chromium.mac')
+    api.ios.read_build_config(main_name='chromium.mac')
     try:
       api.ios.build(analyze=True, suffix='with patch')
     except api.step.StepFailure:
@@ -52,7 +52,7 @@ def GenTests(api):
       buildername='ios-simulator',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -87,7 +87,7 @@ def GenTests(api):
       buildername='ios-simulator',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -116,7 +116,7 @@ def GenTests(api):
       buildername='ios-simulator-swarming',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -150,7 +150,7 @@ def GenTests(api):
       buildername='ios-simulator',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       patch_project='icu',
       rietveld='fake://rietveld.url',
@@ -185,7 +185,7 @@ def GenTests(api):
       buildername='ios',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -222,7 +222,7 @@ def GenTests(api):
       buildername='ios',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -253,7 +253,7 @@ def GenTests(api):
       buildername='ios',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -285,7 +285,7 @@ def GenTests(api):
       buildername='ios-simulator-gn',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -324,7 +324,7 @@ def GenTests(api):
       buildername='ios-simulator-gn',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',
@@ -360,7 +360,7 @@ def GenTests(api):
       buildername='ios-simulator',
       buildnumber='0',
       issue=123456,
-      mastername='tryserver.fake',
+      mainname='tryserver.fake',
       patchset=1,
       rietveld='fake://rietveld.url',
       bot_id='fake-vm',

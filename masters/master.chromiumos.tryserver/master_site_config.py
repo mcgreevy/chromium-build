@@ -2,13 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""ActiveMaster definition."""
+"""ActiveMain definition."""
 
-from config_bootstrap import Master
+from config_bootstrap import Main
 
-class ChromiumOSTryServer(Master.ChromiumOSBase):
+class ChromiumOSTryServer(Main.ChromiumOSBase):
   project_name = 'ChromiumOS Try Server'
-  master_port_id = 2
+  main_port_id = 2
   buildbot_url = 'https://uberchromegw.corp.google.com/i/chromiumos.tryserver/'
   repo_url_ext = 'https://chromium.googlesource.com/chromiumos/tryjobs.git'
   repo_url_int = 'https://chrome-internal.googlesource.com/chromeos/tryjobs.git'
@@ -18,7 +18,7 @@ class ChromiumOSTryServer(Master.ChromiumOSBase):
   # Select tree status urls and codereview location.
   base_app_url = 'https://chromiumos-status.appspot.com'
   tree_status_url = base_app_url + '/status'
-  buildbucket_bucket = 'master.chromiumos.tryserver'
+  buildbucket_bucket = 'main.chromiumos.tryserver'
   service_account_file = 'service-account-chromeos.json'
   pubsub_service_account_file = 'service-account-luci-milo.json'
   pubsub_topic = 'projects/luci-milo/topics/private-buildbot'

@@ -41,10 +41,10 @@ def RunSteps(api):
         api.properties.get('parent_got_revision_cp'))
     v8.set_up_swarming()
   else:
-    # Make sure we don't run a non-pure swarming tester on a subdir slave.
-    # Subdir slaves have the name pattern 'slaveN-c3#M'.
+    # Make sure we don't run a non-pure swarming tester on a subdir subordinate.
+    # Subdir subordinates have the name pattern 'subordinateN-c3#M'.
     assert '#' not in api.properties.get('bot_id', ''), (
-        'Can only use pure swarming testers on subdir slaves.')
+        'Can only use pure swarming testers on subdir subordinates.')
 
     if api.platform.is_win:
       api.chromium.taskkill()
@@ -109,8 +109,8 @@ def RunSteps(api):
 
 
 def GenTests(api):
-  for mastername, _, buildername, _ in api.v8.iter_builders():
-    yield api.v8.test(mastername, buildername)
+  for mainname, _, buildername, _ in api.v8.iter_builders():
+    yield api.v8.test(mainname, buildername)
 
   yield (
     api.v8.test(
@@ -464,7 +464,7 @@ def GenTests(api):
     api.override_step_data(
         'generate_build_files', api.raw_io.stream_output(
             'Writing """\\\n'
-            'goma_dir = "/b/build/slave/cache/cipd/goma"\n'
+            'goma_dir = "/b/build/subordinate/cache/cipd/goma"\n'
             'target_cpu = "x64"\n'
             'use_goma = true\n'
             '""" to /path/to/args.gn.\n'

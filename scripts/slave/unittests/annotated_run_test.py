@@ -21,12 +21,12 @@ import test_env  # pylint: disable=W0403,W0611
 import mock
 from common import annotator
 from common import env
-from slave import annotated_run
-from slave import logdog_bootstrap
-from slave import remote_run
-from slave import robust_tempdir
-from slave import update_scripts
-from slave.unittests.utils import FakeBuildRootTestCase
+from subordinate import annotated_run
+from subordinate import logdog_bootstrap
+from subordinate import remote_run
+from subordinate import robust_tempdir
+from subordinate import update_scripts
+from subordinate.unittests.utils import FakeBuildRootTestCase
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -39,9 +39,9 @@ class AnnotatedRunTest(FakeBuildRootTestCase):
 
   def test_example(self):
     build_properties = {
-      'mastername': 'tryserver.chromium.linux',
+      'mainname': 'tryserver.chromium.linux',
       'buildername': 'builder',
-      'slavename': 'bot42-m1',
+      'subordinatename': 'bot42-m1',
       'recipe': 'annotated_run_test',
       'true_prop': True,
       'num_prop': 123,
@@ -60,9 +60,9 @@ class AnnotatedRunTest(FakeBuildRootTestCase):
 
   def test_passthrough(self):
     build_properties = {
-      'mastername': 'tryserver.chromium.linux',
+      'mainname': 'tryserver.chromium.linux',
       'buildername': 'builder',
-      'slavename': 'bot42-m1',
+      'subordinatename': 'bot42-m1',
       'recipe': 'annotated_run_test',
       'true_prop': True,
       'num_prop': 123,
@@ -93,10 +93,10 @@ class AnnotatedRunExecTest(unittest.TestCase):
     self.maxDiff = None
     self._patchers = []
     map(self._patch, (
-        mock.patch('slave.annotated_run._run_command'),
-        mock.patch('slave.annotated_run._build_dir'),
-        mock.patch('slave.annotated_run._builder_dir'),
-        mock.patch('slave.annotated_run._get_engine_flags'),
+        mock.patch('subordinate.annotated_run._run_command'),
+        mock.patch('subordinate.annotated_run._build_dir'),
+        mock.patch('subordinate.annotated_run._builder_dir'),
+        mock.patch('subordinate.annotated_run._get_engine_flags'),
         mock.patch('os.path.exists'),
         ))
 
@@ -114,12 +114,12 @@ class AnnotatedRunExecTest(unittest.TestCase):
         dry_run=False,
         logdog_disable=False)
     self.properties = {
-      'slavename': 'bot42-m1',
+      'subordinatename': 'bot42-m1',
       'recipe': 'example/recipe',
-      'mastername': 'tryserver.chromium.linux',
+      'mainname': 'tryserver.chromium.linux',
       'buildername': 'builder',
     }
-    self.rpy_path = os.path.join(env.Build, 'scripts', 'slave', 'recipes.py')
+    self.rpy_path = os.path.join(env.Build, 'scripts', 'subordinate', 'recipes.py')
     self.recipe_args = [
         sys.executable, '-u', self.rpy_path, '--verbose', 'run',
         '--workdir=/home/user/builder/build',
@@ -164,8 +164,8 @@ class AnnotatedRunExecTest(unittest.TestCase):
     with open(self._tp('recipe_result.json'), 'w') as fd:
       json.dump(v, fd)
 
-  @mock.patch('slave.update_scripts._run_command')
-  @mock.patch('slave.annotated_run.main')
+  @mock.patch('subordinate.update_scripts._run_command')
+  @mock.patch('subordinate.annotated_run.main')
   @mock.patch('sys.platform', return_value='win')
   @mock.patch('tempfile.mkstemp', side_effect=Exception('failure'))
   def test_update_scripts_must_run(self, _tempfile_mkstemp, _sys_platform,
@@ -201,8 +201,8 @@ class AnnotatedRunExecTest(unittest.TestCase):
     annotated_run._run_command.assert_called_once_with(self.recipe_args,
                                                        dry_run=False)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
   def test_exec_with_logdog_bootstrap(self, bs_result, bootstrap):
     cfg = self._default_namedtuple(logdog_bootstrap.Config)._replace(
         params=self._default_namedtuple(logdog_bootstrap.Params)._replace(
@@ -241,8 +241,8 @@ class AnnotatedRunExecTest(unittest.TestCase):
         ]
     )
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
-  @mock.patch('slave.logdog_bootstrap.BootstrapState.get_result')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.BootstrapState.get_result')
   def test_exec_with_logdog_bootstrap_logdog_only(self, bs_result, bootstrap):
     cfg = self._default_namedtuple(logdog_bootstrap.Config)._replace(
         params=self._default_namedtuple(logdog_bootstrap.Params)._replace(
@@ -282,7 +282,7 @@ class AnnotatedRunExecTest(unittest.TestCase):
         ]
     )
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
   def test_exec_with_logdog_bootstrap_fail_raises(self, bootstrap):
     bootstrap.side_effect = logdog_bootstrap.BootstrapError('Bootstrap failed')
 
@@ -291,7 +291,7 @@ class AnnotatedRunExecTest(unittest.TestCase):
           self.rt, self.opts, self.stream, self.basedir, self.tdir,
           self.properties)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
   def test_exec_with_result_proto(self, bootstrap):
     bootstrap.side_effect = logdog_bootstrap.NotBootstrapped()
     annotated_run._get_engine_flags.return_value = {
@@ -305,7 +305,7 @@ class AnnotatedRunExecTest(unittest.TestCase):
         self.properties)
     self.assertEqual(rv, 13)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
   def test_exec_with_result_proto_fail(self, bootstrap):
     bootstrap.side_effect = logdog_bootstrap.NotBootstrapped()
     annotated_run._get_engine_flags.return_value = {
@@ -321,7 +321,7 @@ class AnnotatedRunExecTest(unittest.TestCase):
         self.properties)
     self.assertEqual(rv, 255)
 
-  @mock.patch('slave.logdog_bootstrap.bootstrap')
+  @mock.patch('subordinate.logdog_bootstrap.bootstrap')
   def test_exec_with_result_proto_step_fail(self, bootstrap):
     bootstrap.side_effect = logdog_bootstrap.NotBootstrapped()
     annotated_run._get_engine_flags.return_value = {

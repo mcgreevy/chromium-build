@@ -44,7 +44,7 @@ def sdk_multi_steps(api):
       api.chromium.runhooks()
 
     # generate_build_files step
-    api.chromium.run_mb(api.properties.get('mastername'),
+    api.chromium.run_mb(api.properties.get('mainname'),
                         api.properties.get('buildername'))
 
     # compile step
@@ -53,7 +53,7 @@ def sdk_multi_steps(api):
     # annotated_steps step
     api.python(
         "annotated_steps",
-        api.package_repo_resource("scripts", "slave", "chromium",
+        api.package_repo_resource("scripts", "subordinate", "chromium",
                                "nacl_sdk_buildbot_run.py"),
         allow_subannotations=True)
 
@@ -88,7 +88,7 @@ def sdk_multirel_steps(api):
       api.chromium.runhooks()
 
     # generate_build_files step
-    api.chromium.run_mb(api.properties.get('mastername'),
+    api.chromium.run_mb(api.properties.get('mainname'),
                         api.properties.get('buildername'))
 
     # compile step
@@ -97,7 +97,7 @@ def sdk_multirel_steps(api):
     # annotated_steps step
     api.python(
         "annotated_steps",
-        api.package_repo_resource("scripts", "slave", "chromium",
+        api.package_repo_resource("scripts", "subordinate", "chromium",
                                "nacl_sdk_buildbot_run.py"),
         allow_subannotations=True)
 
@@ -126,48 +126,48 @@ def RunSteps(api):
 
 def GenTests(api):
     yield (api.test('linux_sdk_multi') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='linux-sdk-multi') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('mac_sdk_multi') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='mac-sdk-multi') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('windows_sdk_multi') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='windows-sdk-multi') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('linux_sdk_multirel') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='linux-sdk-multirel') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('linux_sdk_asan_multi') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='linux-sdk-asan-multi') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('windows_sdk_multirel') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='windows-sdk-multirel') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('mac_sdk_multirel') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='mac-sdk-multirel') +
            api.properties(revision='123456789abcdef') + api.properties(
                got_revision='123456789abcdef') + api.properties(
-                   buildnumber='42') + api.properties(bot_id='TestSlave'))
+                   buildnumber='42') + api.properties(bot_id='TestSubordinate'))
     yield (api.test('builder_not_in_dispatch_directory') + api.properties(
-        mastername='client.nacl.sdk') + api.properties(
+        mainname='client.nacl.sdk') + api.properties(
             buildername='nonexistent_builder') + api.properties(
-                bot_id='TestSlave'))
+                bot_id='TestSubordinate'))

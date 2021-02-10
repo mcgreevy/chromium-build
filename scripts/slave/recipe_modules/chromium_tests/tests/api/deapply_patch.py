@@ -11,7 +11,7 @@ DEPS = [
 
 def RunSteps(api):
   bot_config = api.chromium_tests.trybots[
-      api.properties['mastername']]['builders'][api.properties['buildername']]
+      api.properties['mainname']]['builders'][api.properties['buildername']]
   bot_config_object = api.chromium_tests.create_generalized_bot_config_object(
       bot_config['bot_ids'])
   api.chromium_tests.configure_build(bot_config_object)
@@ -24,6 +24,6 @@ def GenTests(api):
       api.test('basic') +
       api.platform.name('win') +
       api.properties.tryserver(
-          mastername='tryserver.chromium.win',
+          mainname='tryserver.chromium.win',
           buildername='win_chromium_rel_ng')
   )

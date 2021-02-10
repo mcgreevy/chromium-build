@@ -12,7 +12,7 @@ DEPS = [
 
 
 _BUILDERS_DICT = {
-    'test_mastername': {
+    'test_mainname': {
         'builders': {
             'test_buildername': {
                 'chromium_config': 'chromium_clang',

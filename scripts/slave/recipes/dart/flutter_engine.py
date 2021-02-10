@@ -104,7 +104,7 @@ def RunSteps(api):
 
 def GenTests(api):
   yield (api.test('flutter-engine-linux') + api.platform('linux', 64)
-      + api.properties(mastername='client.dart.internal',
+      + api.properties(mainname='client.dart.internal',
             buildername='flutter-engine-linux',
             bot_id='fake-m1', clobber='',
             rev_sdk='foo', rev_engine='bar'))

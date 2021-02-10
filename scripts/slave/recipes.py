@@ -38,7 +38,7 @@ from cStringIO import StringIO
 #   merged as a subdirectory of some other repo and you depended on that
 #   subdirectory.
 # branch (str) - the branch to fetch for the engine as an absolute ref (e.g.
-#   refs/heads/master)
+#   refs/heads/main)
 # repo_type ("GIT"|"GITILES") - An ignored enum which will be removed soon.
 EngineDep = namedtuple('EngineDep',
                        'url revision path_override branch repo_type')
@@ -81,7 +81,7 @@ def parse(repo_root, recipes_cfg_path):
 
     engine.setdefault('revision', '')
     engine.setdefault('path_override', '')
-    engine.setdefault('branch', 'refs/heads/master')
+    engine.setdefault('branch', 'refs/heads/main')
     recipes_path = pb.get('recipes_path', '')
 
     # TODO(iannucci): only support absolute refs

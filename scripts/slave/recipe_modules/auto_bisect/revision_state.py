@@ -376,7 +376,7 @@ class RevisionState(object):
     bot_name = self.bisector.get_builder_bot_for_this_platform()
     operation_id = 'dummy' if self.bisector.dummy_tests else uuid.uuid4().hex
     build_details = {
-        'bucket': 'master.' + api.m.properties['mastername'],
+        'bucket': 'main.' + api.m.properties['mainname'],
         'parameters': {
             'builder_name': bot_name,
             'properties': {

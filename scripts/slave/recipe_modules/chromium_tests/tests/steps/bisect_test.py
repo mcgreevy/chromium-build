@@ -44,7 +44,7 @@ def GenTests(api):
       'truncate_percent': '25',
       'bug_id': '425582',
       'gs_bucket': 'chrome-perf',
-      'builder_host': 'master4.golo.chromium.org',
+      'builder_host': 'main4.golo.chromium.org',
       'builder_port': '8341'
   }
   yield (

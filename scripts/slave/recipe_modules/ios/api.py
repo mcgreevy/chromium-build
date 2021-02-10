@@ -138,23 +138,23 @@ class iOSApi(recipe_api.RecipeApi):
 
   def read_build_config(
     self,
-    master_name=None,
+    main_name=None,
     build_config_base_dir=None,
     buildername=None,
   ):
     """Reads the iOS build config for this bot.
 
     Args:
-      master_name: Name of a master to read the build config from, or None
+      main_name: Name of a main to read the build config from, or None
         to read from buildbot properties at run-time.
-      build_config_base_dir: Directory to search for build config master and
+      build_config_base_dir: Directory to search for build config main and
         test include directories.
     """
     buildername = buildername or self.m.properties['buildername']
-    master_name = master_name or self.m.properties['mastername']
+    main_name = main_name or self.m.properties['mainname']
     build_config_base_dir = build_config_base_dir or (
         self.m.path['checkout'].join('ios', 'build', 'bots'))
-    build_config_dir = build_config_base_dir.join(master_name)
+    build_config_dir = build_config_base_dir.join(main_name)
     include_dir = build_config_base_dir.join('tests')
 
     self.__config = self.m.json.read(
@@ -198,7 +198,7 @@ class iOSApi(recipe_api.RecipeApi):
     self.__config.setdefault('triggered bots', {})
     self.__config.setdefault('upload', [])
 
-    self.__config['mastername'] = master_name
+    self.__config['mainname'] = main_name
 
     self.__config['tests'] = self.parse_tests(
         self.__config['tests'], include_dir)
@@ -295,7 +295,7 @@ class iOSApi(recipe_api.RecipeApi):
       self.m.chromium.c.project_generator.tool = 'mb'
       with self.m.context(env=env):
         self.m.chromium.run_mb(
-            self.__config['mastername'],
+            self.__config['mainname'],
             self.m.properties['buildername'],
             build_dir='//out/%s' % build_sub_path,
             mb_path=mb_path,
@@ -340,7 +340,7 @@ class iOSApi(recipe_api.RecipeApi):
             self.__config['additional_compile_targets'],
             'trybot_analyze_config.json',
             additional_names=['chromium', 'ios'],
-            mb_mastername=self.__config['mastername'],
+            mb_mainname=self.__config['mainname'],
           )
         )
 
@@ -633,7 +633,7 @@ class iOSApi(recipe_api.RecipeApi):
         'xcode_version': task['test'].get(
           'xcode version', self.__config['xcode version'])
       }
-      if 'internal' not in self.m.properties['mastername']:
+      if 'internal' not in self.m.properties['mainname']:
         # 4 cores are better than 8! See https://crbug.com/711845.
         swarming_task.dimensions['cores'] = '4'
       if self.platform == 'simulator':
@@ -655,7 +655,7 @@ class iOSApi(recipe_api.RecipeApi):
           continue
 
       spec = [
-        self.m.properties['mastername'],
+        self.m.properties['mainname'],
         self.m.properties['buildername'],
         task['test']['app'],
         self.platform,

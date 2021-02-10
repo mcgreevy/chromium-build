@@ -57,17 +57,17 @@ class Test(object):
   applied patch.
   """
 
-  def __init__(self, waterfall_mastername=None, waterfall_buildername=None):
+  def __init__(self, waterfall_mainname=None, waterfall_buildername=None):
     """
     Args:
-      waterfall_mastername (str): Matching waterfall buildbot master name.
-        This value would be different from trybot master name.
+      waterfall_mainname (str): Matching waterfall buildbot main name.
+        This value would be different from trybot main name.
       waterfall_buildername (str): Matching waterfall buildbot builder name.
         This value would be different from trybot builder name.
     """
     super(Test, self).__init__()
     self._test_runs = {}
-    self._waterfall_mastername = waterfall_mastername
+    self._waterfall_mainname = waterfall_mainname
     self._waterfall_buildername = waterfall_buildername
     self._test_options = None
 
@@ -202,9 +202,9 @@ class ScriptTest(Test):  # pylint: disable=W0232
 
   def __init__(self, name, script, all_compile_targets, script_args=None,
                override_compile_targets=None,
-               waterfall_mastername=None, waterfall_buildername=None):
+               waterfall_mainname=None, waterfall_buildername=None):
     super(ScriptTest, self).__init__(
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._name = name
     self._script = script
@@ -296,7 +296,7 @@ class LocalGTestTest(Test):
                revision=None, webkit_revision=None,
                android_shard_timeout=None, android_tool=None,
                override_compile_targets=None, override_isolate_target=None,
-               use_xvfb=True, waterfall_mastername=None,
+               use_xvfb=True, waterfall_mainname=None,
                waterfall_buildername=None, **runtest_kwargs):
     """Constructs an instance of LocalGTestTest.
 
@@ -319,7 +319,7 @@ class LocalGTestTest(Test):
 
     """
     super(LocalGTestTest, self).__init__(
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._name = name
     self._args = args or []
@@ -455,7 +455,7 @@ class LocalGTestTest(Test):
 
   def step_metadata(self, api, suffix):
     return {
-        'waterfall_mastername': self._waterfall_mastername,
+        'waterfall_mainname': self._waterfall_mainname,
         'waterfall_buildername': self._waterfall_buildername,
         'canonical_step_name': self._name,
         'patched': suffix == 'with patch',
@@ -499,7 +499,7 @@ def get_args_for_test(api, chromium_tests_api, test_spec, bot_update_step):
   return [string.Template(arg).safe_substitute(substitutions) for arg in args]
 
 
-def generate_gtest(api, chromium_tests_api, mastername, buildername, test_spec,
+def generate_gtest(api, chromium_tests_api, mainname, buildername, test_spec,
                    bot_update_step, enable_swarming=False,
                    swarming_dimensions=None, scripts_compile_targets=None):
   def canonicalize_test(test):
@@ -584,7 +584,7 @@ def generate_gtest(api, chromium_tests_api, mastername, buildername, test_spec,
                         override_compile_targets=override_compile_targets,
                         override_isolate_target=override_isolate_target,
                         use_xvfb=use_xvfb, cipd_packages=cipd_packages,
-                        waterfall_mastername=mastername,
+                        waterfall_mainname=mainname,
                         waterfall_buildername=buildername,
                         merge=merge)
     else:
@@ -599,12 +599,12 @@ def generate_gtest(api, chromium_tests_api, mastername, buildername, test_spec,
                       override_compile_targets=override_compile_targets,
                       override_isolate_target=override_isolate_target,
                       use_xvfb=use_xvfb, cipd_packages=cipd_packages,
-                      waterfall_mastername=mastername,
+                      waterfall_mainname=mainname,
                       waterfall_buildername=buildername,
                       merge=merge)
 
 
-def generate_instrumentation_test(api, chromium_tests_api, mastername,
+def generate_instrumentation_test(api, chromium_tests_api, mainname,
                                   buildername, test_spec, bot_update_step,
                                   enable_swarming=False,
                                   swarming_dimensions=None,
@@ -635,20 +635,20 @@ def generate_instrumentation_test(api, chromium_tests_api, mastername,
           result_details=True,
           store_tombstones=True,
           args=args,
-          waterfall_mastername=mastername, waterfall_buildername=buildername)
+          waterfall_mainname=mainname, waterfall_buildername=buildername)
 
 
-def generate_junit_test(api, chromium_tests_api, mastername, buildername,
+def generate_junit_test(api, chromium_tests_api, mainname, buildername,
                         test_spec, bot_update_step, enable_swarming=False,
                         swarming_dimensions=None,
                         scripts_compile_targets=None):
   for test in test_spec.get(buildername, {}).get('junit_tests', []):
     yield AndroidJunitTest(
         str(test['test']),
-        waterfall_mastername=mastername, waterfall_buildername=buildername)
+        waterfall_mainname=mainname, waterfall_buildername=buildername)
 
 
-def generate_script(api, chromium_tests_api, mastername, buildername, test_spec,
+def generate_script(api, chromium_tests_api, mainname, buildername, test_spec,
                     bot_update_step, enable_swarming=False,
                     swarming_dimensions=None, scripts_compile_targets=None):
   for script_spec in test_spec.get(buildername, {}).get('scripts', []):
@@ -658,7 +658,7 @@ def generate_script(api, chromium_tests_api, mastername, buildername, test_spec,
         scripts_compile_targets,
         script_spec.get('args', []),
         script_spec.get('override_compile_targets', []),
-        waterfall_mastername=mastername, waterfall_buildername=buildername)
+        waterfall_mainname=mainname, waterfall_buildername=buildername)
 
 
 class DynamicPerfTests(Test):
@@ -1004,7 +1004,7 @@ class LayoutTestResultsHandler(JSONResultsHandler):
     buildnumber = api.properties['buildnumber']
 
     archive_layout_test_results = api.chromium.package_repo_resource(
-        'scripts', 'slave', 'chromium', 'archive_layout_test_results.py')
+        'scripts', 'subordinate', 'chromium', 'archive_layout_test_results.py')
 
     archive_layout_test_args = [
       '--results-dir', results_dir,
@@ -1014,7 +1014,7 @@ class LayoutTestResultsHandler(JSONResultsHandler):
       '--gs-bucket', 'gs://chromium-layout-test-archives',
       '--staging-dir', api.path['cache'].join('chrome_staging'),
     ]
-    archive_layout_test_args += api.build.slave_utils_args
+    archive_layout_test_args += api.build.subordinate_utils_args
     # TODO(phajdan.jr): Pass gs_acl as a parameter, not build property.
     if api.properties.get('gs_acl'):
       archive_layout_test_args.extend(['--gs-acl', api.properties['gs_acl']])
@@ -1045,9 +1045,9 @@ class SwarmingTest(Test):
   def __init__(self, name, dimensions=None, tags=None, target_name=None,
                extra_suffix=None, priority=None, expiration=None,
                hard_timeout=None, io_timeout=None,
-               waterfall_mastername=None, waterfall_buildername=None):
+               waterfall_mainname=None, waterfall_buildername=None):
     super(SwarmingTest, self).__init__(
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._name = name
     self._tasks = {}
@@ -1246,7 +1246,7 @@ class SwarmingTest(Test):
 
   def step_metadata(self, api, suffix):
     return {
-      'waterfall_mastername': self._waterfall_mastername,
+      'waterfall_mainname': self._waterfall_mainname,
       'waterfall_buildername': self._waterfall_buildername,
       'canonical_step_name': self._name,
       'full_step_name': api.swarming.get_step_name(
@@ -1262,11 +1262,11 @@ class SwarmingGTestTest(SwarmingTest):
                dimensions=None, tags=None, extra_suffix=None, priority=None,
                expiration=None, hard_timeout=None, upload_test_results=True,
                override_compile_targets=None, override_isolate_target=None,
-               cipd_packages=None, waterfall_mastername=None,
+               cipd_packages=None, waterfall_mainname=None,
                waterfall_buildername=None, merge=None):
     super(SwarmingGTestTest, self).__init__(
         name, dimensions, tags, target_name, extra_suffix, priority, expiration,
-        hard_timeout, waterfall_mastername=waterfall_mastername,
+        hard_timeout, waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._args = args or []
     self._shards = shards
@@ -1471,11 +1471,11 @@ class SwarmingIsolatedScriptTest(SwarmingTest):
                hard_timeout=None, upload_test_results=True,
                override_compile_targets=None, perf_id=None, results_url=None,
                perf_dashboard_id=None, io_timeout=None,
-               waterfall_mastername=None, waterfall_buildername=None,
+               waterfall_mainname=None, waterfall_buildername=None,
                merge=None, results_handler=None):
     super(SwarmingIsolatedScriptTest, self).__init__(
         name, dimensions, tags, target_name, extra_suffix, priority, expiration,
-        hard_timeout, io_timeout, waterfall_mastername=waterfall_mastername,
+        hard_timeout, io_timeout, waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._args = args or []
     self._shards = shards
@@ -1622,16 +1622,16 @@ class SwarmingIsolatedScriptTest(SwarmingTest):
     return api.python(
       step_name,
       api.chromium.package_repo_resource(
-          'scripts', 'slave', 'upload_perf_dashboard_results.py'),
+          'scripts', 'subordinate', 'upload_perf_dashboard_results.py'),
       args)
 
 
-def generate_isolated_script(api, chromium_tests_api, mastername, buildername,
+def generate_isolated_script(api, chromium_tests_api, mainname, buildername,
                              test_spec, bot_update_step, enable_swarming=False,
                              swarming_dimensions=None,
                              scripts_compile_targets=None):
   # Get the perf id and results url if present.
-  bot_config = (chromium_tests_api.builders.get(mastername, {})
+  bot_config = (chromium_tests_api.builders.get(mainname, {})
       .get('builders', {}).get(buildername, {}))
   perf_id = bot_config.get('perf-id')
   results_url = bot_config.get('results-url')
@@ -1721,7 +1721,7 @@ def generate_isolated_script(api, chromium_tests_api, mastername, buildername,
               hard_timeout=swarming_hard_timeout, perf_id=perf_id,
               results_url=results_url, perf_dashboard_id=perf_dashboard_id,
               io_timeout=swarming_io_timeout,
-              waterfall_mastername=mastername,
+              waterfall_mainname=mainname,
               waterfall_buildername=buildername,
               merge=merge, results_handler=results_handler)
       else:
@@ -1734,7 +1734,7 @@ def generate_isolated_script(api, chromium_tests_api, mastername, buildername,
             hard_timeout=swarming_hard_timeout, perf_id=perf_id,
             results_url=results_url, perf_dashboard_id=perf_dashboard_id,
             io_timeout=swarming_io_timeout,
-            waterfall_mastername=mastername, waterfall_buildername=buildername,
+            waterfall_mainname=mainname, waterfall_buildername=buildername,
             merge=merge, results_handler=results_handler)
     else:
       yield LocalIsolatedScriptTest(
@@ -1748,11 +1748,11 @@ class GTestTest(Test):
                swarming_shards=1, swarming_dimensions=None, swarming_tags=None,
                swarming_extra_suffix=None, swarming_priority=None,
                swarming_expiration=None, swarming_hard_timeout=None,
-               cipd_packages=None, waterfall_mastername=None,
+               cipd_packages=None, waterfall_mainname=None,
                waterfall_buildername=None, merge=None,
                **runtest_kwargs):
     super(GTestTest, self).__init__(
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     if enable_swarming:
       self._test = SwarmingGTestTest(
@@ -1764,12 +1764,12 @@ class GTestTest(Test):
               'override_compile_targets'),
           override_isolate_target=runtest_kwargs.get(
               'override_isolate_target'),
-          waterfall_mastername=waterfall_mastername,
+          waterfall_mainname=waterfall_mainname,
           waterfall_buildername=waterfall_buildername,
           merge=merge)
     else:
       self._test = LocalGTestTest(
-          name, args, target_name, waterfall_mastername=waterfall_mastername,
+          name, args, target_name, waterfall_mainname=waterfall_mainname,
           waterfall_buildername=waterfall_buildername,
           **runtest_kwargs)
 
@@ -2008,10 +2008,10 @@ class BisectTestStaging(Test):  # pylint: disable=W0232
 
 
 class AndroidTest(Test):
-  def __init__(self, name, compile_targets, waterfall_mastername=None,
+  def __init__(self, name, compile_targets, waterfall_mainname=None,
                waterfall_buildername=None):
     super(AndroidTest, self).__init__(
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
 
     self._name = name
@@ -2076,9 +2076,9 @@ class AndroidTest(Test):
 
 class AndroidJunitTest(AndroidTest):
   def __init__(
-      self, name, waterfall_mastername=None, waterfall_buildername=None):
+      self, name, waterfall_mainname=None, waterfall_buildername=None):
     super(AndroidJunitTest, self).__init__(
-        name, compile_targets=[name], waterfall_mastername=None,
+        name, compile_targets=[name], waterfall_mainname=None,
         waterfall_buildername=None)
 
   @property
@@ -2156,7 +2156,7 @@ class AndroidInstrumentationTest(AndroidTest):
                except_annotation=None, screenshot=False, verbose=True,
                tool=None, additional_apks=None, store_tombstones=False,
                result_details=False, render_results_dir=None,
-               args=None, waterfall_mastername=None,
+               args=None, waterfall_mainname=None,
                waterfall_buildername=None):
     suite_defaults = (
         AndroidInstrumentationTest._DEFAULT_SUITES.get(name)
@@ -2170,7 +2170,7 @@ class AndroidInstrumentationTest(AndroidTest):
     super(AndroidInstrumentationTest, self).__init__(
         name,
         compile_targets,
-        waterfall_mastername=waterfall_mastername,
+        waterfall_mainname=waterfall_mainname,
         waterfall_buildername=waterfall_buildername)
     self._additional_apks = (
         additional_apks or suite_defaults.get('additional_apks'))
@@ -2242,7 +2242,7 @@ class BlinkTest(Test):
         '--results-directory', results_dir,
         '--build-dir', api.chromium.c.build_dir,
         '--json-test-results', api.test_utils.test_results(add_json_log=False),
-        '--master-name', api.properties['mastername'],
+        '--main-name', api.properties['mainname'],
         '--build-number', str(api.properties['buildnumber']),
         '--builder-name', api.properties['buildername'],
         '--step-name', step_name,

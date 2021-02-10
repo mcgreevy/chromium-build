@@ -19,8 +19,8 @@ def inner_main(args):
   event = event_mon.Event(timestamp_kind='POINT')
   analyze_event = event.proto.analyze_event
 
-  if args.master_name:
-    analyze_event.master_name = args.master_name
+  if args.main_name:
+    analyze_event.main_name = args.main_name
   if args.builder_name:
     analyze_event.builder_name = args.builder_name
   if args.build_id:
@@ -75,7 +75,7 @@ def inner_main(args):
 
 def main(argv):
   parser = argparse.ArgumentParser()
-  parser.add_argument('--master-name', help='Buildbot master name')
+  parser.add_argument('--main-name', help='Buildbot main name')
   parser.add_argument('--builder-name', help='Buildbot builder name')
   parser.add_argument('--build-id', help='Build ID (buildnumber)')
   parser.add_argument('--analyze-input', help='JSON input passed to analyze',

@@ -2,22 +2,22 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from master import master_config
-from master.factory import remote_run_factory
+from main import main_config
+from main.factory import remote_run_factory
 
-import master_site_config
+import main_site_config
 
-ActiveMaster = master_site_config.ChromiumWebkit
+ActiveMain = main_site_config.ChromiumWebkit
 
 defaults = {}
 
-helper = master_config.Helper(defaults)
+helper = main_config.Helper(defaults)
 B = helper.Builder
 F = helper.Factory
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -63,5 +63,5 @@ B('WebKit Linux Trusty (dbg)', 'f_webkit_dbg_tests',
 F('f_webkit_dbg_tests', m_remote_run('chromium'))
 
 
-def Update(_config, _active_master, c):
+def Update(_config, _active_main, c):
   return helper.Update(c)

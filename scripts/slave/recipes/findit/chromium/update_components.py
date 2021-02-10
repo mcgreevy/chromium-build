@@ -138,7 +138,7 @@ def GenTests(api):
   yield (
       api.test('no_change')
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   modified_map = copy.deepcopy(_SAMPLE_MAP)
@@ -149,7 +149,7 @@ def GenTests(api):
           'Parse modified mapping',
           api.json.output(modified_map))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   modified_map = copy.deepcopy(_SAMPLE_MAP)
@@ -160,7 +160,7 @@ def GenTests(api):
           'Parse modified mapping with subdirs',
           api.json.output(modified_map))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   modified_map = copy.deepcopy(_SAMPLE_MAP)
@@ -171,7 +171,7 @@ def GenTests(api):
           'Parse modified mapping',
           api.json.output(modified_map))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   modified_map = copy.deepcopy(_SAMPLE_MAP)
@@ -182,7 +182,7 @@ def GenTests(api):
           'Parse modified mapping',
           api.json.output(modified_map))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   yield (
@@ -192,7 +192,7 @@ def GenTests(api):
           retcode=1,
           stdout=api.raw_io.output_text('Dummy script error'))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))
 
   modified_map = copy.deepcopy(_SAMPLE_MAP)
@@ -205,5 +205,5 @@ def GenTests(api):
           'Parse modified mapping',
           api.json.output(modified_map))
       + api.properties.tryserver(
-          mastername='chromium.linux',
+          mainname='chromium.linux',
           buildername='Linux Builder'))

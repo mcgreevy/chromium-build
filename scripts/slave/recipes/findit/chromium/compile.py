@@ -27,8 +27,8 @@ DEPS = [
 
 
 PROPERTIES = {
-    'target_mastername': Property(
-        kind=str, help='The target master to match compile config to.'),
+    'target_mainname': Property(
+        kind=str, help='The target main to match compile config to.'),
     'target_buildername': Property(
         kind=str, help='The target builder to match compile config to.'),
     'good_revision': Property(
@@ -67,12 +67,12 @@ class CompileResult(object):
   INFRA_FAILED = 'infra_failed'  # Infra failed.
 
 
-def _run_compile_at_revision(api, target_mastername, target_buildername,
+def _run_compile_at_revision(api, target_mainname, target_buildername,
                              revision, compile_targets, use_analyze):
   with api.step.nest('test %s' % str(revision)):
     # Checkout code at the given revision to recompile.
     bot_config = api.chromium_tests.create_bot_config_object(
-        target_mastername, target_buildername)
+        target_mainname, target_buildername)
     bot_update_step, bot_db = api.chromium_tests.prepare_checkout(
         bot_config, root_solution_revision=revision)
 
@@ -95,13 +95,13 @@ def _run_compile_at_revision(api, target_mastername, target_buildername,
             test_targets=[],
             additional_compile_targets=compile_targets,
             config_file_name='trybot_analyze_config.json',
-            mb_mastername=target_mastername,
+            mb_mainname=target_mainname,
             mb_buildername=target_buildername,
             additional_names=None)
     else:
       # Use ninja to filter out none-existing targets.
       compile_targets = api.findit.existing_targets(
-          compile_targets, target_mastername, target_buildername)
+          compile_targets, target_mainname, target_buildername)
 
     if not compile_targets:
       # No compile target exists, or is impacted by the given revision.
@@ -114,7 +114,7 @@ def _run_compile_at_revision(api, target_mastername, target_buildername,
           bot_db,
           compile_targets,
           tests_including_triggered=[],
-          mb_mastername=target_mastername,
+          mb_mainname=target_mainname,
           mb_buildername=target_buildername,
           override_bot_type='builder_tester')
       return CompileResult.PASSED
@@ -131,7 +131,7 @@ def _is_flaky_compile(compile_result, revision_being_checked, last_revision):
           revision_being_checked == last_revision)
 
 
-def RunSteps(api, target_mastername, target_buildername,
+def RunSteps(api, target_mainname, target_buildername,
              good_revision, bad_revision, compile_targets,
              buildbucket, use_analyze, suspected_revisions, use_bisect,
              compile_on_good_revision):
@@ -151,7 +151,7 @@ def RunSteps(api, target_mastername, target_buildername,
             'additional_build_parameters', {}).get('compile_targets')
 
   bot_config = api.chromium_tests.create_bot_config_object(
-      target_mastername, target_buildername)
+      target_mainname, target_buildername)
   api.chromium_tests.configure_build(
       bot_config, override_bot_type='builder_tester')
 
@@ -250,7 +250,7 @@ def RunSteps(api, target_mastername, target_buildername,
       if revision_before_suspect is not None:
         revision_being_checked = revision_before_suspect
         compile_result = _run_compile_at_revision(
-            api, target_mastername, target_buildername,
+            api, target_mainname, target_buildername,
             revision_being_checked, compile_targets, use_analyze)
         compile_results[revision_being_checked] = compile_result
         if compile_result == CompileResult.FAILED:
@@ -274,7 +274,7 @@ def RunSteps(api, target_mastername, target_buildername,
             index = len(remaining_revisions) / 2
           revision_being_checked = remaining_revisions[index]
           compile_result = _run_compile_at_revision(
-              api, target_mastername, target_buildername,
+              api, target_mainname, target_buildername,
               revision_being_checked, compile_targets, use_analyze)
           compile_results[revision_being_checked] = compile_result
           if compile_result == CompileResult.FAILED:
@@ -294,7 +294,7 @@ def RunSteps(api, target_mastername, target_buildername,
         for revision in remaining_revisions:
           revision_being_checked = revision
           compile_result = _run_compile_at_revision(
-              api, target_mastername, target_buildername,
+              api, target_mainname, target_buildername,
               revision, compile_targets, use_analyze)
           compile_results[revision] = compile_result
           if compile_result == CompileResult.FAILED:
@@ -316,7 +316,7 @@ def RunSteps(api, target_mastername, target_buildername,
           # The culprit is the first one in the regression range, we need to run
           # compile on last good to reduce false positives.
           compile_result = _run_compile_at_revision(
-              api, target_mastername, target_buildername,
+              api, target_mainname, target_buildername,
               good_revision, compile_targets, use_analyze)
           compile_results[good_revision] = compile_result
           # If compile failed on last good revision, the original failure could
@@ -351,11 +351,11 @@ def GenTests(api):
             suspected_revisions=None, use_bisect=False, buildbucket=None):
     properties = {
         'path_config': 'kitchen',
-        'mastername': 'tryserver.chromium.linux',
+        'mainname': 'tryserver.chromium.linux',
         'buildername': 'linux_variable',
         'bot_id': 'build1-a1',
         'buildnumber': '1',
-        'target_mastername': 'chromium.linux',
+        'target_mainname': 'chromium.linux',
         'target_buildername': 'Linux Builder',
         'good_revision': good_revision or 'r0',
         'bad_revision': bad_revision or 'r1',

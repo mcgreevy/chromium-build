@@ -38,8 +38,8 @@ DEPS = [
 
 
 PROPERTIES = {
-    'target_mastername': Property(
-        kind=str, help='The target master to match compile config to.'),
+    'target_mainname': Property(
+        kind=str, help='The target main to match compile config to.'),
     'target_testername': Property(
         kind=str,
         help='The target tester to match test config to. If the tests are run '
@@ -90,12 +90,12 @@ def _get_reduced_test_dict(original_test_dict, failed_tests_dict):
       reduced_dict[step].extend(tests)
   return reduced_dict
 
-def RunSteps(api, target_mastername, target_testername, good_revision,
+def RunSteps(api, target_mainname, target_testername, good_revision,
              bad_revision, tests, buildbucket, use_analyze,
              suspected_revisions, test_on_good_revision, test_repeat_count):
 
   tests, target_buildername = api.findit.configure_and_sync(
-      api, tests, buildbucket, target_mastername, target_testername,
+      api, tests, buildbucket, target_mainname, target_testername,
       bad_revision)
 
   # retrieve revisions in the regression range.
@@ -165,7 +165,7 @@ def RunSteps(api, target_mastername, target_testername, good_revision,
         revision_being_checked = potential_green_rev
         test_results[potential_green_rev], tests_failed_in_potential_green = (
             api.findit.compile_and_test_at_revision(
-                api, target_mastername, target_buildername, target_testername,
+                api, target_mainname, target_buildername, target_testername,
                 potential_green_rev, tests_have_not_found_culprit, use_analyze,
                 test_repeat_count=test_repeat_count))
       else:
@@ -185,7 +185,7 @@ def RunSteps(api, target_mastername, target_testername, good_revision,
           # culprit.
           test_results[revision], tests_failed_in_revision = (
               api.findit.compile_and_test_at_revision(
-                  api, target_mastername, target_buildername, target_testername,
+                  api, target_mainname, target_buildername, target_testername,
                   revision, tests_to_run, use_analyze, test_repeat_count))
 
           # Removes tests that passed in potential green and failed in
@@ -216,7 +216,7 @@ def RunSteps(api, target_mastername, target_testername, good_revision,
       if tests_run_on_good_revision:
         test_results[good_revision], tests_failed_in_revision = (
           api.findit.compile_and_test_at_revision(
-            api, target_mastername, target_buildername, target_testername,
+            api, target_mainname, target_buildername, target_testername,
             good_revision, tests_run_on_good_revision, use_analyze,
             test_repeat_count))
         if tests_failed_in_revision:
@@ -258,11 +258,11 @@ def GenTests(api):
       test_on_good_revision=True, test_repeat_count=20):
     properties = {
         'path_config': 'kitchen',
-        'mastername': 'tryserver.chromium.%s' % platform_name,
+        'mainname': 'tryserver.chromium.%s' % platform_name,
         'buildername': '%s_chromium_variable' % platform_name,
         'bot_id': 'build1-a1',
         'buildnumber': 1,
-        'target_mastername': 'chromium.%s' % platform_name,
+        'target_mainname': 'chromium.%s' % platform_name,
         'target_testername': tester_name,
         'good_revision': good_revision or 'r0',
         'bad_revision': bad_revision or 'r1',

@@ -24,4 +24,4 @@ class PBChangeSourceWithComparator(PBChangeSource):
   def getPerspective(self, _mind, username):
     assert username == self.user
     return ChangePerspectiveWithComparator(
-        self.comparator, self.master, self.prefix)
+        self.comparator, self.main, self.prefix)

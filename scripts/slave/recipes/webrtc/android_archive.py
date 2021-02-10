@@ -59,14 +59,14 @@ def RunSteps(api):
 def GenTests(api):
   yield (
     api.test('build_ok') +
-    api.properties.generic(mastername='client.webrtc.fyi',
+    api.properties.generic(mainname='client.webrtc.fyi',
                            buildername='Android Archive',
                            path_config='kitchen')
   )
 
   yield (
     api.test('build_failure') +
-    api.properties.generic(mastername='client.webrtc.fyi',
+    api.properties.generic(mainname='client.webrtc.fyi',
                            buildername='Android Archive',
                            path_config='kitchen') +
     api.step_data('build', retcode=1)
@@ -74,7 +74,7 @@ def GenTests(api):
 
   yield (
     api.test('trybot_build') +
-    api.properties.tryserver(mastername='tryserver.webrtc',
+    api.properties.tryserver(mainname='tryserver.webrtc',
                              buildername='android_archive',
                              path_config='kitchen')
   )

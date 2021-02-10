@@ -329,18 +329,18 @@ class V8TestApi(recipe_test_api.RecipeTestApi):
     return self.m.json.output({
       'log': [
         {'commit': '[child2 hsh]', 'parents': ['[child1 hsh]']},
-        {'commit': '[child1 hsh]', 'parents': ['[master-branch-point hsh]']},
+        {'commit': '[child1 hsh]', 'parents': ['[main-branch-point hsh]']},
       ],
     })
 
-  def _get_test_branch_name(self, mastername, buildername):
-    if mastername == 'client.dart.fyi':
+  def _get_test_branch_name(self, mainname, buildername):
+    if mainname == 'client.dart.fyi':
       return STABLE_BRANCH
     if re.search(r'stable branch', buildername):
       return STABLE_BRANCH
     if re.search(r'beta branch', buildername):
       return BETA_BRANCH
-    return 'master'
+    return 'main'
 
   def _make_dummy_swarm_hashes(self, bot_config):
     """Makes dummy isolate hashes for all tests of a bot.
@@ -363,23 +363,23 @@ class V8TestApi(recipe_test_api.RecipeTestApi):
     )
 
 
-  def test(self, mastername, buildername, suffix='', **kwargs):
+  def test(self, mainname, buildername, suffix='', **kwargs):
     name = '_'.join(filter(bool, [
       'full',
-      _sanitize_nonalpha(mastername),
+      _sanitize_nonalpha(mainname),
       _sanitize_nonalpha(buildername),
       suffix,
     ]))
-    builders_list = builders.BUILDERS[mastername]['builders']
+    builders_list = builders.BUILDERS[mainname]['builders']
     bot_config = builders_list[buildername]
     v8_config_kwargs = bot_config.get('v8_config_kwargs', {})
     parent_buildername = bot_config.get('parent_buildername')
-    branch=self._get_test_branch_name(mastername, buildername)
+    branch=self._get_test_branch_name(mainname, buildername)
 
     if bot_config.get('bot_type') in ['builder', 'builder_tester']:
       assert parent_buildername is None
 
-    if mastername.startswith('tryserver'):
+    if mainname.startswith('tryserver'):
       properties_fn = self.m.properties.tryserver
     else:
       properties_fn = self.m.properties.generic
@@ -387,7 +387,7 @@ class V8TestApi(recipe_test_api.RecipeTestApi):
     test = (
         recipe_test_api.RecipeTestApi.test(name) +
         properties_fn(
-            mastername=mastername,
+            mainname=mainname,
             buildername=buildername,
             branch=branch,
             parent_buildername=parent_buildername,
@@ -403,7 +403,7 @@ class V8TestApi(recipe_test_api.RecipeTestApi):
       test += self.m.properties(
           # TODO(machenbach): Turn that into a git hash.
           parent_got_revision='54321',
-          parent_got_revision_cp='refs/heads/master@{#20123}',
+          parent_got_revision_cp='refs/heads/main@{#20123}',
           parent_build_environment={
             'useful': 'envvars', 'from': 'the', 'parent': 'bot'},
       )
@@ -415,16 +415,16 @@ class V8TestApi(recipe_test_api.RecipeTestApi):
           swarm_hashes=self._make_dummy_swarm_hashes(bot_config),
         )
 
-    if mastername.startswith('tryserver'):
+    if mainname.startswith('tryserver'):
       test += self.m.properties(
           category='cq',
-          master='tryserver.v8',
+          main='tryserver.v8',
           patch_project='v8',
           reason='CQ',
           revision='12345',
           try_job_key='1234',
       )
-    if (mastername.startswith('tryserver') and
+    if (mainname.startswith('tryserver') and
         not kwargs.get('gerrit_project')):
       test += self.m.properties(patch_storage='rietveld')
 

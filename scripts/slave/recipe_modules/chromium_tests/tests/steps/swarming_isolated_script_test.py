@@ -56,7 +56,7 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -70,7 +70,7 @@ def GenTests(api):
   yield (
       api.test('override_compile_targets') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -85,7 +85,7 @@ def GenTests(api):
   yield (
       api.test('chartjson') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -109,7 +109,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_ignore_task_failure') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -133,7 +133,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_invalid') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -157,7 +157,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_max_failures') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -181,7 +181,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_no_results') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -197,7 +197,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_no_results_failure') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -214,7 +214,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_not_uploading') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -236,7 +236,7 @@ def GenTests(api):
   yield (
       api.test('chartjson_disabled') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -260,7 +260,7 @@ def GenTests(api):
   yield (
       api.test('dimensions_windows') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -275,7 +275,7 @@ def GenTests(api):
   yield (
       api.test('dimensions_mac') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={
@@ -290,7 +290,7 @@ def GenTests(api):
   yield (
       api.test('dimensions_mac_hidpi') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           buildnumber=123,
           swarm_hashes={

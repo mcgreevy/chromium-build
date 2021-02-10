@@ -79,9 +79,9 @@ def _AddTestSpec(name, perf_id, platform, num_device_shards=1,
       'chromium_perf', perf_id, platform, target_bits,
       parent_buildername=parent_buildername, tests=tests)
   if not parent_buildername:
-    spec['parent_mastername'] = 'chromium.perf'
+    spec['parent_mainname'] = 'chromium.perf'
   else:
-    spec['parent_mastername'] = 'chromium.perf.fyi'
+    spec['parent_mainname'] = 'chromium.perf.fyi'
 
   SPEC['builders'][name] = spec
 

@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 
-from slave import goma_utils
+from subordinate import goma_utils
 
 
 def start_cloudtail(args):

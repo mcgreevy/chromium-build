@@ -38,8 +38,8 @@ DEPS = [
 
 
 PROPERTIES = {
-    'target_mastername': Property(
-        kind=str, help='The target master to match compile config to.'),
+    'target_mainname': Property(
+        kind=str, help='The target main to match compile config to.'),
     'target_testername': Property(
         kind=str,
         help='The target tester to match test config to. If the tests are run '
@@ -64,11 +64,11 @@ PROPERTIES = {
 }
 
 
-def RunSteps(api, target_mastername, target_testername,
+def RunSteps(api, target_mainname, target_testername,
              test_revision, tests, buildbucket, test_repeat_count):
 
   tests, target_buildername = api.findit.configure_and_sync(
-      api, tests, buildbucket, target_mastername, target_testername,
+      api, tests, buildbucket, target_mainname, target_testername,
       test_revision)
 
   test_results = {}
@@ -79,7 +79,7 @@ def RunSteps(api, target_mastername, target_testername,
 
   try:
     test_results[test_revision], _ = api.findit.compile_and_test_at_revision(
-        api, target_mastername, target_buildername, target_testername,
+        api, target_mainname, target_buildername, target_testername,
         test_revision, tests, False, test_repeat_count)
   except api.step.InfraFailure:
     test_results[test_revision] = api.findit.TestResult.INFRA_FAILED
@@ -99,11 +99,11 @@ def GenTests(api):
       buildbucket=None):
     properties = {
         'path_config': 'kitchen',
-        'mastername': 'tryserver.chromium.%s' % platform_name,
+        'mainname': 'tryserver.chromium.%s' % platform_name,
         'buildername': '%s_chromium_variable' % platform_name,
         'bot_id': 'build1-a1',
         'buildnumber': 1,
-        'target_mastername': 'chromium.%s' % platform_name,
+        'target_mainname': 'chromium.%s' % platform_name,
         'target_testername': tester_name,
         'test_revision': revision or 'r0',
     }

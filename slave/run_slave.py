@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-""" Initialize the environment variables and start the buildbot slave.
+""" Initialize the environment variables and start the buildbot subordinate.
 """
 
 import os
@@ -26,9 +26,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(SCRIPT_DIR), 'scripts'))
 from common import chromium_utils
 sys.path.pop(0)
 
-# By default, the slave will identify itself to the master by its hostname.
-# To override that, explicitly set a slavename here.
-slavename = None
+# By default, the subordinate will identify itself to the main by its hostname.
+# To override that, explicitly set a subordinatename here.
+subordinatename = None
 
 def remove_all_vars_except(dictionary, keep):
   """Remove all keys from the specified dictionary except those in !keep|"""
@@ -100,22 +100,22 @@ def Sleep(desired_sleep):
 def Reboot():
   """Repeatedly try to reboot the system.
 
-  On some platforms, like Mac, run_slave.py is launched by a system launcher
+  On some platforms, like Mac, run_subordinate.py is launched by a system launcher
   agent.  In those cases, any children of this process will get killed by the
   agent if they're still running after we exit.  Our strategy to ensure our
   system reboot command is issued without getting killed before sudo runs
   shutdown for us is:
 
-  1. Only call Reboot() from run_slave.py, and not from within the
+  1. Only call Reboot() from run_subordinate.py, and not from within the
      remote_shutdown method.  This allows us to avoid the possibility of
      the sudo being executed and being interrupted by the Twisted service
      as it shuts down due to a separate reactor.stop() call.  (This was just
      the only theory available for why some bots would not reboot at times.)
 
   2. In IssueReboot, use subprocess.call() instead of Popen() to ensure that
-     run_slave.py doesn't exit at all when it calls Reboot().  This ensures that
-     run_slave.py won't exit and trigger any cleanup routines by whatever
-     launched run_slave.py.
+     run_subordinate.py doesn't exit at all when it calls Reboot().  This ensures that
+     run_subordinate.py won't exit and trigger any cleanup routines by whatever
+     launched run_subordinate.py.
 
   Since our strategy depends on Reboot() never returning, raise an exception
   if that should occur to make it clear in logs that an error condition is
@@ -132,26 +132,26 @@ def Reboot():
   raise Exception('Reboot: Should not return but would have')
 
 
-def HotPatchSlaveBuilder(is_testing):
-  """We could override the SlaveBuilder class but it's way simpler to just
+def HotPatchSubordinateBuilder(is_testing):
+  """We could override the SubordinateBuilder class but it's way simpler to just
   hotpatch it."""
-  Log('HotPatchSlaveBuilder(%s)' % is_testing)
-  from buildslave.bot import Bot  # pylint: disable=F0401
+  Log('HotPatchSubordinateBuilder(%s)' % is_testing)
+  from buildsubordinate.bot import Bot  # pylint: disable=F0401
 
   Bot.old_remote_shutdown = Bot.remote_shutdown
   def rebooting_remote_shutdown(self):
-    """Set a reboot flag and stop the reactor so when the slave exits we reboot.
+    """Set a reboot flag and stop the reactor so when the subordinate exits we reboot.
 
-    Note that Buildbot masters >= 0.8.3 try to stop the slave in 2 ways.  First
-    they try the new way which works for slaves running based on Buildbot 0.8.3
-    or later.  If the slave is running something earlier than Buildbot 0.8.3,
-    the master will then try the old way which will be what actually restarts
-    those older slaves.
+    Note that Buildbot mains >= 0.8.3 try to stop the subordinate in 2 ways.  First
+    they try the new way which works for subordinates running based on Buildbot 0.8.3
+    or later.  If the subordinate is running something earlier than Buildbot 0.8.3,
+    the main will then try the old way which will be what actually restarts
+    those older subordinates.
 
-    For older slaves, the new way is always run first, and this causes the
-    "No such method 'remote_shutdown'" message that is seen in the old slaves'
-    twistd.log files.  This error is safe to ignore since the master will have
-    immediately tried the old way and correctly restarted those slaves after
+    For older subordinates, the new way is always run first, and this causes the
+    "No such method 'remote_shutdown'" message that is seen in the old subordinates'
+    twistd.log files.  This error is safe to ignore since the main will have
+    immediately tried the old way and correctly restarted those subordinates after
     that error is caught.
     """
     global needs_reboot
@@ -183,7 +183,7 @@ def HotPatchSlaveBuilder(is_testing):
         if not is_testing:
           chromium_utils.RemoveDirectory(possible_build_dead)
 
-      # Delete old slave directories.
+      # Delete old subordinate directories.
       if d not in wanted_dirs:
         Log('Deleting unwanted directory %s' % d)
         if not is_testing:
@@ -193,16 +193,16 @@ def HotPatchSlaveBuilder(is_testing):
   Bot.remote_setBuilderList = Bot.new_remote_setBuilderList
 
 
-def GetActiveMasterClass(master_class_name, slave_bootstrap, config_bootstrap):
-  slave_bootstrap.ImportMasterConfigs(master_class_name)
-  if hasattr(config_bootstrap.Master, 'active_master'):
+def GetActiveMainClass(main_class_name, subordinate_bootstrap, config_bootstrap):
+  subordinate_bootstrap.ImportMainConfigs(main_class_name)
+  if hasattr(config_bootstrap.Main, 'active_main'):
     # pylint: disable=E1101
-    return config_bootstrap.Master.active_master
-  if master_class_name and getattr(config_bootstrap.Master, master_class_name):
-    master = getattr(config_bootstrap.Master, master_class_name)
-    config_bootstrap.Master.active_master = master
-    return master
-  raise RuntimeError('*** Failed to detect the active master')
+    return config_bootstrap.Main.active_main
+  if main_class_name and getattr(config_bootstrap.Main, main_class_name):
+    main = getattr(config_bootstrap.Main, main_class_name)
+    config_bootstrap.Main.active_main = main
+    return main
+  raise RuntimeError('*** Failed to detect the active main')
 
 
 def GetRoot():
@@ -213,9 +213,9 @@ def GetRoot():
 
 def _GetSubdirBuildbotPaths():
   return [
-    os.path.join(SUBDIR_ROOT, slave['subdir'])
-    for slave in chromium_utils.GetSlavesForHost()
-    if slave.get('subdir')
+    os.path.join(SUBDIR_ROOT, subordinate['subdir'])
+    for subordinate in chromium_utils.GetSubordinatesForHost()
+    if subordinate.get('subdir')
   ]
 
 
@@ -248,7 +248,7 @@ def _CheckSubdirBuildbotLiveliness():
   while True:
     time.sleep(60)
     for botdir in _GetSubdirBuildbotPaths():
-      twistd_pid_file = os.path.join(botdir, 'build', 'slave', 'twistd.pid')
+      twistd_pid_file = os.path.join(botdir, 'build', 'subordinate', 'twistd.pid')
       if not os.path.exists(twistd_pid_file):
         print 'Missing %s for subdir buildbot' % twistd_pid_file
         return
@@ -279,7 +279,7 @@ def SpawnSubdirBuildbotsIfNeeded():
   # Checking the subdir twistd pids is implemented for posix only.
   assert os.name == 'posix', 'Can only us subdir buildbots with posix.'
 
-  print 'Spawning other slaves on this host as needed.'
+  print 'Spawning other subordinates on this host as needed.'
   print 'Run make stopall to terminate.'
 
   for botdir in subdirs:
@@ -323,12 +323,12 @@ def SpawnSubdirBuildbotsIfNeeded():
           GetBotoFilePath(build=os.path.join(botdir, 'build')),
       )
 
-    bot_slavedir = os.path.join(botdir, 'build', 'slave')
-    twistd_pid_file = os.path.join(bot_slavedir, 'twistd.pid')
+    bot_subordinatedir = os.path.join(botdir, 'build', 'subordinate')
+    twistd_pid_file = os.path.join(bot_subordinatedir, 'twistd.pid')
     if (not os.path.exists(twistd_pid_file) or
         not _CheckTwistdRuns(twistd_pid_file)):
-      print 'Spawning slave in %s' % bot_slavedir
-      subprocess.check_call(['make', 'start'], cwd=bot_slavedir)
+      print 'Spawning subordinate in %s' % bot_subordinatedir
+      subprocess.check_call(['make', 'start'], cwd=bot_subordinatedir)
 
   if '--nodaemon' in sys.argv:
     # Block on liveliness of the subdir buildbots if called with --nodaemon.
@@ -337,16 +337,16 @@ def SpawnSubdirBuildbotsIfNeeded():
   return True
 
 
-def GetThirdPartyVersions(master):
-  """Checks whether the master to which this slave belongs specifies particular
-  versions of buildbot and twisted for its slaves to run.  If not specified,
+def GetThirdPartyVersions(main):
+  """Checks whether the main to which this subordinate belongs specifies particular
+  versions of buildbot and twisted for its subordinates to run.  If not specified,
   this function returns default values.
   """
-  bb_ver = 'buildbot_slave_8_4'
+  bb_ver = 'buildbot_subordinate_8_4'
   tw_ver = 'twisted_10_2'
-  if master:
-    bb_ver = getattr(master, 'buildslave_version', bb_ver)
-    tw_ver = getattr(master, 'twisted_version', tw_ver)
+  if main:
+    bb_ver = getattr(main, 'buildsubordinate_version', bb_ver)
+    tw_ver = getattr(main, 'twisted_version', tw_ver)
   print 'Using %s and %s' % (bb_ver, tw_ver)
   return (bb_ver, tw_ver)
 
@@ -432,20 +432,20 @@ def main():
         if 'dist-packages' not in x and 'site-packages' not in x]
   sys.path = python_path + filtered_sys_path
 
-  import slave.bootstrap
+  import subordinate.bootstrap
   import config_bootstrap
-  active_slavename = chromium_utils.GetActiveSlavename()
-  config_bootstrap.Master.active_slavename = active_slavename
+  active_subordinatename = chromium_utils.GetActiveSubordinatename()
+  config_bootstrap.Main.active_subordinatename = active_subordinatename
 
-  active_master_class_name = chromium_utils.GetActiveMaster(active_slavename)
-  if not active_master_class_name:
-    raise RuntimeError('*** Failed to detect the active master')
+  active_main_class_name = chromium_utils.GetActiveMain(active_subordinatename)
+  if not active_main_class_name:
+    raise RuntimeError('*** Failed to detect the active main')
 
-  active_master = GetActiveMasterClass(
-      active_master_class_name, slave.bootstrap, config_bootstrap)
+  active_main = GetActiveMainClass(
+      active_main_class_name, subordinate.bootstrap, config_bootstrap)
   active_subdir = chromium_utils.GetActiveSubdir()
 
-  bb_ver, tw_ver = GetThirdPartyVersions(active_master)
+  bb_ver, tw_ver = GetThirdPartyVersions(active_main)
   python_path.append(os.path.join(BUILD_DIR, 'third_party', bb_ver))
   python_path.append(os.path.join(BUILD_DIR, 'third_party', tw_ver))
   sys.path = python_path[-2:] + sys.path
@@ -511,8 +511,8 @@ def main():
     remove_all_vars_except(os.environ, env_var)
 
     # Extend the env variables with the chrome-specific settings. Tailor the
-    # slave process' (and derivative tasks') PATH environment variable.
-    slave_path = [
+    # subordinate process' (and derivative tasks') PATH environment variable.
+    subordinate_path = [
         depot_tools,
         # Reuse the python executable used to start this script.
         os.path.dirname(sys.executable),
@@ -529,15 +529,15 @@ def main():
     def which_path(cmd):
       path = chromium_utils.Which(cmd)
       return ([os.path.dirname(os.path.abspath(path))] if path else [])
-    slave_path += which_path('powershell.exe')
+    subordinate_path += which_path('powershell.exe')
 
     # build_internal/tools contains tools we can't redistribute.
     tools = os.path.join(ROOT_DIR, 'build_internal', 'tools')
     if os.path.isdir(tools):
-      slave_path.append(os.path.abspath(tools))
+      subordinate_path.append(os.path.abspath(tools))
     if 'JAVA_HOME' in os.environ:
-      slave_path.append(os.path.join(os.environ['JAVA_HOME'], 'bin'))
-    os.environ['PATH'] = os.pathsep.join(slave_path)
+      subordinate_path.append(os.path.join(os.environ['JAVA_HOME'], 'bin'))
+    os.environ['PATH'] = os.pathsep.join(subordinate_path)
     os.environ['LOGNAME'] = os.environ['USERNAME']
 
   elif sys.platform in ('darwin', 'posix', 'linux2'):
@@ -581,33 +581,33 @@ def main():
     ]
 
     remove_all_vars_except(os.environ, env_var)
-    slave_path = [
-        os.path.join(os.path.expanduser('~'), 'slavebin'),
+    subordinate_path = [
+        os.path.join(os.path.expanduser('~'), 'subordinatebin'),
         depot_tools,
     ]
     # Git on mac is installed from git-scm.com/download/mac
     if sys.platform == 'darwin' and os.path.isdir('/usr/local/git/bin'):
-      slave_path.append('/usr/local/git/bin')
-    slave_path += [
+      subordinate_path.append('/usr/local/git/bin')
+    subordinate_path += [
         # Reuse the python executable used to start this script.
         os.path.dirname(sys.executable),
         '/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin'
     ]
     if 'JAVA_HOME' in os.environ:
-      slave_path.append(os.path.join(os.environ['JAVA_HOME'], 'bin'))
-    os.environ['PATH'] = os.pathsep.join(slave_path)
+      subordinate_path.append(os.path.join(os.environ['JAVA_HOME'], 'bin'))
+    os.environ['PATH'] = os.pathsep.join(subordinate_path)
 
   else:
     error('Platform %s is not implemented yet' % sys.platform)
 
-  # Export the active master name in the enviornment. We do this because some
+  # Export the active main name in the enviornment. We do this because some
   # scripts actually rely on this value, and it is not available otherwise.
   #
   # XXX: This is a BuildBot transition hack. Please do NOT use these variables.
   # They will go away and if you use them, we're not going to fix your code; it
   # will just break.
-  os.environ['INFRA_BUILDBOT_MASTER_CLASS_NAME'] = active_master_class_name
-  os.environ['INFRA_BUILDBOT_SLAVE_NAME'] = active_slavename
+  os.environ['INFRA_BUILDBOT_MASTER_CLASS_NAME'] = active_main_class_name
+  os.environ['INFRA_BUILDBOT_SLAVE_NAME'] = active_subordinatename
   os.environ['INFRA_BUILDBOT_SLAVE_ACTIVE_SUBDIR'] = active_subdir or ''
 
   git_exe = 'git' + ('.bat' if sys.platform.startswith('win') else '')
@@ -627,18 +627,18 @@ def main():
   # This may be redundant, unless this is imported and main is called.
   UseBotoPath()
 
-  # This envrionment is defined only when testing the slave on a dev machine.
+  # This envrionment is defined only when testing the subordinate on a dev machine.
   is_testing = 'TESTING_MASTER' in os.environ
-  HotPatchSlaveBuilder(is_testing)
+  HotPatchSubordinateBuilder(is_testing)
 
   import twisted.scripts.twistd as twistd
   twistd.run()
   shutdown_file = os.path.join(os.path.dirname(__file__), 'shutdown.stamp')
   if os.path.isfile(shutdown_file):
-    # If this slave is being shut down gracefully, don't reboot it.
+    # If this subordinate is being shut down gracefully, don't reboot it.
     try:
       os.remove(shutdown_file)
-      # Only disable reboot if the file can be removed.  Otherwise, the slave
+      # Only disable reboot if the file can be removed.  Otherwise, the subordinate
       # might get stuck offline after every build.
       global needs_reboot
       needs_reboot = False
@@ -647,7 +647,7 @@ def main():
 
   # Although prevent_reboot_file looks similar to shutdown_file above, it is not
   # the same as shutdown.stamp is actually used by Buildbot to shut down the
-  # slave process, while ~/no_reboot prevents rebooting the slave machine.
+  # subordinate process, while ~/no_reboot prevents rebooting the subordinate machine.
   prevent_reboot_file = os.path.join(os.path.expanduser('~'), 'no_reboot')
   if needs_reboot:
     if not os.path.isfile(prevent_reboot_file):
@@ -656,7 +656,7 @@ def main():
       # This line should not be reached.
     else:
       Log('Reboot was prevented by %s. Please remove the file and reboot the '
-          'slave manually to resume automatic reboots.' % prevent_reboot_file)
+          'subordinate manually to resume automatic reboots.' % prevent_reboot_file)
 
 
 def EnvWithDepotTools(**kwargs):

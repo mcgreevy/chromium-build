@@ -49,13 +49,13 @@ class LuciConfigApi(recipe_api.RecipeApi):
 
     Args:
       project: The name of the project in luci-config.
-      config: The config to fetch from refs/heads/master of the project.
+      config: The config to fetch from refs/heads/main of the project.
 
     Returns:
       The json returned from luci-config.
     """
     url = self.c.base_url + '/_ah/api/config/v1/config_sets/'
-    url += self.m.url.quote('projects/%s/refs/heads/master' % project, safe='')
+    url += self.m.url.quote('projects/%s/refs/heads/main' % project, safe='')
     url += '/config/%s' % config
 
     result = self.m.url.get_json(

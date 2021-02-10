@@ -35,7 +35,7 @@ def target_dartino_linux_debug_arm_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -85,7 +85,7 @@ def dartino_mac_debug_asan_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -128,7 +128,7 @@ def target_dartino_linux_release_arm_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -178,7 +178,7 @@ def dartino_lk_debug_arm_qemu_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -228,7 +228,7 @@ def dartino_linux_release_asan_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -278,7 +278,7 @@ def dartino_mac_release_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -321,7 +321,7 @@ def cross_dartino_linux_arm_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -375,7 +375,7 @@ def dartino_mac_release_asan_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -418,7 +418,7 @@ def cross_dartino_linux_arm_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -472,7 +472,7 @@ def dartino_free_rtos_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -522,7 +522,7 @@ def dartino_mac_release_x64_sdk_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -565,7 +565,7 @@ def dartino_free_rtos_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -615,7 +615,7 @@ def dartino_mac_debug_asan_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -658,7 +658,7 @@ def dartino_mac_debug_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -701,7 +701,7 @@ def target_dartino_linux_debug_arm_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -735,7 +735,7 @@ def dartino_win_debug_x86_steps(api):
   # svnkill step; not necessary in recipes
   # update scripts step; implicitly run by recipe engine.
   # extra taskkill step
-  api.python("taskkill", api.package_repo_resource("scripts", "slave",
+  api.python("taskkill", api.package_repo_resource("scripts", "subordinate",
                                                 "kill_processes.py"))
   # bot_update step
   src_cfg = api.gclient.make_config()
@@ -755,7 +755,7 @@ def dartino_win_debug_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -768,7 +768,7 @@ def dartino_win_debug_x86_steps(api):
           "BUILDBOT_ANNOTATED_STEPS_RUN": "1",
           "BUILDBOT_BUILDERNAME": api.properties["buildername"]}):
         api.step("annotated steps",
-                 ["python_slave",
+                 ["python_subordinate",
                   api.path["checkout"].join("tools", "bots", "dartino.py")],
                  allow_subannotations=True)
       # taskkill step
@@ -799,7 +799,7 @@ def dartino_linux_release_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -849,7 +849,7 @@ def dartino_mac_debug_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -892,7 +892,7 @@ def dartino_linux_release_x64_sdk_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -945,7 +945,7 @@ def dartino_linux_debug_asan_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -995,7 +995,7 @@ def dartino_linux_debug_asan_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1045,7 +1045,7 @@ def dartino_mac_release_asan_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1088,7 +1088,7 @@ def target_dartino_linux_release_arm_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1138,7 +1138,7 @@ def dartino_mac_release_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1181,7 +1181,7 @@ def dartino_linux_release_x64_sdk_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1234,7 +1234,7 @@ def dartino_lk_debug_arm_qemu_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1284,7 +1284,7 @@ def dartino_mac_release_x64_sdk_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1327,7 +1327,7 @@ def dartino_linux_release_asan_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1377,7 +1377,7 @@ def dartino_linux_debug_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1427,7 +1427,7 @@ def dartino_linux_release_x86_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1477,7 +1477,7 @@ def dartino_linux_debug_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1511,7 +1511,7 @@ def dartino_win_debug_x86_dev_steps(api):
   # svnkill step; not necessary in recipes
   # update scripts step; implicitly run by recipe engine.
   # extra taskkill step
-  api.python("taskkill", api.package_repo_resource("scripts", "slave",
+  api.python("taskkill", api.package_repo_resource("scripts", "subordinate",
                                                 "kill_processes.py"))
   # bot_update step
   src_cfg = api.gclient.make_config()
@@ -1531,7 +1531,7 @@ def dartino_win_debug_x86_dev_steps(api):
          "DEPOT_TOOLS_UPDATE": "0"}
   with api.context(env=env):
     api.python("gclient runhooks wrapper",
-               api.package_repo_resource("scripts", "slave", "runhooks_wrapper.py"))
+               api.package_repo_resource("scripts", "subordinate", "runhooks_wrapper.py"))
   with api.context(cwd=api.path['checkout']):
     with api.step.defer_results():
       # taskkill step
@@ -1544,7 +1544,7 @@ def dartino_win_debug_x86_dev_steps(api):
           "BUILDBOT_ANNOTATED_STEPS_RUN": "1",
           "BUILDBOT_BUILDERNAME": api.properties["buildername"]}):
         api.step("annotated steps",
-                 ["python_slave",
+                 ["python_subordinate",
                   api.path["checkout"].join("tools", "bots", "dartino.py")],
                  allow_subannotations=True)
       # taskkill step
@@ -1601,199 +1601,199 @@ def RunSteps(api):
 
 def GenTests(api):
   yield (api.test('target_dartino_linux_debug_arm_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='target-dartino-linux-debug-arm-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_debug_asan_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-debug-asan-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('target_dartino_linux_release_arm_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='target-dartino-linux-release-arm-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_lk_debug_arm_qemu_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-lk-debug-arm-qemu-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_asan_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-asan-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('cross_dartino_linux_arm') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='cross-dartino-linux-arm') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_asan_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-asan-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('cross_dartino_linux_arm_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='cross-dartino-linux-arm-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_free_rtos') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-free-rtos') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_x64_sdk') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-x64-sdk') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_free_rtos_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-free-rtos-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_debug_asan_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-debug-asan-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_debug_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-debug-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('target_dartino_linux_debug_arm') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='target-dartino-linux-debug-arm') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_win_debug_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-win-debug-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_debug_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-debug-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_x64_sdk_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-x64-sdk-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_debug_asan_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-debug-asan-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_debug_asan_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-debug-asan-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_asan_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-asan-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('target_dartino_linux_release_arm') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='target-dartino-linux-release-arm') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_x64_sdk') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-x64-sdk') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_lk_debug_arm_qemu') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-lk-debug-arm-qemu') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_mac_release_x64_sdk_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-mac-release-x64-sdk-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_asan_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-asan-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_debug_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-debug-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_release_x86') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-release-x86') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_linux_debug_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-linux-debug-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('dartino_win_debug_x86_dev') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='dartino-win-debug-x86-dev') +
     api.properties(revision='123456789abcdef') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )
   yield (api.test('builder_not_in_dispatch_directory') +
-    api.properties(mastername='client.fletch') +
+    api.properties(mainname='client.fletch') +
     api.properties(buildername='nonexistent_builder') +
-    api.properties(bot_id='TestSlave')
+    api.properties(bot_id='TestSubordinate')
         )

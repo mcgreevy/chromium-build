@@ -26,5 +26,5 @@ def RunSteps(api):
 
 def GenTests(api):
   yield(api.test('fake_test') +
-        api.properties.generic(mastername='fake_mastername',
+        api.properties.generic(mainname='fake_mainname',
                                buildername='fake_buildername'))

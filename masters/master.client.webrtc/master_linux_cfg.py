@@ -4,16 +4,16 @@
 
 from buildbot.schedulers.basic import SingleBranchScheduler
 
-from master.factory import annotator_factory
-from master.factory import remote_run_factory
+from main.factory import annotator_factory
+from main.factory import remote_run_factory
 
-import master_site_config
-ActiveMaster = master_site_config.WebRTC
+import main_site_config
+ActiveMain = main_site_config.WebRTC
 
 
 def m_remote_run(recipe, **kwargs):
   return remote_run_factory.RemoteRunFactory(
-      active_master=ActiveMaster,
+      active_main=ActiveMain,
       repository='https://chromium.googlesource.com/chromium/tools/build.git',
       recipe=recipe,
       factory_properties={'path_config': 'kitchen'},
@@ -26,7 +26,7 @@ m_annotator = annotator_factory.AnnotatorFactory()
 def Update(c):
   c['schedulers'].extend([
       SingleBranchScheduler(name='webrtc_linux_scheduler',
-                            branch='master',
+                            branch='main',
                             treeStableTimer=30,
                             builderNames=[
           'Linux32 Debug',
@@ -48,36 +48,36 @@ def Update(c):
       ]),
   ])
 
-  # 'slavebuilddir' below is used to reduce the number of checkouts since some
-  # of the builders are pooled over multiple slave machines.
+  # 'subordinatebuilddir' below is used to reduce the number of checkouts since some
+  # of the builders are pooled over multiple subordinate machines.
   specs = [
-    {'name': 'Linux32 Release (ARM)', 'slavebuilddir': 'linux_arm'},
-    {'name': 'Linux32 Debug', 'slavebuilddir': 'linux32'},
-    {'name': 'Linux32 Release', 'slavebuilddir': 'linux32'},
-    {'name': 'Linux64 Debug', 'slavebuilddir': 'linux64'},
-    {'name': 'Linux64 Release', 'slavebuilddir': 'linux64'},
-    {'name': 'Linux64 Debug (ARM)', 'slavebuilddir': 'linux_arm64'},
-    {'name': 'Linux64 Release (ARM)', 'slavebuilddir': 'linux_arm64'},
-    {'name': 'Linux Asan', 'slavebuilddir': 'linux_asan'},
-    {'name': 'Linux MSan', 'slavebuilddir': 'linux_msan'},
-    {'name': 'Linux Memcheck', 'slavebuilddir': 'linux_memcheck_tsan'},
-    {'name': 'Linux Tsan v2', 'slavebuilddir': 'linux_tsan2'},
-    {'name': 'Linux UBSan', 'slavebuilddir': 'linux_ubsan'},
-    {'name': 'Linux UBSan vptr', 'slavebuilddir': 'linux_ubsan_vptr'},
+    {'name': 'Linux32 Release (ARM)', 'subordinatebuilddir': 'linux_arm'},
+    {'name': 'Linux32 Debug', 'subordinatebuilddir': 'linux32'},
+    {'name': 'Linux32 Release', 'subordinatebuilddir': 'linux32'},
+    {'name': 'Linux64 Debug', 'subordinatebuilddir': 'linux64'},
+    {'name': 'Linux64 Release', 'subordinatebuilddir': 'linux64'},
+    {'name': 'Linux64 Debug (ARM)', 'subordinatebuilddir': 'linux_arm64'},
+    {'name': 'Linux64 Release (ARM)', 'subordinatebuilddir': 'linux_arm64'},
+    {'name': 'Linux Asan', 'subordinatebuilddir': 'linux_asan'},
+    {'name': 'Linux MSan', 'subordinatebuilddir': 'linux_msan'},
+    {'name': 'Linux Memcheck', 'subordinatebuilddir': 'linux_memcheck_tsan'},
+    {'name': 'Linux Tsan v2', 'subordinatebuilddir': 'linux_tsan2'},
+    {'name': 'Linux UBSan', 'subordinatebuilddir': 'linux_ubsan'},
+    {'name': 'Linux UBSan vptr', 'subordinatebuilddir': 'linux_ubsan_vptr'},
     {
       'name': 'Linux (more configs)',
       'recipe': 'webrtc/more_configs',
-      'slavebuilddir': 'linux64',
+      'subordinatebuilddir': 'linux64',
     },
     {
       'name': 'Linux64 Release [large tests]',
       'category': 'compile|baremetal',
-      'slavebuilddir': 'linux_baremetal',
+      'subordinatebuilddir': 'linux_baremetal',
     },
     {
       'name': 'Linux64 Release (Libfuzzer)',
       'recipe': 'webrtc/libfuzzer',
-      'slavebuilddir': 'linux64_libfuzzer',
+      'subordinatebuilddir': 'linux64_libfuzzer',
     },
   ]
 
@@ -89,6 +89,6 @@ def Update(c):
                    else m_remote_run('webrtc/standalone'),
         'notify_on_missing': True,
         'category': spec.get('category', 'compile|testers'),
-        'slavebuilddir': spec['slavebuilddir'],
+        'subordinatebuilddir': spec['subordinatebuilddir'],
       } for spec in specs
   ])

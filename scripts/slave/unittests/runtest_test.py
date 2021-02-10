@@ -10,7 +10,7 @@ import unittest
 import test_env  # pylint: disable=W0403,W0611
 
 import mock
-from slave import runtest
+from subordinate import runtest
 
 
 class FakeLogProcessor(object):
@@ -71,16 +71,16 @@ class SendResultsToDashboardTest(unittest.TestCase):
   # Testing private method _GetDataFromLogProcessor.
   # Also, this test method doesn't reference self.
   # pylint: disable=W0212,R0201
-  @mock.patch('slave.runtest._GetDataFromLogProcessor')
-  @mock.patch('slave.results_dashboard.MakeListOfPoints')
-  @mock.patch('slave.results_dashboard.SendResults')
+  @mock.patch('subordinate.runtest._GetDataFromLogProcessor')
+  @mock.patch('subordinate.results_dashboard.MakeListOfPoints')
+  @mock.patch('subordinate.results_dashboard.SendResults')
   def test_SendResultsToDashboard_SimpleCase(
       self, SendResults, MakeListOfPoints, GetDataFromLogProcessor):
     """Tests that the right methods get called in _SendResultsToDashboard."""
     # Since this method just tests that certain methods get called when
     # a call to _SendResultsDashboard is made, the data used below is arbitrary.
     fake_charts_data = {'chart': {'traces': {'x': [1, 0]}, 'rev': 1000}}
-    fake_points_data = [{'test': 'master/bot/chart/x', 'revision': 1000}]
+    fake_points_data = [{'test': 'main/bot/chart/x', 'revision': 1000}]
     fake_results_tracker = mock.Mock()
     fake_results_tracker.IsChartJson = mock.MagicMock(return_value=False)
     GetDataFromLogProcessor.return_value = fake_charts_data
@@ -92,7 +92,7 @@ class SendResultsToDashboardTest(unittest.TestCase):
             'test': 'sunspider',
             'url': 'http://x.com',
             'build_dir': 'builddir',
-            'mastername': 'my.master',
+            'mainname': 'my.main',
             'buildername': 'Builder',
             'buildnumber': 123,
             'supplemental_columns': {}})
@@ -111,8 +111,8 @@ class SendResultsToDashboardTest(unittest.TestCase):
     # No errors, should return True.
     self.assertTrue(result)
 
-  @mock.patch('slave.results_dashboard.MakeDashboardJsonV1')
-  @mock.patch('slave.results_dashboard.SendResults')
+  @mock.patch('subordinate.results_dashboard.MakeDashboardJsonV1')
+  @mock.patch('subordinate.results_dashboard.SendResults')
   def test_SendResultsToDashboard_Telemetry(
       self, SendResults, MakeDashboardJsonV1):
     """Tests that the right methods get called in _SendResultsToDashboard."""
@@ -134,7 +134,7 @@ class SendResultsToDashboardTest(unittest.TestCase):
             'test': 'sunspider',
             'url': 'http://x.com',
             'build_dir': 'builddir',
-            'mastername': 'my.master',
+            'mainname': 'my.main',
             'buildername': 'Builder',
             'buildnumber': 123,
             'revisions': {'rev': 343},
@@ -153,8 +153,8 @@ class SendResultsToDashboardTest(unittest.TestCase):
     # No errors, should return True.
     self.assertTrue(result)
 
-  @mock.patch('slave.results_dashboard.MakeDashboardJsonV1')
-  @mock.patch('slave.results_dashboard.SendResults')
+  @mock.patch('subordinate.results_dashboard.MakeDashboardJsonV1')
+  @mock.patch('subordinate.results_dashboard.SendResults')
   def test_SendResultsToDashboard_DisabledBenchmark(
       self, SendResults, MakeDashboardJsonV1):
     """Tests that the right methods get called in _SendResultsToDashboard."""
@@ -176,7 +176,7 @@ class SendResultsToDashboardTest(unittest.TestCase):
             'test': 'sunspider',
             'url': 'http://x.com',
             'build_dir': 'builddir',
-            'mastername': 'my.master',
+            'mainname': 'my.main',
             'buildername': 'Builder',
             'buildnumber': 123,
             'revisions': {'rev': 343},
@@ -193,8 +193,8 @@ class SendResultsToDashboardTest(unittest.TestCase):
     # No errors, should return True since disabled run is successful.
     self.assertTrue(result)
 
-  @mock.patch('slave.results_dashboard.MakeDashboardJsonV1')
-  @mock.patch('slave.results_dashboard.SendResults')
+  @mock.patch('subordinate.results_dashboard.MakeDashboardJsonV1')
+  @mock.patch('subordinate.results_dashboard.SendResults')
   def test_SendResultsToDashboard_NoTelemetryOutput(
       self, SendResults, MakeDashboardJsonV1):
     """Tests that the right methods get called in _SendResultsToDashboard."""
@@ -210,7 +210,7 @@ class SendResultsToDashboardTest(unittest.TestCase):
             'test': 'sunspider',
             'url': 'http://x.com',
             'build_dir': 'builddir',
-            'mastername': 'my.master',
+            'mainname': 'my.main',
             'buildername': 'Builder',
             'buildnumber': 123,
             'revisions': {'rev': 343},

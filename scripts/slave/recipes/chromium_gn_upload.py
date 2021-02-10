@@ -62,7 +62,7 @@ BUILDERS = freeze({
 
 
 def RunSteps(api):
-  mastername = api.m.properties['mastername']
+  mainname = api.m.properties['mainname']
   buildername, bot_config = api.chromium.configure_bot(BUILDERS,
                                                        ['gn_for_uploads', 'mb'])
 
@@ -73,7 +73,7 @@ def RunSteps(api):
 
   api.chromium.runhooks()
 
-  api.chromium.run_mb(mastername, buildername)
+  api.chromium.run_mb(mainname, buildername)
 
   api.chromium.compile(targets=['gn', 'gn_unittests'], use_goma_module=True)
 

@@ -59,11 +59,11 @@ def RunSteps(api):
 
 
 def GenTests(api):
-  for mastername, config in MASTERS.iteritems():
+  for mainname, config in MASTERS.iteritems():
     yield (
       api.test(config['testname']) +
       api.properties.generic(
           buildername=config['buildername'],
-          mastername=mastername,
+          mainname=mainname,
       )
     )

@@ -59,27 +59,27 @@ class Gatekeeper(recipe_api.RecipeApi):
       if tree_args.get('status-user'):
         args.extend(['--status-user', tree_args['status-user']])
 
-      if tree_args.get('masters'):
+      if tree_args.get('mains'):
         if self.c and self.c.use_new_logic:
-          valid_masters = []
+          valid_mains = []
 
           modifies_tree = False
           if tree_args.get('set-status') or tree_args.get('open-tree'):
             modifies_tree = True
 
-          for master, allowed in tree_args['masters'].items():
+          for main, allowed in tree_args['mains'].items():
             if '*' in allowed:
-              valid_masters.append(master)
+              valid_mains.append(main)
             elif allowed:
-              valid_masters.append(master + ':' + ','.join(allowed))
-          args.extend(valid_masters)
+              valid_mains.append(main + ':' + ','.join(allowed))
+          args.extend(valid_mains)
         else: #pragma: no cover
-          args.extend(tree_args['masters'])
+          args.extend(tree_args['mains'])
 
       try:
         self.m.build.python(
           'gatekeeper: %s' % str(tree_name),
-          self.package_repo_resource('scripts', 'slave', 'gatekeeper_ng.py'),
+          self.package_repo_resource('scripts', 'subordinate', 'gatekeeper_ng.py'),
           args,
         )
       except self.m.step.StepFailure:

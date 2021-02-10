@@ -26,7 +26,7 @@ MASTER_SWARMING_PRIORITIES.update({
 
 
 class ChromiumSwarmingApi(recipe_api.RecipeApi):
-  def configure_swarming(self, project_name, precommit, mastername=None):
+  def configure_swarming(self, project_name, precommit, mainname=None):
     """Configures default swarming dimensions and tags.
 
     Uses the 'chromium' global config to determine target platform defaults,
@@ -67,6 +67,6 @@ class ChromiumSwarmingApi(recipe_api.RecipeApi):
       if patch_project:
         self.m.swarming.add_default_tag('patch_project:%s' % patch_project)
     else:
-      self.m.swarming.default_priority = MASTER_SWARMING_PRIORITIES[mastername]
+      self.m.swarming.default_priority = MASTER_SWARMING_PRIORITIES[mainname]
       self.m.swarming.add_default_tag('purpose:post-commit')
       self.m.swarming.add_default_tag('purpose:CI')

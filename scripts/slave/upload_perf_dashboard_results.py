@@ -10,8 +10,8 @@ import os
 import re
 import sys
 
-from slave import results_dashboard
-from slave import slave_utils
+from subordinate import results_dashboard
+from subordinate import subordinate_utils
 
 
 def _GetMainRevision(commit_pos, build_dir, revision=None):
@@ -27,7 +27,7 @@ def _GetMainRevision(commit_pos, build_dir, revision=None):
   # TODO(sullivan,qyearsley): Don't fall back to _GetRevision if it returns
   # a git commit, since this should be a numerical revision. Instead, abort
   # and fail.
-  return slave_utils.GetRevision(os.path.dirname(os.path.abspath(build_dir)))
+  return subordinate_utils.GetRevision(os.path.dirname(os.path.abspath(build_dir)))
 
 
 def main(args):
@@ -55,8 +55,8 @@ def main(args):
     parser.error('--perf-id and --results-url are required')
 
   main_revision = _GetMainRevision(options.got_revision_cp, options.build_dir)
-  blink_revision = slave_utils.GetBlinkRevision(options.build_dir)
-  revisions = slave_utils.GetPerfDashboardRevisionsWithProperties(
+  blink_revision = subordinate_utils.GetBlinkRevision(options.build_dir)
+  revisions = subordinate_utils.GetPerfDashboardRevisionsWithProperties(
     options.got_webrtc_revision, options.got_v8_revision, options.version,
     options.git_revision, main_revision, blink_revision)
   reference_build = 'reference' in options.name

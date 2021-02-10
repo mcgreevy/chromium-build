@@ -49,7 +49,7 @@ def GenTests(api):
   yield (
       api.test('basic') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           bot_id='test_bot_id',
           buildnumber=123)
@@ -58,7 +58,7 @@ def GenTests(api):
   yield (
       api.test('android') +
       api.properties(
-          mastername='test_mastername',
+          mainname='test_mainname',
           buildername='test_buildername',
           bot_id='test_bot_id',
           buildnumber=123,

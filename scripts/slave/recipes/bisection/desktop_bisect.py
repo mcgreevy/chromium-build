@@ -18,11 +18,11 @@ DEPS = [
 
 
 def RunSteps(api):
-  mastername = api.properties.get('mastername')
+  mainname = api.properties.get('mainname')
   buildername = api.properties.get('buildername')
   # TODO(akuegel): Explicitly load the builder configs instead of relying on
   # builder.py from chromium_tests recipe module.
-  bot_config = api.chromium_tests.create_bot_config_object(mastername,
+  bot_config = api.chromium_tests.create_bot_config_object(mainname,
                                                            buildername)
   api.chromium_tests.configure_build(bot_config)
   api.gclient.apply_config('perf')
@@ -43,7 +43,7 @@ def GenTests(api):
       api.test('basic') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect') +
       api.override_step_data(
           'git diff to analyze patch',
@@ -98,7 +98,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
 
   buildbucket_get_response = {
     "build":{
-      "bucket": "master.tryserver.chromium.perf",
+      "bucket": "main.tryserver.chromium.perf",
       "id": "9009962699124567824",
       "result": "SUCCESS",
       "status": "COMPLETED",
@@ -112,7 +112,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   yield (
       api.test('basic_perf_tryjob') + api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',
@@ -159,7 +159,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
 
   yield (api.test('basic_perf_tryjob_with_bucket') + api.properties.tryserver(
       path_config='kitchen',
-      mastername='tryserver.chromium.perf',
+      mainname='tryserver.chromium.perf',
       buildername='linux_perf_bisect',
       patch_storage='rietveld',
       patchset='20001',
@@ -202,7 +202,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   yield (
       api.test('deps_perf_tryjob') + api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_project='v8',
           deps_revision_overrides={'src/v8': 'feeedbeed'},
@@ -244,7 +244,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       api.test('basic_perf_tryjob_with_metric') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',
@@ -286,7 +286,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       api.test('basic_perf_tryjob_with_metric_valueset') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',
@@ -326,7 +326,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   yield (
       api.test('perf_tryjob_failed_test') + api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',
@@ -360,7 +360,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       api.test('basic_perf_tryjob_with_revisions') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',
@@ -415,7 +415,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
       api.test('perf_tryjob_config_error') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect') +
       api.properties(requester='abcdxyz@chromium.org') +
       api.override_step_data(
@@ -426,7 +426,7 @@ m/cloudstorage/b/chromium-telemetry/o/html-results/results-without
   yield (api.test('perf_tryjob_no_config') +
       api.properties.tryserver(
           path_config='kitchen',
-          mastername='tryserver.chromium.perf',
+          mainname='tryserver.chromium.perf',
           buildername='linux_perf_bisect',
           patch_storage='rietveld',
           patchset='20001',

@@ -12,12 +12,12 @@ import unittest
 import test_env  # pylint: disable=W0403,W0611
 
 import mock
-from slave import infra_platform
+from subordinate import infra_platform
 
 
 class TestGet(unittest.TestCase):
 
-  @mock.patch('slave.infra_platform.sys')
+  @mock.patch('subordinate.infra_platform.sys')
   @mock.patch('platform.machine')
   @mock.patch('platform.architecture')
   def test_get(self, plat_arch, plat_machine, sys_platform):

@@ -587,9 +587,9 @@ class SwarmingApi(recipe_api.RecipeApi):
     tags.update(self._default_tags)
     tags.add('data:' + task.isolated_hash)
     tags.add('name:' + task.title.split(' ')[0])
-    mastername = self.m.properties.get('mastername')
-    if mastername:
-      tags.add('master:' + mastername)
+    mainname = self.m.properties.get('mainname')
+    if mainname:
+      tags.add('main:' + mainname)
     if task.buildername:
       tags.add('buildername:' + task.buildername)
     if task.buildnumber:
@@ -597,7 +597,7 @@ class SwarmingApi(recipe_api.RecipeApi):
     if task.dimensions.get('os'):
       tags.add('os:' + task.dimensions['os'])
     if self.m.properties.get('bot_id'):
-      tags.add('slavename:%s' % self.m.properties['bot_id'])
+      tags.add('subordinatename:%s' % self.m.properties['bot_id'])
     tags.add('stepname:%s' % self.get_step_name('', task))
     rietveld = self.m.properties.get('rietveld')
     issue = self.m.properties.get('issue')
@@ -1094,7 +1094,7 @@ class SwarmingTask(object):
       collect_step: callback that will be called to collect and processes
           results of task execution, signature is collect_step(task, **kwargs).
       dimensions: key-value mapping with swarming dimensions that specify
-          on what Swarming slaves task can run. One important dimension is 'os',
+          on what Swarming subordinates task can run. One important dimension is 'os',
           which defines platform flavor to run the task on. See Swarming doc.
       env: key-value mapping with additional environment variables to add to
           environment before launching the task executable.

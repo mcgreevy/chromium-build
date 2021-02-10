@@ -3,27 +3,27 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This script will change a master from using postgresql to sqlite.
+"""This script will change a main from using postgresql to sqlite.
 
 It:
-1) Creates .stop_master_lifecycle to stop master manager.
-2) Stops the master.
+1) Creates .stop_main_lifecycle to stop main manager.
+2) Stops the main.
 3) Dumps the postgres database and imports it into sqlite.
 4) Removes the .dbconfig file indicating buildbot should now use sqlite.
-5) Starts the master.
-6) Removes .stop_master_lifecycle.
+5) Starts the main.
+6) Removes .stop_main_lifecycle.
 
 If this script fails in the middle you will have to restore it to a known state
 manually.
 
-Run this script in the master's directory.  Some third_party libraries need to
+Run this script in the main's directory.  Some third_party libraries need to
 be on the PYTHONPATH, so use runit.py:
   export TOOLS_DIR=~/buildbot/build/scripts/tools
   ${TOOLS_DIR}/runit.py ${TOOLS_DIR}/migrate_psql_to_sqlite.py
 
 Without any arguments this will run in a dry-run mode and create a
 'dry-run-psql-conversion.sqlite' file for you to inspect manually.  Use
---no-dry-run to actually stop and restart the master and update the config.
+--no-dry-run to actually stop and restart the main and update the config.
 """
 
 import argparse
@@ -38,7 +38,7 @@ from buildbot.db import connector
 from twisted.internet import defer, reactor
 
 
-class FakeBuildMaster(object):
+class FakeBuildMain(object):
   def __init__(self):
     self.caches = cache.CacheManager()
 
@@ -51,20 +51,20 @@ def Run(args):
     sqlite_filename = 'dry-run-psql-conversion.sqlite'
 
   # Read the dbconfig.  This will fail if the config doesn't exist and the
-  # master doesn't use postgresql.
+  # main doesn't use postgresql.
   dbconfig = {}
   execfile('.dbconfig', dbconfig)
 
   if args.no_dry_run:
-    # Stop master manager from touching this master while we play with it.
-    if os.path.exists('.stop_master_lifecycle'):
-      raise Exception('A .stop_master_lifecycle file already exists')
-    logging.info('Creating .stop_master_lifecycle file')
-    with open('.stop_master_lifecycle', 'w') as fh:
+    # Stop main manager from touching this main while we play with it.
+    if os.path.exists('.stop_main_lifecycle'):
+      raise Exception('A .stop_main_lifecycle file already exists')
+    logging.info('Creating .stop_main_lifecycle file')
+    with open('.stop_main_lifecycle', 'w') as fh:
       fh.write('migrate_psql_to_sqlite.py')
 
-    # Stop the master.
-    logging.info('Stopping master')
+    # Stop the main.
+    logging.info('Stopping main')
     subprocess.check_call(['make', 'stop'])
     subprocess.check_call(['make', 'wait'])
 
@@ -93,7 +93,7 @@ def Run(args):
   # Create the new sqlite database.
   logging.info('Creating empty sqlite database in %s', sqlite_filename)
   db = connector.DBConnector(
-      FakeBuildMaster(), 'sqlite:///%s' % sqlite_filename, '.')
+      FakeBuildMain(), 'sqlite:///%s' % sqlite_filename, '.')
   yield db.model.upgrade()
 
   # Import the data into the sqlite database.
@@ -111,13 +111,13 @@ def Run(args):
     logging.info('Moving .dbconfig file to dbconfig.bak')
     os.rename('.dbconfig', 'dbconfig.bak')
 
-    # Start the master.
-    logging.info('Starting master')
+    # Start the main.
+    logging.info('Starting main')
     subprocess.check_call(['make', 'start'])
 
-    # Let master manager take over again.
-    logging.info('Removing .stop_master_lifecycle file')
-    os.unlink('.stop_master_lifecycle')
+    # Let main manager take over again.
+    logging.info('Removing .stop_main_lifecycle file')
+    os.unlink('.stop_main_lifecycle')
 
     logging.info('Done!')
   else:

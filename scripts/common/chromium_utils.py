@@ -939,7 +939,7 @@ def RunCommand(command, parser_func=None, filter_obj=None, pipes=None,
         break
     print threading.currentThread(), 'TimedFlush: Finished'
 
-  # TODO(all): nsylvain's CommandRunner in buildbot_slave is based on this
+  # TODO(all): nsylvain's CommandRunner in buildbot_subordinate is based on this
   # method.  Update it when changes are introduced here.
   def ProcessRead(proc, writefh, parser_func=None, filter_obj=None,
                   log_event=None, debug=False):
@@ -947,7 +947,7 @@ def RunCommand(command, parser_func=None, filter_obj=None, pipes=None,
 
     # Python on Windows writes the buffer only when it reaches 4k.  Ideally
     # we would flush a minimum of 10 seconds.  However, we only write and
-    # flush no more often than 20 seconds to avoid flooding the master with
+    # flush no more often than 20 seconds to avoid flooding the main with
     # network traffic from unbuffered output.
     kill_event = threading.Event()
     flush_thread = threading.Thread(
@@ -1266,12 +1266,12 @@ def SshCopyTree(srctree, host, dst):
                         (srctree, host + ':' + dst, result))
 
 
-def ListMasters(cue='master.cfg', include_public=True, include_internal=True):
-  """Returns all the masters found."""
-  # Look for "internal" masters first.
+def ListMains(cue='main.cfg', include_public=True, include_internal=True):
+  """Returns all the mains found."""
+  # Look for "internal" mains first.
   path_internal = os.path.join(
-      BUILD_DIR, os.pardir, 'build_internal', 'masters/*/' + cue)
-  path = os.path.join(BUILD_DIR, 'masters/*/' + cue)
+      BUILD_DIR, os.pardir, 'build_internal', 'mains/*/' + cue)
+  path = os.path.join(BUILD_DIR, 'mains/*/' + cue)
   filenames = []
   if include_public:
     filenames += glob.glob(path)
@@ -1280,51 +1280,51 @@ def ListMasters(cue='master.cfg', include_public=True, include_internal=True):
   return [os.path.abspath(os.path.dirname(f)) for f in filenames]
 
 
-def MasterPath(mastername, include_public=True, include_internal=True):
-  if not mastername.startswith('master.'):
-    mastername = 'master.' + mastername
+def MainPath(mainname, include_public=True, include_internal=True):
+  if not mainname.startswith('main.'):
+    mainname = 'main.' + mainname
 
   for inc, base in (
       (include_public, env.Build),
       (include_internal, env.BuildInternal)):
     if inc and base:
-      path = os.path.join(base, 'masters', mastername)
+      path = os.path.join(base, 'mains', mainname)
       if os.path.isdir(path):
         return path
-  raise LookupError('Path for master %s not found' % mastername)
+  raise LookupError('Path for main %s not found' % mainname)
 
 
-def ListMastersWithSlaves(include_public=True, include_internal=True):
-  masters_path = ListMasters('builders.pyl', include_public, include_internal)
-  masters_path.extend(ListMasters('slaves.cfg', include_public,
+def ListMainsWithSubordinates(include_public=True, include_internal=True):
+  mains_path = ListMains('builders.pyl', include_public, include_internal)
+  mains_path.extend(ListMains('subordinates.cfg', include_public,
                                   include_internal))
-  return masters_path
+  return mains_path
 
 
-def GetSlavesFromMasterPath(path, fail_hard=False):
+def GetSubordinatesFromMainPath(path, fail_hard=False):
   builders_path = os.path.join(path, 'builders.pyl')
   if os.path.exists(builders_path):
     return GetBotsFromBuildersFile(builders_path)
-  return RunSlavesCfg(os.path.join(path, 'slaves.cfg'), fail_hard=fail_hard)
+  return RunSubordinatesCfg(os.path.join(path, 'subordinates.cfg'), fail_hard=fail_hard)
 
 
-def GetAllSlaves(fail_hard=False, include_public=True, include_internal=True):
-  """Return all slave objects from masters."""
-  slaves = []
-  for master in ListMastersWithSlaves(include_public, include_internal):
-    cur_slaves = GetSlavesFromMasterPath(master, fail_hard)
-    for slave in cur_slaves:
-      slave['mastername'] = os.path.basename(master)
-    slaves.extend(cur_slaves)
-  return slaves
+def GetAllSubordinates(fail_hard=False, include_public=True, include_internal=True):
+  """Return all subordinate objects from mains."""
+  subordinates = []
+  for main in ListMainsWithSubordinates(include_public, include_internal):
+    cur_subordinates = GetSubordinatesFromMainPath(main, fail_hard)
+    for subordinate in cur_subordinates:
+      subordinate['mainname'] = os.path.basename(main)
+    subordinates.extend(cur_subordinates)
+  return subordinates
 
 
-def GetSlavesForHost():
-  """Get slaves for a host, defaulting to current host."""
+def GetSubordinatesForHost():
+  """Get subordinates for a host, defaulting to current host."""
   hostname = os.getenv('TESTING_SLAVENAME')
   if not hostname:
     hostname = socket.getfqdn().split('.', 1)[0].lower()
-  return [s for s in GetAllSlaves() if s.get('hostname') == hostname]
+  return [s for s in GetAllSubordinates() if s.get('hostname') == hostname]
 
 
 def GetActiveSubdir():
@@ -1338,7 +1338,7 @@ def GetActiveSubdir():
   subdir = os.getenv('INFRA_BUILDBOT_SLAVE_ACTIVE_SUBDIR')
   if subdir is not None:
     # Empty string in enviornment variable is cached version of None return
-    # value (see "run_slave.py").
+    # value (see "run_subordinate.py").
     return subdir or None
 
   basedir = os.path.dirname(BUILD_DIR)
@@ -1349,31 +1349,31 @@ def GetActiveSubdir():
     return os.path.basename(basedir)
 
 
-def GetActiveSlavename():
-  slavename = os.getenv('TESTING_SLAVENAME')
-  if not slavename:
-    slavename = os.getenv('INFRA_BUILDBOT_SLAVE_NAME')
-    if not slavename:
-      slavename = socket.getfqdn().split('.', 1)[0].lower()
+def GetActiveSubordinatename():
+  subordinatename = os.getenv('TESTING_SLAVENAME')
+  if not subordinatename:
+    subordinatename = os.getenv('INFRA_BUILDBOT_SLAVE_NAME')
+    if not subordinatename:
+      subordinatename = socket.getfqdn().split('.', 1)[0].lower()
   subdir = GetActiveSubdir()
   if subdir:
-    return '%s#%s' % (slavename, subdir)
-  return slavename
+    return '%s#%s' % (subordinatename, subdir)
+  return subordinatename
 
 
-def EntryToSlaveName(entry):
-  """Produces slave name from the slaves config dict."""
-  name = entry.get('slavename') or entry.get('hostname')
+def EntryToSubordinateName(entry):
+  """Produces subordinate name from the subordinates config dict."""
+  name = entry.get('subordinatename') or entry.get('hostname')
   if 'subdir' in entry:
     return '%s#%s' % (name, entry['subdir'])
   return name
 
 
-def EntryToSlavePool(entry):
-  """Extracts the canonical slave pool name from slaves config dict.
+def EntryToSubordinatePool(entry):
+  """Extracts the canonical subordinate pool name from subordinates config dict.
 
-  A pool is either specificed explicitly in the slave dict, or it is the first
-  builder name (alphabetically) associated with the slave.
+  A pool is either specificed explicitly in the subordinate dict, or it is the first
+  builder name (alphabetically) associated with the subordinate.
   """
   pool = entry.get('pool')
   if pool:
@@ -1389,48 +1389,48 @@ def EntryToSlavePool(entry):
   return builders[0]
 
 
-def GetActiveMaster(slavename=None, default=None):
-  """Returns the name of the Active master serving the current host.
+def GetActiveMain(subordinatename=None, default=None):
+  """Returns the name of the Active main serving the current host.
 
-  Parse all of the active masters with slaves matching the current hostname
-  and optional slavename. Returns |default| if no match found.
+  Parse all of the active mains with subordinates matching the current hostname
+  and optional subordinatename. Returns |default| if no match found.
   """
-  master_class_name = os.getenv('TESTING_MASTER')
-  if master_class_name:
-    return master_class_name
+  main_class_name = os.getenv('TESTING_MASTER')
+  if main_class_name:
+    return main_class_name
 
-  master_class_name = os.getenv('INFRA_BUILDBOT_MASTER_CLASS_NAME')
-  if master_class_name:
-    return master_class_name
+  main_class_name = os.getenv('INFRA_BUILDBOT_MASTER_CLASS_NAME')
+  if main_class_name:
+    return main_class_name
 
-  slavename = slavename or GetActiveSlavename()
-  for slave in GetAllSlaves():
-    if slavename == EntryToSlaveName(slave):
-      return slave['master']
+  subordinatename = subordinatename or GetActiveSubordinatename()
+  for subordinate in GetAllSubordinates():
+    if subordinatename == EntryToSubordinateName(subordinate):
+      return subordinate['main']
   return default
 
 
 @contextmanager
-def MasterEnvironment(master_dir):
-  """Context manager that enters an enviornment similar to a master's.
+def MainEnvironment(main_dir):
+  """Context manager that enters an enviornment similar to a main's.
 
   This involves:
-    - Modifying 'sys.path' to include paths available to the master.
-    - Changing directory (via os.chdir()) to the master's base directory.
+    - Modifying 'sys.path' to include paths available to the main.
+    - Changing directory (via os.chdir()) to the main's base directory.
 
   These changes will be reverted after the context manager completes.
 
   Args:
-    master_dir: (str) The master's base directory.
+    main_dir: (str) The main's base directory.
   """
-  master_dir = os.path.abspath(master_dir)
+  main_dir = os.path.abspath(main_dir)
 
-  # Setup a 'sys.path' that is adequate for loading 'slaves.cfg'.
+  # Setup a 'sys.path' that is adequate for loading 'subordinates.cfg'.
   old_cwd = os.getcwd()
 
-  with env.GetInfraPythonPath(master_dir=master_dir).Enter():
+  with env.GetInfraPythonPath(main_dir=main_dir).Enter():
     try:
-      os.chdir(master_dir)
+      os.chdir(main_dir)
       yield
     finally:
       os.chdir(old_cwd)
@@ -1440,18 +1440,18 @@ def ParsePythonCfg(cfg_filepath, fail_hard=False):
   """Retrieves data from a python config file.
 
   Args:
-    cfg_filepath(str): path to a slaves.cfg file.
+    cfg_filepath(str): path to a subordinates.cfg file.
     fail_hard(boolean): if True, raise exception on error, otherwise returns {}
 
   Returns:
-    vars(dict): names defined by slaves.cfg, with values.
+    vars(dict): names defined by subordinates.cfg, with values.
   """
 
   if not os.path.exists(cfg_filepath):
     return None
 
-  # Execute 'slaves.cfg' in the master path environment.
-  with MasterEnvironment(os.path.dirname(os.path.abspath(cfg_filepath))):
+  # Execute 'subordinates.cfg' in the main path environment.
+  with MainEnvironment(os.path.dirname(os.path.abspath(cfg_filepath))):
     try:
       local_vars = {}
       execfile(os.path.join(cfg_filepath), local_vars)
@@ -1467,10 +1467,10 @@ def ParsePythonCfg(cfg_filepath, fail_hard=False):
       return {}
 
 
-def RunSlavesCfg(slaves_cfg, fail_hard=False):
-  """Runs slaves.cfg in a consistent way."""
-  slave_config = ParsePythonCfg(slaves_cfg, fail_hard=fail_hard) or {}
-  return slave_config.get('slaves', [])
+def RunSubordinatesCfg(subordinates_cfg, fail_hard=False):
+  """Runs subordinates.cfg in a consistent way."""
+  subordinate_config = ParsePythonCfg(subordinates_cfg, fail_hard=fail_hard) or {}
+  return subordinate_config.get('subordinates', [])
 
 
 def convert_json(option, _, value, parser):
@@ -1610,8 +1610,8 @@ def GetSortableUploadPathForSortKey(branch, value, delimiter=None):
 
   Returns a canonical sort key path for a sort key. The result will be one of
   the following forms:
-  - (Without Branch or With Branch=='refs/heads/master'): <value> (e.g., 12345)
-  - (With non-Master Branch): <branch-path>-<value> (e.g.,
+  - (Without Branch or With Branch=='refs/heads/main'): <value> (e.g., 12345)
+  - (With non-Main Branch): <branch-path>-<value> (e.g.,
         "refs_my-branch-12345")
 
   When a 'branch' is supplied, it is converted to a path-suitable form. This
@@ -1631,7 +1631,7 @@ def GetSortableUploadPathForSortKey(branch, value, delimiter=None):
         <value> when constructing the branch-inclusive form. If omitted
         (default), a hyphen ('-') will be used.
   """
-  if branch and branch != 'refs/heads/master':
+  if branch and branch != 'refs/heads/main':
     delimiter = delimiter or '-'
     branch = branch.replace('/', '_')
     return '%s%s%s' % (branch, delimiter, value)
@@ -1655,8 +1655,8 @@ def ParseCommitPosition(value):
 def BuildCommitPosition(branch, value):
   """Returns: A constructed commit position.
 
-  An example commit position for branch 'refs/heads/master' value '12345' is:
-  refs/heads/master@{#12345}
+  An example commit position for branch 'refs/heads/main' value '12345' is:
+  refs/heads/main@{#12345}
 
   This value can be parsed via 'ParseCommitPosition'.
 
@@ -1845,8 +1845,8 @@ def ReadJsonAsUtf8(filename=None, text=None):
     return json.loads(text, object_hook=_decode_dict)
 
 
-def GetMasterDevParameters(filename='master_cfg_params.json'):
-  """Look for master development parameter files in the master directory.
+def GetMainDevParameters(filename='main_cfg_params.json'):
+  """Look for main development parameter files in the main directory.
 
   Return the parsed content if the file exists, as a dictionary.
   Every string value in the dictionary is utf8-encoded str.
@@ -1899,22 +1899,22 @@ def FileExclusions():
   return all_platforms
 
 
-def DatabaseSetup(buildmaster_config):
-  """Configure the database settings for the buildbot master."""
+def DatabaseSetup(buildmain_config):
+  """Configure the database settings for the buildbot main."""
 
   # By default nothing is ever deleted from the database.  We set a
   # changeHorizon here to put an upper bound on the database size.
-  if 'changeHorizon' not in buildmaster_config:
-    buildmaster_config['changeHorizon'] = 30000
+  if 'changeHorizon' not in buildmain_config:
+    buildmain_config['changeHorizon'] = 30000
 
-  # Read database credentials in the master directory.
+  # Read database credentials in the main directory.
   if os.path.isfile('.dbconfig'):
     values = {}
     execfile('.dbconfig', values)
     if 'password' not in values:
       raise Exception('could not get db password')
 
-    buildmaster_config['db_url'] = 'postgresql://%s:%s@%s/%s' % (
+    buildmain_config['db_url'] = 'postgresql://%s:%s@%s/%s' % (
         values['username'], values['password'],
         values.get('hostname', 'localhost'), values['dbname'])
 
@@ -1932,13 +1932,13 @@ def ParseBuildersFileContents(path, contents):
   # file's location in the filesystem.
   basedir = os.path.dirname(os.path.abspath(path))
   repodir = os.path.basename(os.path.dirname(os.path.dirname(basedir)))
-  master_dirname = os.path.basename(basedir)
-  master_name_comps = master_dirname.split('.')[1:]
-  buildbot_path =  '.'.join(master_name_comps)
-  master_classname =  ''.join(c[0].upper() + c[1:] for c in master_name_comps)
-  builders['master_dirname'] = master_dirname
-  builders.setdefault('master_classname', master_classname)
-  builders['name'] = '.'.join(master_name_comps)
+  main_dirname = os.path.basename(basedir)
+  main_name_comps = main_dirname.split('.')[1:]
+  buildbot_path =  '.'.join(main_name_comps)
+  main_classname =  ''.join(c[0].upper() + c[1:] for c in main_name_comps)
+  builders['main_dirname'] = main_dirname
+  builders.setdefault('main_classname', main_classname)
+  builders['name'] = '.'.join(main_name_comps)
   builders.setdefault('buildbot_url',
                       'https://build.chromium.org/p/%s/' % buildbot_path)
 
@@ -1961,18 +1961,18 @@ def ParseBuildersFileContents(path, contents):
       builders['pubsub_service_account_file'])
   builders['pubsub_topic_str'] = repr(builders['pubsub_topic'])
 
-  # Handle backwards-compatibility of old 'slaves' nomenclature.
+  # Handle backwards-compatibility of old 'subordinates' nomenclature.
   # TODO: Remove this once all builders.pyl files have been upgraded.
-  if 'slave_port' in builders:
-    builders['bot_port'] = builders.pop('slave_port')
-    builders['bot_pools'] = builders.pop('slave_pools')
+  if 'subordinate_port' in builders:
+    builders['bot_port'] = builders.pop('subordinate_port')
+    builders['bot_pools'] = builders.pop('subordinate_pools')
     for builder_data in builders['builders'].values():
-      builder_data['bot_pools'] = builder_data.pop('slave_pools')
-      if 'slavebuilddir' in builders:
-        builder_data['botbuilddir'] = builder_data.pop('slavebuilddir')
+      builder_data['bot_pools'] = builder_data.pop('subordinate_pools')
+      if 'subordinatebuilddir' in builders:
+        builder_data['botbuilddir'] = builder_data.pop('subordinatebuilddir')
     for bot_pool in builders['bot_pools'].values():
-      bot_pool['bot_data'] = bot_pool.pop('slave_data')
-      bot_pool['bots'] = bot_pool.pop('slaves')
+      bot_pool['bot_data'] = bot_pool.pop('subordinate_data')
+      bot_pool['bots'] = bot_pool.pop('subordinates')
 
   return builders
 
@@ -1985,9 +1985,9 @@ def GetBotsFromBuildersFile(builders_path):
 
   Returns:
     bots(list of dict): each element is a dict with keys 'hostname',
-      'builder', 'master', 'os', 'version', 'bits', as found in slaves.cfg.
-      The return value must match the output of RunSlavesCfg(). The source of
-      truth is in master/slave_list.py.
+      'builder', 'main', 'os', 'version', 'bits', as found in subordinates.cfg.
+      The return value must match the output of RunSubordinatesCfg(). The source of
+      truth is in main/subordinate_list.py.
   """
   builders = ReadBuildersFile(builders_path)
   return GetBotsFromBuilders(builders)
@@ -2019,7 +2019,7 @@ def GetBotsFromBuilders(builders):
         bots.append({
             'hostname': name,
             'builder': builder_names,
-            'master': builders['master_classname'],
+            'main': builders['main_classname'],
             'os': bot_data['os'],
             'version': bot_data['version'],
             'bits': bot_data['bits'],

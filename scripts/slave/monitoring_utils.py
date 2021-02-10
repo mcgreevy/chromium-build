@@ -13,7 +13,7 @@ BUILD_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(
                              os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(BUILD_ROOT, 'scripts'))
 
-from slave import infra_platform
+from subordinate import infra_platform
 
 
 LOGGER = logging.getLogger('monitoring_utils')
@@ -62,8 +62,8 @@ def write_build_monitoring_event(datadir, build_properties):
        '--event-mon-output-file', os.path.join(datadir, 'log_request_proto'),
        '--event-mon-run-type', 'file',
        '--event-mon-service-name',
-           'buildbot/master/master.%s'
-           % build_properties.get('mastername', 'UNKNOWN'),
+           'buildbot/main/main.%s'
+           % build_properties.get('mainname', 'UNKNOWN'),
        '--build-event-build-name',
            build_properties.get('buildername', 'UNKNOWN'),
        '--build-event-build-number',

@@ -61,6 +61,6 @@ def GenTests(api):
       api.test('sdk-gn-linux-release-be') +
       api.platform('linux', 64) +
       api.properties.generic(
-        mastername='client.dart',
+        mainname='client.dart',
         buildername='sdk-gn-linux-release-be',
         revision='hash_of_revision'))

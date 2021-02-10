@@ -196,7 +196,7 @@ def GenTests(api):
     current_roll = current_roll or current_lkgr
     return (
         api.test(name) +
-        api.properties.generic(mastername='client.v8.fyi',
+        api.properties.generic(mainname='client.v8.fyi',
                                buildername='Auto-roll - release process') +
         api.override_step_data(
             'get new lkgr',
